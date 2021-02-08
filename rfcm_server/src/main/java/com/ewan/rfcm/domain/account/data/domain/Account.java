@@ -26,4 +26,10 @@ public class Account {
     @Column(name = "ACCOUNT_ROLE")
     @Enumerated(value = EnumType.STRING)
     private AccountRole accountRole = AccountRole.USER;
+
+    public Account(String userId, String password, AccountRole accountRole) {
+        this.userId =  userId;
+        this.password = password;
+        this.accountRole = accountRole;
+    }
 }

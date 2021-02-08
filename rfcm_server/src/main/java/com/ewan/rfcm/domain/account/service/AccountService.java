@@ -7,20 +7,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+@Service
 public class AccountService implements UserDetailsService {
 
     private AccountRepository accountRepository;
+    private PasswordEncoder passwordEncoder;
 
     /**
      * Inject dependence object as constructor for forcing dependency object with this class.
     * */
     @Autowired
-    public AccountService(AccountRepository accountRepository){
+    public AccountService(
+            AccountRepository accountRepository
+            , PasswordEncoder passwordEncoder
+    ){
         this.accountRepository = accountRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -32,5 +40,10 @@ public class AccountService implements UserDetailsService {
 
     public Optional<Account> findByUserId(String userId){
         return accountRepository.findByUserId(userId);
+    }
+
+    public Account createAccount(Account account) {
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
+        return accountRepository.save(account);
     }
 }

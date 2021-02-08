@@ -3,21 +3,30 @@ package com.ewan.rfcm.global.security.provider;
 import com.ewan.rfcm.domain.account.data.domain.Account;
 import com.ewan.rfcm.domain.account.service.AccountService;
 import com.ewan.rfcm.global.security.AccountContext;
+import com.ewan.rfcm.global.security.token.PostAuthenticationToken;
 import com.ewan.rfcm.global.security.token.PreAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 import java.util.NoSuchElementException;
 
-public class FormLoginAuthenticationProvider implements AuthenticationProvider {
+@Component
+public class LoginAuthenticationProvider implements AuthenticationProvider {
 
     private AccountService accountService;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public FormLoginAuthenticationProvider(AccountService accountService){
+    public LoginAuthenticationProvider(
+            AccountService accountService
+            , PasswordEncoder passwordEncoder
+    ){
         this.accountService = accountService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -31,10 +40,10 @@ public class FormLoginAuthenticationProvider implements AuthenticationProvider {
         Account account = accountService.findByUserId(username).orElseThrow(() -> new NoSuchElementException("Cannot find account with this id"));
 
         if(isCorrectPassword(password, account)){
-
+            return PostAuthenticationToken.getTokenFromAccountContext(AccountContext.fromAccountModel(account));
         }
 
-        return null;
+        throw new NoSuchElementException("Not match with this information");
     }
 
 
@@ -48,6 +57,6 @@ public class FormLoginAuthenticationProvider implements AuthenticationProvider {
     }
 
     private boolean isCorrectPassword(String password, Account account){
-        return false;
+        return passwordEncoder.matches(account.getPassword(), password);
     }
 }
