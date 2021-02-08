@@ -2,7 +2,6 @@ package com.ewan.rfcm.domain.account.data.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -11,9 +10,20 @@ import javax.persistence.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "ACCOUNT")
 public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
+    private Long id;
+
+    @Column(name = "ACCOUNT_USERID")
+    private String userId;
+
+    @Column(name = "ACCOUNT_PASSWORD")
+    private String password;
+
+    @Column(name = "ACCOUNT_ROLE")
+    @Enumerated(value = EnumType.STRING)
+    private AccountRole accountRole = AccountRole.USER;
 }
