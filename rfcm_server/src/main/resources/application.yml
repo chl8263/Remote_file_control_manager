@@ -8,3 +8,8 @@ spring:
     url: jdbc:postgresql://192.168.117.131:5432/postgres
     username: postgres
     password: 930324
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
