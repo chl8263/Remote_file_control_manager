@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class AccountService implements UserDetailsService {
 
@@ -27,5 +28,9 @@ public class AccountService implements UserDetailsService {
         Account account = accountRepository.findByUserId(username).orElseThrow(() -> new NoSuchElementException("Cannot find account with this id."));
         AccountContext accountContext = AccountContext.fromAccountModel(account);
         return accountContext;
+    }
+
+    public Optional<Account> findByUserId(String userId){
+        return accountRepository.findByUserId(userId);
     }
 }
