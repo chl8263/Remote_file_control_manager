@@ -1,5 +1,6 @@
 package com.ewan.rfcm.global.security.token;
 
+import com.ewan.rfcm.domain.account.data.domain.Account;
 import com.ewan.rfcm.domain.account.data.domain.AccountRole;
 import com.ewan.rfcm.global.security.AccountContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +31,8 @@ public class JwtPostProcessingToken extends UsernamePasswordAuthenticationToken 
     }
 
     public String getUserId(){
-        return (String)super.getPrincipal();
+        AccountContext accountContext = (AccountContext) super.getPrincipal();
+        return accountContext.getUsername ();
     }
 
     public String getPassword(){

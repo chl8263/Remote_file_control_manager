@@ -22,12 +22,11 @@ import javax.servlet.http.HttpSession;
 public class AccountController {
 
     @GetMapping("/{accountName}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity a (@PathVariable String accountName, Authentication authentication){
 
         JwtPostProcessingToken token = (JwtPostProcessingToken) authentication;
 
         return ResponseEntity.ok(token.getPrincipal());
-
     }
 }

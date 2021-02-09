@@ -29,9 +29,9 @@ public class AccountContext extends User {
         return new AccountContext(account, account.getUserId(), account.getPassword(), parseAuthorities(account.getAccountRole()));
     }
 
-    public static AccountContext fromJwtPostToken(JwtPostProcessingToken token){
-        return new AccountContext(null, token.getUserId(), token.getPassword(), token.getAuthorities());
-    }
+//    public static AccountContext fromJwtPostToken(JwtPostProcessingToken token){
+//        return new AccountContext(null, token.getUserId(), token.getPassword(), token.getAuthorities());
+//    }
 
     private static List<SimpleGrantedAuthority> parseAuthorities(AccountRole role){
         return Arrays.asList(role).stream().map(x -> new SimpleGrantedAuthority(x.getRoleName())).collect(Collectors.toList());

@@ -11,11 +11,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.session.Session;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
@@ -39,6 +41,7 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+
         String tokenPayload = request.getHeader("Authorization");
         JwtPreProcessingToken token = new JwtPreProcessingToken(this.headerTokenExtractor.extract(tokenPayload));
         return super.getAuthenticationManager().authenticate(token);
