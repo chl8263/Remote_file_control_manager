@@ -39,6 +39,7 @@ public class LoginAuthenticationFailureHandler implements AuthenticationFailureH
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.BAD_REQUEST.value());
-        //response.getWriter(objectMapper.writeValueAsString(new ErrorDto(Integer.toString(HttpStatus.BAD_REQUEST.value()), "Cannot create JWT token")));
+        ErrorDto errorDto = new ErrorDto(Integer.toString(HttpStatus.BAD_REQUEST.value()), "Cannot create JWT token");
+        response.getWriter().write(objectMapper.writeValueAsString(errorDto));
     }
 }

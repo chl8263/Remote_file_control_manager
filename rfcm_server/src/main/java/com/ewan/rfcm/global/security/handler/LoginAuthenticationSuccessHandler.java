@@ -40,6 +40,7 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
         PostAuthenticationToken token = (PostAuthenticationToken) authentication;
         AccountContext accountContext = (AccountContext) token.getPrincipal();
         String tokenString = jwtFactory.generateToken(accountContext);
+        processResponse(response, writeDto(tokenString));
     }
 
     private TokenDto writeDto(String token){

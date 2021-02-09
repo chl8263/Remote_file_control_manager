@@ -13,6 +13,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
@@ -35,6 +36,11 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
 
         LoginDto loginDto = new ObjectMapper().readValue(request.getReader(), LoginDto.class);
         PreAuthenticationToken preAuthenticationToken = new PreAuthenticationToken(loginDto);
+
+        HttpSession httpSession = request.getSession();
+        String id = httpSession.getId();
+        httpSession.setAttribute(loginDto.getUserId(), httpSession.getId());
+        String userId = (String) httpSession.getAttribute(loginDto.getUserId());
 
         return super.getAuthenticationManager().authenticate(preAuthenticationToken);
     }

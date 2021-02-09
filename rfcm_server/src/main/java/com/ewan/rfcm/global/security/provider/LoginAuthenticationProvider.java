@@ -34,10 +34,10 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
 
         PreAuthenticationToken token = (PreAuthenticationToken) authentication;
 
-        String username = token.getUsername();
+        String userId = token.getUserId();
         String password = token.getUserPassword();
 
-        Account account = accountService.findByUserId(username).orElseThrow(() -> new NoSuchElementException("Cannot find account with this id"));
+        Account account = accountService.findByUserId(userId).orElseThrow(() -> new NoSuchElementException("Cannot find account with this id"));
 
         if(isCorrectPassword(password, account)){
             return PostAuthenticationToken.getTokenFromAccountContext(AccountContext.fromAccountModel(account));
@@ -45,7 +45,6 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
 
         throw new NoSuchElementException("Not match with this information");
     }
-
 
     /**
     * Define class type for support this provider.
@@ -57,6 +56,6 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
     }
 
     private boolean isCorrectPassword(String password, Account account){
-        return passwordEncoder.matches(account.getPassword(), password);
+        return passwordEncoder.matches(password, account.getPassword());
     }
 }

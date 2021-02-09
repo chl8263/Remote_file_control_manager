@@ -27,7 +27,7 @@ public class JwtFactory {
         try{
             token = JWT.create()
                     .withIssuer(ISSUER)
-                    .withClaim(USER_ID, accountContext.getAccount().getId())
+                    .withClaim(USER_ID, accountContext.getAccount().getUserId())
                     .withClaim(USER_ROLE, accountContext.getAccount().getAccountRole().getRoleName())
                     .sign(generateAlgorithm(signingKey));
 
