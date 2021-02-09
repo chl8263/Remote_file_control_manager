@@ -16,10 +16,10 @@ public class JwtFactory {
 
     private static final Logger log = LoggerFactory.getLogger(JwtFactory.class);
 
-    private static String signingKey = "jwttest";
-    private final String ISSUER = "RFCM";
-    private final String USER_ID = "USER_ID";
-    private final String USER_ROLE = "USER_ROLE";
+    protected static final String signingKey = "jwttest";
+    protected static final String ISSUER = "RFCM";
+    protected static final String USER_ID = "USER_ID";
+    protected static final String USER_ROLE = "USER_ROLE";
 
     public String generateToken(AccountContext accountContext){
         String token = null;
