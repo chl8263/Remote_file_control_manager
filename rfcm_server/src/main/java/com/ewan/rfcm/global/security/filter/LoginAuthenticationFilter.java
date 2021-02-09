@@ -1,7 +1,7 @@
 package com.ewan.rfcm.global.security.filter;
 
 import com.ewan.rfcm.domain.account.data.dto.LoginDto;
-import com.ewan.rfcm.global.security.token.PreAuthenticationToken;
+import com.ewan.rfcm.global.security.token.PreLoginAuthenticationToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -35,7 +35,7 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
 
         LoginDto loginDto = new ObjectMapper().readValue(request.getReader(), LoginDto.class);
-        PreAuthenticationToken preAuthenticationToken = new PreAuthenticationToken(loginDto);
+        PreLoginAuthenticationToken preAuthenticationToken = new PreLoginAuthenticationToken(loginDto);
 
         HttpSession httpSession = request.getSession();
         String id = httpSession.getId();
@@ -52,6 +52,6 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        super.unsuccessfulAuthentication(request, response, failed);
+        this.authenticationFailureHandler.onAuthenticationFailure(request, response, failed);
     }
 }

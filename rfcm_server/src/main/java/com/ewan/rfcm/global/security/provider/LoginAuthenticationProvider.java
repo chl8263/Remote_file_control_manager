@@ -3,8 +3,8 @@ package com.ewan.rfcm.global.security.provider;
 import com.ewan.rfcm.domain.account.data.domain.Account;
 import com.ewan.rfcm.domain.account.service.AccountService;
 import com.ewan.rfcm.global.security.AccountContext;
-import com.ewan.rfcm.global.security.token.PostAuthenticationToken;
-import com.ewan.rfcm.global.security.token.PreAuthenticationToken;
+import com.ewan.rfcm.global.security.token.PostLoginAuthenticationToken;
+import com.ewan.rfcm.global.security.token.PreLoginAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -32,7 +32,7 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-        PreAuthenticationToken token = (PreAuthenticationToken) authentication;
+        PreLoginAuthenticationToken token = (PreLoginAuthenticationToken) authentication;
 
         String userId = token.getUserId();
         String password = token.getUserPassword();
@@ -40,7 +40,7 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
         Account account = accountService.findByUserId(userId).orElseThrow(() -> new NoSuchElementException("Cannot find account with this id"));
 
         if(isCorrectPassword(password, account)){
-            return PostAuthenticationToken.getTokenFromAccountContext(AccountContext.fromAccountModel(account));
+            return PostLoginAuthenticationToken.getTokenFromAccountContext(AccountContext.fromAccountModel(account));
         }
 
         throw new NoSuchElementException("Not match with this information");
@@ -52,7 +52,7 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
     * */
     @Override
     public boolean supports(Class<?> authentication) {
-        return PreAuthenticationToken.class.isAssignableFrom(authentication);
+        return PreLoginAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
     private boolean isCorrectPassword(String password, Account account){
