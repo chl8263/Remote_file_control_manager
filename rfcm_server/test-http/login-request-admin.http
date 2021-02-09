@@ -1,0 +1,7 @@
+POST http://localhost:8081/authLogin
+Content-Type: application/json
+
+{
+  "userId": "Admin",
+  "password": "Admin"
+}

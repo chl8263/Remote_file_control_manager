@@ -1,6 +1,7 @@
 package com.ewan.rfcm.global.security.token;
 
 import com.ewan.rfcm.domain.account.data.domain.AccountRole;
+import com.ewan.rfcm.global.security.AccountContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,6 +19,10 @@ public class JwtPostProcessingToken extends UsernamePasswordAuthenticationToken 
 
     public JwtPostProcessingToken(String username, AccountRole accountRole){
         super(username, "***", parseAuthorities(accountRole));
+    }
+
+    public static JwtPostProcessingToken getTokenFromAccountContext(AccountContext context){
+        return new JwtPostProcessingToken(context, context.getPassword(), context.getAuthorities());
     }
 
     private static Collection<? extends GrantedAuthority> parseAuthorities(AccountRole accountRole){

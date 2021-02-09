@@ -36,5 +36,7 @@ public class LoginAuthenticationFailureHandler implements AuthenticationFailureH
         response.setStatus(HttpStatus.BAD_REQUEST.value());
         ErrorDto errorDto = new ErrorDto(Integer.toString(HttpStatus.BAD_REQUEST.value()), "Cannot create JWT token");
         response.getWriter().write(objectMapper.writeValueAsString(errorDto));
+
+        this.onAuthenticationFailure(request, response, exception);
     }
 }

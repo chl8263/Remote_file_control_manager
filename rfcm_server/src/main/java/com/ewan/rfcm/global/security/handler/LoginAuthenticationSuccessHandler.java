@@ -3,7 +3,7 @@ package com.ewan.rfcm.global.security.handler;
 import com.ewan.rfcm.global.security.AccountContext;
 import com.ewan.rfcm.global.security.JwtFactory;
 import com.ewan.rfcm.global.security.dto.TokenDto;
-import com.ewan.rfcm.global.security.token.PostLoginAuthenticationToken;
+import com.ewan.rfcm.global.security.token.LoginPostAuthenticationToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,7 +36,7 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
-        PostLoginAuthenticationToken token = (PostLoginAuthenticationToken) authentication;
+        LoginPostAuthenticationToken token = (LoginPostAuthenticationToken) authentication;
         AccountContext accountContext = (AccountContext) token.getPrincipal();
         String tokenString = jwtFactory.generateToken(accountContext);
         processResponse(response, writeDto(tokenString));

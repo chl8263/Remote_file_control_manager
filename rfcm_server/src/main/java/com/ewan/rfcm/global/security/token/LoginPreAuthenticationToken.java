@@ -3,13 +3,13 @@ package com.ewan.rfcm.global.security.token;
 import com.ewan.rfcm.domain.account.data.dto.LoginDto;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-public class PreLoginAuthenticationToken extends UsernamePasswordAuthenticationToken {
+public class LoginPreAuthenticationToken extends UsernamePasswordAuthenticationToken {
 
-    public PreLoginAuthenticationToken(String userId, String password){
+    public LoginPreAuthenticationToken(String userId, String password){
         super(userId, password);
     }
 
-    public PreLoginAuthenticationToken(LoginDto loginDto){
+    public LoginPreAuthenticationToken(LoginDto loginDto){
         this(loginDto.getUserId(), loginDto.getPassword());
     }
 

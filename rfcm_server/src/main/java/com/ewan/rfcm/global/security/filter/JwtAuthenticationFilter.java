@@ -31,9 +31,8 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
     }
 
     public JwtAuthenticationFilter(RequestMatcher matcher, JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler, JwtAuthenticationFailureHandler jwtAuthenticationFailureHandler, HeaderTokenExtractor headerTokenExtractor){
-        this(matcher);
+        super(matcher);
         this.jwtAuthenticationSuccessHandler = jwtAuthenticationSuccessHandler;
-        this.jwtAuthenticationFailureHandler = jwtAuthenticationFailureHandler;
         this.jwtAuthenticationFailureHandler = jwtAuthenticationFailureHandler;
         this.headerTokenExtractor = headerTokenExtractor;
     }
@@ -53,5 +52,6 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         SecurityContextHolder.clearContext();
+        this.jwtAuthenticationFailureHandler.onAuthenticationFailure(request, response, failed);
     }
 }
