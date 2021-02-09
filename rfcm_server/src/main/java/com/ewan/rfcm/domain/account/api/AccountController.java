@@ -29,4 +29,9 @@ public class AccountController {
 
         return ResponseEntity.ok(token.getPrincipal());
     }
+
+    @GetMapping("/check")
+    public ResponseEntity check (){
+        return (ResponseEntity) ResponseEntity.ok();
+    }
 }

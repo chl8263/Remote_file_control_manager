@@ -37,23 +37,26 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
         JwtPostProcessingToken token = (JwtPostProcessingToken) authentication;
 
         //session
-         HttpSession session = request.getSession();
+        HttpSession session = request.getSession();
         String sessionId = session.getId();
         String userId = token.getUserId();
         String storedSession = (String) session.getAttribute(userId);
 
         if(storedSession == null || storedSession.isEmpty() || storedSession.isBlank() || !sessionId.equals(storedSession)){
             session.invalidate();
-            session.removeAttribute(sessionId);
+            if(storedSession != null) session.removeAttribute(sessionId);
             throw new SessionAuthenticationException("This session isn't valid session");
         }
 
-        String requestURI = request.getRequestURI();
-        if(requestURI.equals("/check")){
-            response.setStatus(HttpStatus.OK.value());
-        }else {
-            chain.doFilter(request, response);  //Run chain which remain on security filter
-        }
+        chain.doFilter(request, response);  //Run chain which remain on security filter
+
+//        String requestURI = request.getRequestURI();
+//        if(requestURI.equals("/check")){
+//            response.setStatus(HttpStatus.OK.value());
+//            response.getWriter().write(requestURI);
+//        }else {
+//            chain.doFilter(request, response);  //Run chain which remain on security filter
+//        }
     }
 
     @Override

@@ -38,7 +38,5 @@ public class JwtAuthenticationFailureHandler implements AuthenticationFailureHan
         response.setStatus(HttpStatus.BAD_REQUEST.value());
         ErrorDto errorDto = new ErrorDto(Integer.toString(HttpStatus.BAD_REQUEST.value()), exception.getMessage());
         response.getWriter().write(objectMapper.writeValueAsString(errorDto));
-
-        this.onAuthenticationFailure(request, response, exception);
     }
 }
