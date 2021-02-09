@@ -21,7 +21,7 @@ public class AccountCreator implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        accountService.createAccount(new Account("Admin", "Admin", AccountRole.ADMIN));
-        accountService.createAccount(new Account("user1", "1234", AccountRole.USER));
+        accountService.createAccount(new Account("admin", "admin", AccountRole.ADMIN));
+        accountService.createAccount(new Account("user", "1234", AccountRole.USER));
     }
 }

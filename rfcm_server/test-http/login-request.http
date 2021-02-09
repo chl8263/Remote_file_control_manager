@@ -1,7 +1,7 @@
-POST http://localhost:8081/authLogin
+POST http://localhost:8081/auth
 Content-Type: application/json
 
 {
-  "userId": "user1",
+  "userId": "user",
   "password": "1234"
 }

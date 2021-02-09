@@ -82,7 +82,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager getAuthenticationManager() throws Exception { return super.authenticationManagerBean(); }
 
     protected LoginAuthenticationFilter loginAuthenticationFilter() throws Exception {
-        LoginAuthenticationFilter filter = new LoginAuthenticationFilter("/authLogin", loginAuthenticationSuccessHandler, loginAuthenticationFailureHandler);
+        LoginAuthenticationFilter filter = new LoginAuthenticationFilter("/auth", loginAuthenticationSuccessHandler, loginAuthenticationFailureHandler);
         filter.setAuthenticationManager(super.authenticationManagerBean());
 
         return filter;
@@ -113,7 +113,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable();
+                .csrf().disable()
+                .cors().configurationSource(corsConfigurationSource());
 
         http
                 .sessionManagement()
