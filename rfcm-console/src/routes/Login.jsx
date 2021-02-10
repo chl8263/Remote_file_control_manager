@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
-import $ from "jquery";
+import { useCookies } from 'react-cookie';
 import { connect } from "react-redux";
-
-import PreLoader from "../component/PreLoader";
+import $ from "jquery";
 
 import { actionCreators } from "../store";
 import { PAGE_ROUTE, HTTP, MediaType, ROLE} from "../util/Const";
+
+import PreLoader from "../component/PreLoader";
 
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -44,18 +45,22 @@ const useStyles = makeStyles((theme) => ({
 
 const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
 
-    const [userName, setUserName] = useState("");
+    const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
+
+    const [userId, setUserId] = useState("");
     const [password, setPassword] = useState("");
-    const userNameRef = useRef(null);
+    const userIdRef = useRef(null);
     const passwordRef = useRef(null);
 
+
     useEffect(() => {
+        
         history.pushState('','', '/Login');
         $(".preloader").fadeOut();
     }, []);
 
-    const onChangeUserNameInput = (e) => {
-        setUserName(e.target.value);
+    const onChangeUserIdInput = (e) => {
+        setUserId(e.target.value);
     };
 
     const onChangePasswordInput = (e) => {
@@ -63,15 +68,27 @@ const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
     };
 
     const onSubmitLoginForm = (e) => {
+        e.preventDefault();
 
-        // s: Ajax ----------------------------------
-            fetch(HTTP.SERVER_URL + "/accounts/ewan", {
-                method: HTTP.GET,
+        if(userId === ""){
+            alert("Please fill out 'id' field");
+            userIdRef.current.focus();
+        } else if(password === ""){
+            alert("Please fill out 'Password' field");
+            passwordRef.current.focus();
+        } else {
+            const accountInfo = {
+                userId: userId,
+                password: password
+            }
+            // s: Ajax ----------------------------------
+            fetch(HTTP.SERVER_URL + "/auth", {
+                method: HTTP.POST,
                 headers: {
                     'Content-type': MediaType.JSON,
                     'Accept': MediaType.JSON
                 },
-                // body: JSON.stringify(accountInfo)
+                body: JSON.stringify(accountInfo)
                 
             }).then(res => {
                 if(!res.ok){
@@ -81,106 +98,18 @@ const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
             }).then(res => {
                 return res.json();
             }).then(json => {
+                console.log("22222222");
                 var JWT_TOKEN = json.token;
-                if(JWT_TOKEN !== "" || JWT_TOKEN !== null){
-                    addJwtToken(JWT_TOKEN);
-                    
-                    fetch(HTTP.SERVER_URL + `/api/accounts/${userName}`, {
-                        method: HTTP.GET,
-                        headers: {
-                            'Content-type': MediaType.JSON,
-                            'Accept': MediaType.HAL_JSON,
-                            'Authorization': HTTP.BASIC_TOKEN_PREFIX + JWT_TOKEN
-                        },
-                    }).then(res => {
-                        if(!res.ok){
-                            throw res;
-                        }
-                        return res;
-                    }).then(res => {
-                        return res.json();
-                    }).then(json => {
-                        addUserInfo(json)
-                        if(json.role === ROLE.USER){
-                            switchMainBoard();
-                        }else if(json.role === ROLE.ADMIN){
-                            // TODO : switch ADMIN page..
-                        }else {throw json;}
-                    }).catch(error => {
-                        console.error(error);
-                        alert("Please check account again.");
-                    });
-                }
-            }).catch(error => {
-                alert("Please check account again.");
-            });
-        //     // e: Ajax ----------------------------------
-
-        // console.log("111111");
-        // e.preventDefault();
-        // if(userName === ""){
-        //     alert("Please fill out 'User name' field");
-        //     userNameRef.current.focus();
-        // } else if(password === ""){
-        //     alert("Please fill out 'Password' field");
-        //     passwordRef.current.focus();
-        // } else {
-        //     const accountInfo = {
-        //         accountname: userName,
-        //         password: password
-        //     }
-        //     // s: Ajax ----------------------------------
-        //     fetch(HTTP.SERVER_URL + "/auth", {
-        //         method: HTTP.POST,
-        //         headers: {
-        //             'Content-type': MediaType.JSON,
-        //             'Accept': MediaType.JSON
-        //         },
-        //         body: JSON.stringify(accountInfo)
+                var UID = json.uid;
+                setCookie('JWT_TOKEN', JWT_TOKEN, { path: '/' });
+                setCookie('UID', UID, { path: '/' });
+                switchMainBoard();
                 
-        //     }).then(res => {
-        //         if(!res.ok){
-        //             throw res;
-        //         }
-        //         return res;
-        //     }).then(res => {
-        //         return res.json();
-        //     }).then(json => {
-        //         var JWT_TOKEN = json.token;
-        //         if(JWT_TOKEN !== "" || JWT_TOKEN !== null){
-        //             addJwtToken(JWT_TOKEN);
-                    
-        //             fetch(HTTP.SERVER_URL + `/api/accounts/${userName}`, {
-        //                 method: HTTP.GET,
-        //                 headers: {
-        //                     'Content-type': MediaType.JSON,
-        //                     'Accept': MediaType.HAL_JSON,
-        //                     'Authorization': HTTP.BASIC_TOKEN_PREFIX + JWT_TOKEN
-        //                 },
-        //             }).then(res => {
-        //                 if(!res.ok){
-        //                     throw res;
-        //                 }
-        //                 return res;
-        //             }).then(res => {
-        //                 return res.json();
-        //             }).then(json => {
-        //                 addUserInfo(json)
-        //                 if(json.role === ROLE.USER){
-        //                     switchMainBoard();
-        //                 }else if(json.role === ROLE.ADMIN){
-        //                     // TODO : switch ADMIN page..
-        //                 }else {throw json;}
-        //             }).catch(error => {
-        //                 console.error(error);
-        //                 alert("Please check account again.");
-        //             });
-        //         }
-        //     }).catch(error => {
-        //         alert("Please check account again.");
-        //     });
-        //     // e: Ajax ----------------------------------
-        // }
+            }).catch(error => {
+                alert("Please check account information.");
+            });
+            // e: Ajax ----------------------------------
+        }
     };
 
     const onclickSignUpBtn = () => {
@@ -227,6 +156,9 @@ const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
                         name="id"
                         autoComplete="id"
                         autoFocus
+                        ref={userIdRef}
+                        onChange={onChangeUserIdInput}
+                        value={userId}
                     />
                     <TextField
                         variant="outlined"
@@ -238,6 +170,9 @@ const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
                         type="password"
                         id="password"
                         autoComplete="current-password"
+                        ref={passwordRef}
+                        onChange={onChangePasswordInput}
+                        value={password}
                     />
                     {/* <FormControlLabel
                         control={<Checkbox value="remember" color="primary" />}

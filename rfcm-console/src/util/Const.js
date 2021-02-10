@@ -12,7 +12,6 @@ const PAGE_ROUTE  = {
     LOGIN: "LOGIN",
     SIGNUP: "SIGNUP",
     MAINBOARD: "MAINBOARD",
-    CELLUNIT: "CELLUNIT",
     ADMIN: "ADMIN",
 }
 

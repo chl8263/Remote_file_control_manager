@@ -1,37 +1,38 @@
 import React, { useEffect } from "react";
-import $ from "jquery";
+import { useCookies } from 'react-cookie';
 import { connect } from "react-redux";
+import $ from "jquery";
 
 import { actionCreators } from "../store";
+import { PAGE_ROUTE, HTTP, MediaType, ROLE} from "../util/Const";
 
+import PreLoader from "../component/PreLoader";
 import Login from "../routes/Login";
 import SignUp from "../routes/SignUp";
 import MainBoard from "../routes/MainBoard";
-import CellUnit from "../routes/CellUnit";
-import PreLoader from "../component/PreLoader";
 
-import { PAGE_ROUTE, HTTP, MediaType, ROLE} from "../util/Const";
-
-import { useCookies } from 'react-cookie';
-
-
-const App = ( { page, switchLogin } ) => {
+const App = ( { page, switchLogin, switchMainBoard } ) => {
 
     const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
 
     useEffect(() => {
+        
+        console.log("========!!!!!!");
         console.log(cookies.JWT_TOKEN);
+        console.log(cookies.UID);
+        console.log("========!!!!=======");
 
-        if(cookies.JWT_TOKEN === undefined || cookies.JWT_TOKEN === null){
-            console.log("Jwt cookie 없음");
+        if(cookies.JWT_TOKEN === undefined || cookies.JWT_TOKEN === null || cookies.UID === undefined || cookies.UID === null){
             switchLogin();
             
         }else {
             // s: Ajax ----------------------------------
-            fetch(HTTP.SERVER_URL + "/check", {
+            fetch(HTTP.SERVER_URL + "/api/accounts/check", {
                 method: HTTP.GET,
                 headers: {
-                    'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN
+                    'Accept': MediaType.JSON,
+                    'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
+                    'Uid': cookies.UID,
                 },
                 // body: JSON.stringify(accountInfo)
                 
@@ -42,11 +43,14 @@ const App = ( { page, switchLogin } ) => {
                 return res;
             }).then(res => {
 
+                console.log("========");
                 console.log(res);
+                console.log("========");
+                switchMainBoard();
 
             }).catch(error => {
 
-                alert("Please check account again.");
+                switchLogin();
 
             }).finally( () => {
                 $(".preloader").fadeOut(); // Remove preloader.        
@@ -69,7 +73,6 @@ const App = ( { page, switchLogin } ) => {
             </>
         )
     } else if(page === PAGE_ROUTE.LOGIN){
-        console.log("sdsaddssaca");
         return (
             <>
                 <Login />
@@ -85,12 +88,6 @@ const App = ( { page, switchLogin } ) => {
         return (
             <>
                 <MainBoard />
-            </>
-        )
-    }else if(page === PAGE_ROUTE.CELLUNIT){
-        return (
-            <>
-                <CellUnit />
             </>
         )
     }else {
