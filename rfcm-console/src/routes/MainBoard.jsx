@@ -6,6 +6,7 @@ import PreLoader from "../component/PreLoader";
 import { PAGE_ROUTE, HTTP, MediaType} from "../util/Const";
 import { actionCreators } from "../store";
 
+import TopBar from "../component/mainBoard/topBar/TopBar";
 import LeftTree from "../component/mainBoard/treeView/LeftTree";
 
 import PropTypes from 'prop-types';
@@ -93,11 +94,12 @@ const MainBoard = ( { appInfo, window } ) => {
         <>
             <PreLoader />
 
+            <TopBar />
             <PanelGroup borderColor="grey" panelWidths={[
                 {size: 300, minSize:200, maxSize:500, resize: "dynamic"},
                 {size: 300, minSize:50, resize: "dynamic"}
                 ]}>
-                <div>panel 1</div>
+                <LeftTree style={{"marginLeft": "40px"}}/>
                 <div>panel 2</div>
             </PanelGroup>
         </> 
