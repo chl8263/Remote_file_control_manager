@@ -38,6 +38,7 @@ const HTTP = {
     STATUS_NOT_FOUND: 404,
     
     SERVER_URL: "http://localhost:8081",
+    WEBSOCKET_URL: "ws://localhost:8081/ws/chat",
     BASIC_TOKEN_PREFIX: "Bearer ",
 }
 

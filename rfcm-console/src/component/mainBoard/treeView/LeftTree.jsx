@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 
+import { PAGE_ROUTE, HTTP, MediaType} from "../../../util/Const";
+
 import PropTypes from 'prop-types';
 import SvgIcon from '@material-ui/core/SvgIcon';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
@@ -9,7 +11,12 @@ import Collapse from '@material-ui/core/Collapse';
 import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFileText } from "@fortawesome/free-solid-svg-icons"
+import { faFileAlt, faFolder } from "@fortawesome/free-regular-svg-icons"
+import { faAngleRight, faAngleDown } from "@fortawesome/free-solid-svg-icons"
+
+import TreeViewParent from "../treeView/TreeViewParent"
+
+import SockJS from 'sockjs-client';
 
 function Root(props) {
   return (
@@ -74,8 +81,8 @@ const StyledTreeItem = withStyles((theme) => ({
     },
   },
   group: {
-    marginLeft: 7,
-    paddingLeft: 18,
+    marginLeft: 3,
+    paddingLeft: 8,
     borderLeft: `1px dashed ${fade(theme.palette.text.primary, 0.4)}`,
   },
 }))((props) => <TreeItem {...props} TransitionComponent={TransitionComponent} />);
@@ -91,18 +98,41 @@ const useStyles = makeStyles({
 const LeftTree = () => {
     const classes = useStyles();
 
+    useEffect(() => {
+      let sockJS = new SockJS("http://localhost:8081/test");
+      sockJS.onopen = function () {
+        // send : connection으로 message를 전달
+        // connection이 맺어진 후 가입(JOIN) 메시지를 전달
+        //sock.send(JSON.stringify({chatRoomId: roomId, type: 'JOIN', writer: member}));
+        sockJS.send("hohoho");
+        
+        // onmessage : message를 받았을 때의 callback
+        sockJS.onmessage = function (e) {
+          console.log("ok!");
+            // var content = JSON.parse(e.data);
+            // chatBox.append('<li>' + content.message + '(' + content.writer + ')</li>')
+        }
+    }
+    });
+
+    const sendMessage = () => {
+      //socketio.emit("sendMessage", "hihih");
+    };
+
     return (
         <>
             <TreeView
                 className={classes.root}
                 defaultExpanded={['1']}
-                defaultCollapseIcon={<OpenedFolder />}
-                defaultExpandIcon={<ClosedFolder />}
-                defaultEndIcon={<CloseSquare />}
+                defaultCollapseIcon={<FontAwesomeIcon icon={faAngleDown} />}
+                defaultExpandIcon={<FontAwesomeIcon icon={faAngleRight} />}
+                // defaultEndIcon={<FontAwesomeIcon icon={faFileAlt} />}
                 >
-                <StyledTreeItem nodeId="1" label={ <span > <FontAwesomeIcon icon={faFileText} /> </span> }>
+                <TreeViewParent />
+
+                {/* <StyledTreeItem nodeId="1" label={ <span onClick={event => {console.log(111); event.preventDefault();}} style={{ width: 100}} > <FontAwesomeIcon icon={faFolder} /> programfiles </span> }>
                   <StyledTreeItem nodeId="2" label="Hello" />
-                  <StyledTreeItem nodeId="3" label="Subtree with children">
+                  <StyledTreeItem nodeId="3" label={ <span > <FontAwesomeIcon icon={faFolder} /> 11 </span> }  >
                       <StyledTreeItem nodeId="6" label="Hello" />
                       <StyledTreeItem nodeId="7" label="Sub-subtree with children">
                       <StyledTreeItem nodeId="9" label="Child 1" />
@@ -113,7 +143,7 @@ const LeftTree = () => {
                   </StyledTreeItem>
                   <StyledTreeItem nodeId="4" label="World" />
                   <StyledTreeItem nodeId="5" label="Something something" />
-                </StyledTreeItem>
+                </StyledTreeItem> */}
             </TreeView>
         </>
     );
