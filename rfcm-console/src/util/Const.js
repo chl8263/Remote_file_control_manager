@@ -54,5 +54,10 @@ const CellUnitRoles = {
     USER: "USER",
 }
 
+const SOCK_REQ_TYPE = {
+    GET_CONNECTIONS: "GET_CONNECTIONS",
+    PATH: 1,
+}
 
-export {FETCH_STATE, PAGE_ROUTE, HTTP, MediaType, ROLE, CellUnitRoles, COLOR};
+
+export {FETCH_STATE, PAGE_ROUTE, HTTP, MediaType, ROLE, CellUnitRoles, COLOR, SOCK_REQ_TYPE};

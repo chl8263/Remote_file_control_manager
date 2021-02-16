@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 
-import { PAGE_ROUTE, HTTP, MediaType} from "../../../util/Const";
+import { PAGE_ROUTE, HTTP, MediaType, SOCK_REQ_TYPE} from "../../../util/Const";
 
 import PropTypes from 'prop-types';
 import SvgIcon from '@material-ui/core/SvgIcon';
@@ -103,7 +103,11 @@ const LeftTree = () => {
       sockJS.onopen = function () {
         // send : connection으로 message를 전달
         // connection이 맺어진 후 가입(JOIN) 메시지를 전달
-        sockJS.send(JSON.stringify({chatRoomId: 123, type: 'JOIN', writer: 'Ewan'}));
+        sockJS.send(JSON.stringify(
+          {
+            reqType: SOCK_REQ_TYPE.GET_CONNECTIONS,
+          }
+          ));
         //sockJS.send("hohoho");
         
         // onmessage : message를 받았을 때의 callback

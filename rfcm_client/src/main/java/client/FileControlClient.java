@@ -1,5 +1,8 @@
 package client;
 
+import cont.Encoding;
+import model.ServerInfo;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -11,8 +14,14 @@ import java.util.concurrent.Executors;
 
 public class FileControlClient {
 
-    AsynchronousChannelGroup channelGroup;
-    AsynchronousSocketChannel socketChannel;
+    private AsynchronousChannelGroup channelGroup;
+    private AsynchronousSocketChannel socketChannel;
+
+    private final ServerInfo serverInfo;
+
+    public FileControlClient(ServerInfo serverInfo){
+        this.serverInfo = serverInfo;
+    }
 
     public void startClient(){
         try {
@@ -22,13 +31,12 @@ public class FileControlClient {
             );
 
             socketChannel = AsynchronousSocketChannel.open(channelGroup);
-            socketChannel.connect(new InetSocketAddress("127.0.0.1", 15000), null,
+            socketChannel.connect(new InetSocketAddress(serverInfo.getIp(), serverInfo.getPort()), null,
                     new CompletionHandler<Void, Void>() {
                         @Override
                         public void completed(Void result, Void attachment) {
                             try {
-                                System.out.println("[연결 완료 : " + socketChannel.getRemoteAddress());
-
+                                System.out.println("[연결 완료 : " + socketChannel.getRemoteAddress() + "]");
 
                             } catch (IOException e) {
 
@@ -69,7 +77,7 @@ public class FileControlClient {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
                         attachment.flip();
-                        Charset charset = Charset.forName("UTF-8");
+                        Charset charset = Charset.forName(Encoding.UTF_8);
                         String data = charset.decode(attachment).toString();
                         System.out.println("[받기 완료 : " + data + " ]");
 
@@ -80,15 +88,14 @@ public class FileControlClient {
                     @Override
                     public void failed(Throwable exc, ByteBuffer attachment) {
                         System.out.println("[서버 에서 읽기 실패]");
-                        ByteBuffer byteBuffer = ByteBuffer.allocate(100);
-                        socketChannel.read(byteBuffer, byteBuffer, this);
+                        stopClient();
                     }
                 }
         );
     }
 
     public void send(String data){
-        Charset charset = Charset.forName("UTF-8");
+        Charset charset = Charset.forName(Encoding.UTF_8);
         ByteBuffer byteBuffer = charset.encode(data);
         socketChannel.write(byteBuffer, null,
                 new CompletionHandler<Integer, Void>() {

@@ -1,18 +1,16 @@
 package com.ewan.rfcm.server.webSocketController;
 
-import antlr.debug.MessageAdapter;
 import com.ewan.rfcm.server.FileControlServer;
 import com.ewan.rfcm.server.model.FileControlClient;
 import com.ewan.rfcm.server.model.WebSocketReqDto;
+import com.ewan.rfcm.server.protocol.MessagePacker;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.msgpack.MessagePack;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
@@ -45,13 +43,17 @@ public class WebSocketHandler extends TextWebSocketHandler {
                         Selector selector = client.getSelector();
                         SelectionKey selectionKey = client.getSocketChannel().keyFor(selector);
 
-                        MessagePack messagePack = new MessagePack();
+                        MessagePacker msg = new MessagePacker();
                         int v1 = 1;
                         int v2 = 2;
                         int v3 = 3;
-                        messagePack.
+                        msg.add(v1);
+                        msg.add(v2);
+                        msg.add(v3);
+                        msg.add("Message test for this project.");
+                        byte [] data = msg.Finish();
 
-                        client.setSendData("hi ~~ !");
+                        client.setSendData(data);
                         selectionKey.interestOps(SelectionKey.OP_WRITE);
                         selector.wakeup();
                     }

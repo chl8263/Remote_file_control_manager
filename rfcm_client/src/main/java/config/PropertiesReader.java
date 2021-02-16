@@ -25,7 +25,7 @@ public class PropertiesReader {
             }
 
             serverInfo.setIp(prop.getProperty("ip"));
-            serverInfo.setPort(prop.getProperty("port"));
+            serverInfo.setPort(Integer.parseInt(prop.getProperty("port")));
 
         } catch(Exception e){
             LOG.warning("Cannot trace [app.properties] file");

@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class ServerInfo {
 
     private String ip = "";
-    private String port = "";
+    private int port = 0;
 }

@@ -1,4 +1,6 @@
+import client.FileControlClient;
 import config.PropertiesReader;
+import model.ServerInfo;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,8 +11,8 @@ public class Application {
 
     public static void main(String[] args) {
 
-        PropertiesReader.getServerInfoFromPropertiesValue();
-
+        ServerInfo serverInfo = PropertiesReader.getServerInfoFromPropertiesValue();
+        new FileControlClient(serverInfo).startClient();
 
     }
 }
