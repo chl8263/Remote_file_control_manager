@@ -1,6 +1,6 @@
 package com.ewan.rfcm.server;
 
-import com.ewan.rfcm.global.security.filter.JwtAuthenticationFilter;
+import com.ewan.rfcm.server.model.FileControlClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,13 +12,13 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 
-public class Server implements Runnable {
+public class FileControlServer implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(Server.class);
+    private static final Logger log = LoggerFactory.getLogger(FileControlServer.class);
 
     private Selector selector;
     private ServerSocketChannel serverSocketChannel;
-    private final Set<Client> connections = new HashSet<>();
+    public static final Set<FileControlClient> connections = new HashSet<>();
     @Override
     public void run() {
         startServer();
@@ -47,11 +47,11 @@ public class Server implements Runnable {
                         accept(selectionKey);
 
                     }else if(selectionKey.isReadable()){
-                        Client client = (Client) selectionKey.attachment();
+                        FileControlClient client = (FileControlClient) selectionKey.attachment();
                         client.receive(selectionKey);
 
                     }else if(selectionKey.isWritable()){
-                        Client client = (Client) selectionKey.attachment();
+                        FileControlClient client = (FileControlClient) selectionKey.attachment();
                         client.send(selectionKey);
                     }
                     iterator.remove();
@@ -78,7 +78,7 @@ public class Server implements Runnable {
 
             log.info("[TCP] Connection accept");
 
-            Client client = new Client(socketChannel, selector, connections);
+            FileControlClient client = new FileControlClient(socketChannel, selector);
             connections.add(client);
 
             log.info("[TCP] Connection count : " + connections.size());

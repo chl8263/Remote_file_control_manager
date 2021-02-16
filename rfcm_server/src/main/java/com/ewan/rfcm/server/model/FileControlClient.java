@@ -1,5 +1,6 @@
-package com.ewan.rfcm.server;
+package com.ewan.rfcm.server.model;
 
+import com.ewan.rfcm.server.FileControlServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,25 +10,20 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
 
-public class Client {
+public class FileControlClient {
 
-    private static final Logger log = LoggerFactory.getLogger(Client.class);
+    private static final Logger log = LoggerFactory.getLogger(FileControlClient.class);
 
     private SocketChannel socketChannel;
-    private String sendData;
-    Selector selector;
+    private byte[] sendData;
+    private Selector selector;
 
-    private Set<Client> connections;
 
-    public Client(SocketChannel socketChannel, Selector selector, Set<Client> connections){
+    public FileControlClient(SocketChannel socketChannel, Selector selector){
         try {
             this.selector  = selector;
             this.socketChannel = socketChannel;
-            this.connections = connections;
             socketChannel.configureBlocking(false);
             SelectionKey selectionKey = socketChannel.register(selector, SelectionKey.OP_READ);
             selectionKey.attach(this);
@@ -54,7 +50,7 @@ public class Client {
 
         } catch (Exception e) {
             try {
-                connections.remove(this);
+                FileControlServer.connections.remove(this);
                 String message = "[클라이언트 통신 안됨 : " + socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName() + "]";
                 System.out.println(message);
                 socketChannel.close();
@@ -65,11 +61,34 @@ public class Client {
 
     public void send(SelectionKey selectionKey){
         try {
-            connections.remove(this);
-            String message = "[클라이언트 통신 안됨 : " + socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName() + "]";
-            System.out.println(message);
-            socketChannel.close();
-        } catch (Exception e2) {
+//            Charset charset = Charset.forName("UTF-8");
+//            ByteBuffer byteBuffer = charset.encode(sendData);
+            ByteBuffer byteBuffer = ByteBuffer.wrap(sendData);//sendData;
+            byteBuffer.flip();
+            socketChannel.write(byteBuffer);
+            selectionKey.interestOps(SelectionKey.OP_READ);
+            selector.wakeup();
+
+        } catch (Exception e) {
+            try {
+                FileControlServer.connections.remove(this);
+                String message = "[클라이언트 통신 안됨 : " + socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName() + "]";
+                System.out.println(message);
+                socketChannel.close();
+            } catch (Exception e2) {
+            }
         }
+    }
+
+    public SocketChannel getSocketChannel(){
+        return this.socketChannel;
+    }
+
+    public Selector getSelector(){
+        return this.selector;
+    }
+
+    public void setSendData(byte[] sendData){
+        this.sendData = sendData;
     }
 }
