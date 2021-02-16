@@ -32,6 +32,6 @@ public class AccountController {
 
     @GetMapping("/check")
     public ResponseEntity check (){
-        return (ResponseEntity) ResponseEntity.ok();
+        return ResponseEntity.ok("");
     }
 }

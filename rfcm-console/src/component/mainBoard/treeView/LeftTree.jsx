@@ -103,16 +103,16 @@ const LeftTree = () => {
       sockJS.onopen = function () {
         // send : connection으로 message를 전달
         // connection이 맺어진 후 가입(JOIN) 메시지를 전달
-        //sock.send(JSON.stringify({chatRoomId: roomId, type: 'JOIN', writer: member}));
-        sockJS.send("hohoho");
+        sockJS.send(JSON.stringify({chatRoomId: 123, type: 'JOIN', writer: 'Ewan'}));
+        //sockJS.send("hohoho");
         
         // onmessage : message를 받았을 때의 callback
         sockJS.onmessage = function (e) {
-          console.log("ok!");
+            console.log(e.data);
             // var content = JSON.parse(e.data);
             // chatBox.append('<li>' + content.message + '(' + content.writer + ')</li>')
         }
-    }
+      }
     });
 
     const sendMessage = () => {

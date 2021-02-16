@@ -1,6 +1,7 @@
 package com.ewan.rfcm.global.security.handler;
 
 import com.ewan.rfcm.Application;
+import com.ewan.rfcm.global.constant.UserConnection;
 import com.ewan.rfcm.global.security.AccountContext;
 import com.ewan.rfcm.global.security.JwtFactory;
 import com.ewan.rfcm.global.security.dto.TokenDto;
@@ -16,10 +17,12 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.UUID;
 
 @Component
 public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
@@ -43,16 +46,9 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
         AccountContext accountContext = (AccountContext) token.getPrincipal();
         String tokenString = jwtFactory.generateToken(accountContext);
 
-        ServletContext application = request.getServletContext();
-
-        HttpSession session = request.getSession();
-        String sessionId = session.getId();
         String userId = accountContext.getUsername();
-        String storedSession = (String) session.getAttribute(userId);
-
-        session.setAttribute(userId, sessionId);
-
-        String a = (String) session.getAttribute(userId);
+        String uid = UUID.randomUUID().toString();
+        UserConnection.userConnections.put(userId, uid);
 
 //        if(storedSession == null || storedSession.isEmpty() || storedSession.isBlank() || !sessionId.equals(storedSession)){
 //            session.invalidate();
@@ -60,11 +56,11 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
 //            throw new SessionAuthenticationException("This session isn't valid session");
 //        }
 
-        processResponse(response, writeDto(tokenString));
+        processResponse(response, writeDto(tokenString, uid));
     }
 
-    private TokenDto writeDto(String token){
-        return new TokenDto(token);
+    private TokenDto writeDto(String token, String uid){
+        return new TokenDto(token, uid);
     }
 
     private void processResponse(HttpServletResponse response, TokenDto dto) throws IOException {

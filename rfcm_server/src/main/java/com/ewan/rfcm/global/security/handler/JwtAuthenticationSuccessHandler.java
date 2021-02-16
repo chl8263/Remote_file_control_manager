@@ -1,6 +1,8 @@
 package com.ewan.rfcm.global.security.handler;
 
+import com.ewan.rfcm.global.constant.UserConnection;
 import com.ewan.rfcm.global.security.token.JwtPostProcessingToken;
+import org.hibernate.InvalidMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.util.Optional;
 
 @Component
@@ -36,27 +39,16 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
 
         JwtPostProcessingToken token = (JwtPostProcessingToken) authentication;
 
-        //session
-        HttpSession session = request.getSession();
-        String sessionId = session.getId();
+        // s: validation
         String userId = token.getUserId();
-        String storedSession = (String) session.getAttribute(userId);
+        String uidPayload = request.getHeader("Uid");
 
-        if(storedSession == null || storedSession.isEmpty() || storedSession.isBlank() || !sessionId.equals(storedSession)){
-            session.invalidate();
-            if(storedSession != null) session.removeAttribute(sessionId);
-            throw new SessionAuthenticationException("This session isn't valid session");
+        if(UserConnection.userConnections.containsKey(userId) && UserConnection.userConnections.get(userId).equals(uidPayload)) {
+            chain.doFilter(request, response);  //Run chain which remain on security filter}
+        }else {
+            throw new InvalidObjectException("Invalid token");
         }
-
-        chain.doFilter(request, response);  //Run chain which remain on security filter
-
-//        String requestURI = request.getRequestURI();
-//        if(requestURI.equals("/check")){
-//            response.setStatus(HttpStatus.OK.value());
-//            response.getWriter().write(requestURI);
-//        }else {
-//            chain.doFilter(request, response);  //Run chain which remain on security filter
-//        }
+        // e: validation
     }
 
     @Override
