@@ -1,5 +1,6 @@
 package com.ewan.rfcm.server.protocol;
 
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -41,11 +42,11 @@ public class MessagePacker {
         return result;
     }
 
-    public void SetProtocol(byte protocol){
+    public void setProtocol(byte protocol){
         buffer.put(protocol);
     }
 
-    public void SetEndianType(ByteOrder option){
+    public void setEndianType(ByteOrder option){
         if(option == ByteOrder.BIG_ENDIAN){
             buffer.order(ByteOrder.BIG_ENDIAN);
         }
@@ -69,11 +70,29 @@ public class MessagePacker {
             buffer.putDouble(param);
     }
 
-    public void add(String param){
+    public void addString(String param){
         int len = param.getBytes().length;
         if(buffer.remaining() > len){ // 남은 공간이 있을 경우
             buffer.putInt(len);
             buffer.put(param.getBytes());
+        }
+    }
+
+    public void add(Object param){
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutput out = new ObjectOutputStream(bos);
+            out.writeObject(param);
+            byte[] yourBytes = bos.toByteArray();
+            buffer.put(yourBytes);
+
+//            int len = param.getBytes().length;
+//            if(buffer.remaining() > len){ // 남은 공간이 있을 경우
+//                buffer.putInt(len);
+//                buffer.put(param.getBytes());
+//            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -105,4 +124,21 @@ public class MessagePacker {
         String result = new String(temp);
         return result;
     }
+
+    public Object getObject(int len){
+        try {
+            byte[] temp = new byte[len];
+            buffer.get(temp);
+            ByteArrayInputStream bis = new ByteArrayInputStream(temp);
+            ObjectInput in = new ObjectInputStream(bis);
+            Object o = in.readObject();
+            return o;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

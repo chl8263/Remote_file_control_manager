@@ -18,7 +18,8 @@ public class FileControlServer implements Runnable {
 
     private Selector selector;
     private ServerSocketChannel serverSocketChannel;
-    public static final Set<FileControlClient> connections = new HashSet<>();
+    public static final HashMap<String, FileControlClient> connections = new HashMap<>();
+
     @Override
     public void run() {
         startServer();
@@ -79,7 +80,8 @@ public class FileControlServer implements Runnable {
             log.info("[TCP] Connection accept");
 
             FileControlClient client = new FileControlClient(socketChannel, selector);
-            connections.add(client);
+            //System.out.println(client.getSocketChannel().getRemoteAddress().toString());
+            connections.put(client.getSocketChannel().getRemoteAddress().toString().substring(1), client);
 
             log.info("[TCP] Connection count : " + connections.size());
 
@@ -88,5 +90,11 @@ public class FileControlServer implements Runnable {
                 stopServer();
             }
         }
+    }
+
+    public static FileControlClient getClient(String ip){
+        if(connections.containsKey(ip)){
+            return connections.get(ip);
+        }else return null;
     }
 }

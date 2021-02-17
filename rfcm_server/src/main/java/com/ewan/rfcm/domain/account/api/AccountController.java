@@ -23,7 +23,7 @@ public class AccountController {
 
     @GetMapping("/{accountName}")
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity a (@PathVariable String accountName, Authentication authentication){
+    public ResponseEntity getAccount (@PathVariable String accountName, Authentication authentication){
 
         JwtPostProcessingToken token = (JwtPostProcessingToken) authentication;
 

@@ -1,5 +1,6 @@
 package com.ewan.rfcm;
 
+import com.ewan.rfcm.server.AsyncFileControlServer;
 import com.ewan.rfcm.server.FileControlServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +12,8 @@ public class Application {
 
         SpringApplication.run(Application.class, args);
 
-        new FileControlServer().run();
+        //new FileControlServer().run();
+        new AsyncFileControlServer().run();
     }
 
 }

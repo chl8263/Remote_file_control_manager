@@ -23,6 +23,6 @@ public class WebSocketConfig implements WebSocketConfigurer{
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(webSocketHandler, "/test").setAllowedOrigins("http://localhost:8080").withSockJS();
+        registry.addHandler(webSocketHandler, "/ws").setAllowedOrigins("http://localhost:8080").withSockJS();
     }
 }
