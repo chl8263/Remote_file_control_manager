@@ -75,7 +75,20 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no} ) => {
     console.log(upPath);
     console.log(currentDirectory);
     // s: Ajax ----------------------------------
-    fetch(HTTP.SERVER_URL + `/api/file/directory/${address}/${upPath + currentDirectory}`, {
+    var fianlPath = upPath;
+    if(fianlPath !== ""){
+      fianlPath += "|";
+    }
+    fianlPath += currentDirectory;
+    console.log("!!!!!!!");
+    console.log(fianlPath);
+    fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
+    if(fianlPath.charAt(0) === '|'){
+      fianlPath = fianlPath.substr(1);
+    }
+    console.log(fianlPath);
+
+    fetch(HTTP.SERVER_URL + `/api/file/directory/${address}/${fianlPath}`, {
         method: HTTP.GET,
         headers: {
             'Content-type': MediaType.JSON,
@@ -92,13 +105,7 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no} ) => {
         return res.json();
     }).then(json => {
       console.log(json);
-      const list = json.payload.split('^');
-      var rootTempList = [];
-      list.forEach(x => {
-        rootTempList.push(x);
-      });
-      rootTempList.shift();
-      setRootDirectoryList(rootTempList);
+      setItems(JSON.parse(json.payload));
     }).catch(error => {
       console.error(error);
       alert("Please check information.");
@@ -117,7 +124,7 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no} ) => {
               label={ <span   style={{ width: 100}} > <FontAwesomeIcon icon={faFolder} /> {currentDirectory} </span> }>
 
               {items.map( x => {
-                return <TreeViewItem address={address} upPath={upPath+currentDirectory} currentDirectory={x} no={no+1}/>;
+                return <TreeViewItem address={address} upPath={upPath+"/"+currentDirectory} currentDirectory={x} no={no+1}/>;
               })}
 
             </StyledTreeItem>

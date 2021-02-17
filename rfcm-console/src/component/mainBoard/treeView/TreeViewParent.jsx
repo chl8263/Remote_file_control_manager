@@ -80,6 +80,7 @@ const TreeViewParent = ( { appInfo, address } ) => {
 
     const getRootDirectory = (e) => {
       console.log(111);
+      console.log(address);
       e.preventDefault();
 
       // s: Ajax ----------------------------------

@@ -28,10 +28,12 @@ public class FileController {
         this.objectMapper = objectMapper;
     }
 
-    @GetMapping("/directory/{ip}/{path}")
+    @GetMapping("/directory/{ip}/{path:.+}")
     public ResponseEntity getRootDirectory(@PathVariable String ip, @PathVariable String path){
         try {
             AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
+            path = preProcessing(path);
+
             if(client == null || path == null || path.equals("")){
                 return ResponseEntity.badRequest().body("");
             }
@@ -63,6 +65,13 @@ public class FileController {
             e.printStackTrace();
         }
         return ResponseEntity.ok("");
+    }
+
+    private String preProcessing(String path){
+        path = path.replace("|", "/");
+        if (path.endsWith(":"))
+            path += "/";
+        return path;
     }
 
 }

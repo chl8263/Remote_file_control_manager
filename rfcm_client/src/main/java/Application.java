@@ -10,7 +10,8 @@ public class Application {
         ServerInfo serverInfo = PropertiesReader.getServerInfoFromPropertiesValue();
         new FileControlClient(serverInfo).startClient();
 
-        //new FileProvider().getRootPath();
+        //FileProvider.getRootPath();
+        //FileProvider.getUnderLineDirectory("C:\\KiwoomHero4bin\\globalticker");
 
     }
 }

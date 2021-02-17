@@ -20,7 +20,7 @@ import SockJS from 'sockjs-client';
 
 function TransitionComponent(props) {
   const style = useSpring({
-    from: { opacity: 0, transform: 'translate3d(20px,0,0)' },
+    from: { opacity: 2, transform: 'translate3d(20px,0,0)' },
     to: { opacity: props.in ? 1 : 0, transform: `translate3d(${props.in ? 0 : 20}px,0,0)` },
   });
 

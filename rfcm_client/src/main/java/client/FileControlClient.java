@@ -91,20 +91,11 @@ public class FileControlClient {
                                 sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
                                 sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
 
-//                                StringBuilder rootPaths = new StringBuilder();
-//                                for (Path p : FileSystems.getDefault().getRootDirectories()) {
-//                                    rootPaths.append("^");
-//                                    rootPaths.append(p);
-//                                }
-
-                                String responseData = FileProvider.getRootPath();
-
+                                String responseData = FileProvider.getDirectoryInRoot();
                                 sendMsg.add(responseData);
 
                                 byte [] sendData = sendMsg.Finish();
                                 send(ByteBuffer.wrap(sendData));
-
-                                FileSystems.getDefault().getRootDirectories();
 
                                 break;
                             }
@@ -117,17 +108,12 @@ public class FileControlClient {
                                 sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
                                 sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
 
-                                StringBuilder rootPaths = new StringBuilder();
-                                for (Path p : FileSystems.getDefault().getRootDirectories()) {
-                                    rootPaths.append("^");
-                                    rootPaths.append(p);
-                                }
-                                sendMsg.add(rootPaths.toString());
+                                String responseData = FileProvider.getUnderLineDirectory(path);
+
+                                sendMsg.add(responseData);
 
                                 byte [] sendData = sendMsg.Finish();
                                 send(ByteBuffer.wrap(sendData));
-
-                                FileSystems.getDefault().getRootDirectories();
 
                                 break;
                             }
