@@ -6,6 +6,7 @@ import com.ewan.rfcm.server.model.FileControlClient;
 import com.ewan.rfcm.server.model.WebSocketReqDto;
 import com.ewan.rfcm.server.protocol.MessagePacker;
 import com.ewan.rfcm.server.protocol.MessageProtocol;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,84 +66,44 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
             switch (requestData.getReqType()){
                 case CONNECTIONS:{
-                    WebSocketReqDto resultObj = new WebSocketReqDto();
-                    String temp = "";
-
-                    Iterator<String> keys = AsyncFileControlServer.connections.keySet().iterator();
-                    for( String key : AsyncFileControlServer.connections.keySet() ){
-                        System.out.println(key);
-                        temp += AsyncFileControlServer.connections.get(key).getSocketChannel().getRemoteAddress();
-                    }
-
-                    System.out.println(temp);
-
-//                    for(FileControlClient client : FileControlServer.connections){
-//                        temp += client.getSocketChannel().getRemoteAddress();
-//                    }
-
-                    resultObj.setReqType(CONNECTIONS);
-                    resultObj.setPayload(temp);
-
-                    String result = objectMapper.writeValueAsString(resultObj);
-
-                    TextMessage textMessage = new TextMessage(result);
-                    session.sendMessage(textMessage);
-                    break;
-                }
-                case ROOT_PATHS:{
-                    System.out.println(requestData.getIp());
-                    FileControlClient client = FileControlServer.connections.get(requestData.getIp());
-
-                    Selector selector = client.getSelector();
-                    if(selector != null) {
-                        SelectionKey selectionKey = client.getSocketChannel().keyFor(selector);
-
-                        System.out.println("[보내기 : 루트파일 경로좀 주세요ㅋ]" + session.getId() + "이새끼한테 줄거임 ㅋ");
-                        MessagePacker msg = new MessagePacker();
-                        msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
-                        msg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
-                        msg.addString(session.getId());
-                        byte[] data = msg.Finish();
-
-                        client.setSendData(data);
-                        selectionKey.interestOps(SelectionKey.OP_WRITE);
-                        selector.wakeup();
-                    }
-                    break;
-                }
-                case PATHS:{
-                    System.out.println("현재 클라이언트 갯수 : " + FileControlServer.connections.size());
-//                    for(FileControlClient client : FileControlServer.connections){
-//                        System.out.println("Client -> " + client.getSocketChannel().getRemoteAddress());
-//
-//                        Selector selector = client.getSelector();
-//                        SelectionKey selectionKey = client.getSocketChannel().keyFor(selector);
-//
-//                        System.out.println("[보내기 : 파일경로좀 ㅋ]");
-//                        MessagePacker msg = new MessagePacker();
-//                        msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
-//                        msg.setProtocol(MessageProtocol.FOLDER_LIST);
-////                        int v1 = 1;
-////                        int v2 = 2;
-////                        int v3 = 3;
-////                        msg.add(v1);
-////                        msg.add(v2);
-////                        msg.add(v3);
-////                        msg.add("Message test for this project.");
-//                        byte [] data = msg.Finish();
-//
-//                        client.setSendData(data);
-//                        selectionKey.interestOps(SelectionKey.OP_WRITE);
-//                        selector.wakeup();
-//                    }
+                    sendConnectedClientInfo(session);
                     break;
                 }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public static void sendConnectedClientInfo(WebSocketSession session){
 
+        try {
+            WebSocketReqDto resultObj = new WebSocketReqDto();
+            String temp = "";
+
+            //Iterator<String> keys = AsyncFileControlServer.connections.keySet().iterator();
+            for( String key : AsyncFileControlServer.connections.keySet() ){
+                System.out.println(key);
+                temp += AsyncFileControlServer.connections.get(key).getSocketChannel().getRemoteAddress();
+            }
+
+            System.out.println(temp);
+
+            resultObj.setReqType(CONNECTIONS);
+            resultObj.setPayload(temp);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String result = "";
+            result = objectMapper.writeValueAsString(resultObj);
+
+            TextMessage textMessage = new TextMessage(result);
+            session.sendMessage(textMessage);
+
+        } catch (Exception e) {
+            try {
+                log.info("[Websocket] 전송실패로 접속 해제 : " + session.getId());
+                session.close();
+            } catch (IOException ioException) { }
+        }
     }
 }

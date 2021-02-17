@@ -2,8 +2,10 @@ package com.ewan.rfcm.server;
 
 import com.ewan.rfcm.server.connection.AsyncFileControlClient;
 import com.ewan.rfcm.server.model.FileControlClient;
+import com.ewan.rfcm.server.webSocketController.WebSocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -57,6 +59,13 @@ public class AsyncFileControlServer implements Runnable {
                     log.info("[Async Server] 연결 갯수 : " + connections.size());
 
                     serverSocketChannel.accept(null, this);
+
+                    // Send new client information to connected web socket session
+                    for( String key : WebSocketHandler.sessionList.keySet() ){
+                        WebSocketSession webSocketSession =  WebSocketHandler.sessionList.get(key);
+                        WebSocketHandler.sendConnectedClientInfo(webSocketSession);
+                    }
+
                 } catch (IOException e) {
                 }
             }

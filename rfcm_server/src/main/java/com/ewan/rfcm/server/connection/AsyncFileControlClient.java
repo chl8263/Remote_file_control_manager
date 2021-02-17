@@ -58,7 +58,7 @@ public class AsyncFileControlClient {
                             try {
                                 FileControlServer.connections.remove(socketChannel.getRemoteAddress().toString().substring(1));
                                 String message = "[클라이언트 통신 안됨 : " + socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName() + "]";
-                                System.out.println(message);
+                                log.info(message);
                                 AsyncFileControlServer.connections.remove(socketChannel.getRemoteAddress().toString().substring(1));
                                 socketChannel.close();
                             } catch (Exception e2) {
@@ -87,7 +87,7 @@ public class AsyncFileControlClient {
                 try {
                     FileControlServer.connections.remove(socketChannel.getRemoteAddress().toString().substring(1));
                     String message = "[클라이언트 통신 안됨 : " + socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName() + "]";
-                    System.out.println(message);
+                    log.info(message);
                     AsyncFileControlServer.connections.remove(socketChannel.getRemoteAddress().toString().substring(1));
                     socketChannel.close();
                 } catch (Exception e2) {
