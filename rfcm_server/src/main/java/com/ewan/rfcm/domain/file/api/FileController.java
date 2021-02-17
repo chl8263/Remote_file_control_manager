@@ -32,7 +32,7 @@ public class FileController {
     public ResponseEntity getRootDirectory(@PathVariable String ip, @PathVariable String path){
         try {
             AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
-            if(client == null){
+            if(client == null || path == null || path.equals("")){
                 return ResponseEntity.badRequest().body("");
             }
 
@@ -42,6 +42,7 @@ public class FileController {
                 msg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
             }else {
                 msg.setProtocol(MessageProtocol.DIRECTORY);
+                msg.addString(path);
             }
 
             byte[] data = msg.Finish();

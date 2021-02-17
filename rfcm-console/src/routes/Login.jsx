@@ -102,6 +102,7 @@ const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
                 var UID = json.uid;
                 setCookie('JWT_TOKEN', JWT_TOKEN, { path: '/' });
                 setCookie('UID', UID, { path: '/' });
+                addJwtToken(JWT_TOKEN);
                 switchMainBoard();
                 
             }).catch(error => {

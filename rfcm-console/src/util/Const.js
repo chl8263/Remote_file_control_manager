@@ -55,8 +55,9 @@ const CellUnitRoles = {
 }
 
 const SOCK_REQ_TYPE = {
-    GET_CONNECTIONS: "GET_CONNECTIONS",
-    PATH: 1,
+    CONNECTIONS: "CONNECTIONS",
+    ROOT_PATHS: "ROOT_PATHS",
+    ROOT_PATHS: "ROOT_PATHS",
 }
 
 

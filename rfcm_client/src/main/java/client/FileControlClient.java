@@ -1,15 +1,18 @@
 package client;
 
-import cont.Encoding;
 import model.ServerInfo;
+import protocol.MessagePacker;
+import protocol.MessageProtocol;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.charset.Charset;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.concurrent.Executors;
 
 public class FileControlClient {
@@ -71,17 +74,66 @@ public class FileControlClient {
     }
 
     public void receive(){
-        ByteBuffer byteBuffer = ByteBuffer.allocate(100);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
         socketChannel.read(byteBuffer, byteBuffer,
                 new CompletionHandler<Integer, ByteBuffer>() {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
-                        attachment.flip();
-                        Charset charset = Charset.forName(Encoding.UTF_8);
-                        String data = charset.decode(attachment).toString();
-                        System.out.println("[받기 완료 : " + data + " ]");
+                        //attachment.flip();
+                        byte [] byteArr = attachment.array();
+                        MessagePacker receivedMsg = new MessagePacker(byteArr);
+                        byte protocol = receivedMsg.getProtocol();
 
-                        ByteBuffer byteBuffer = ByteBuffer.allocate(100);
+                        switch (protocol){
+                            case MessageProtocol.ROOT_DIRECTORY:{
+
+                                MessagePacker sendMsg = new MessagePacker();
+                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
+
+//                                StringBuilder rootPaths = new StringBuilder();
+//                                for (Path p : FileSystems.getDefault().getRootDirectories()) {
+//                                    rootPaths.append("^");
+//                                    rootPaths.append(p);
+//                                }
+
+                                String responseData = FileProvider.getRootPath();
+
+                                sendMsg.add(responseData);
+
+                                byte [] sendData = sendMsg.Finish();
+                                send(ByteBuffer.wrap(sendData));
+
+                                FileSystems.getDefault().getRootDirectories();
+
+                                break;
+                            }
+
+                            case MessageProtocol.DIRECTORY:{
+
+                                String path = receivedMsg.getString();
+
+                                MessagePacker sendMsg = new MessagePacker();
+                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
+
+                                StringBuilder rootPaths = new StringBuilder();
+                                for (Path p : FileSystems.getDefault().getRootDirectories()) {
+                                    rootPaths.append("^");
+                                    rootPaths.append(p);
+                                }
+                                sendMsg.add(rootPaths.toString());
+
+                                byte [] sendData = sendMsg.Finish();
+                                send(ByteBuffer.wrap(sendData));
+
+                                FileSystems.getDefault().getRootDirectories();
+
+                                break;
+                            }
+                        }
+
+                        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
                         socketChannel.read(byteBuffer, byteBuffer, this);
                     }
 
@@ -94,14 +146,14 @@ public class FileControlClient {
         );
     }
 
-    public void send(String data){
-        Charset charset = Charset.forName(Encoding.UTF_8);
-        ByteBuffer byteBuffer = charset.encode(data);
+    public void send(ByteBuffer byteBuffer){
+//        Charset charset = Charset.forName(Encoding.UTF_8);
+//        ByteBuffer byteBuffer = charset.encode(data);
         socketChannel.write(byteBuffer, null,
                 new CompletionHandler<Integer, Void>() {
                     @Override
                     public void completed(Integer result, Void attachment) {
-                        System.out.println("[보내기 완료 : " + data + " ]");
+                        System.out.println("[보내기 완료 : ! ]");
                     }
 
                     @Override

@@ -1,5 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 
+import { connect } from "react-redux";
+import { PAGE_ROUTE, HTTP, MediaType, SOCK_REQ_TYPE} from "../../../util/Const";
+
 import PropTypes from 'prop-types';
 import SvgIcon from '@material-ui/core/SvgIcon';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
@@ -13,6 +16,7 @@ import { faFileAlt, faFolder } from "@fortawesome/free-regular-svg-icons"
 import { faNetworkWired } from "@fortawesome/free-solid-svg-icons"
 
 import TreeViewItem from "../treeView/TreeViewItem"
+import { useCookies } from "react-cookie";
 
 function TransitionComponent(props) {
     const style = useSpring({
@@ -56,29 +60,86 @@ const useStyles = makeStyles({
 });
 
 function NetworkIcon(props) {
-    return (
-      <SvgIcon fontSize="inherit" style={{ width: 14, height: 14 }} {...props}>
-        {/* tslint:disable-next-line: max-line-length */}
-        <path fill="currentColor" d="M15 20C15 19.45 14.55 19 14 19H13V17H19C20.11 17 21 16.11 21 15V7C21 5.9 20.11 5 19 5H13L11 3H5C3.9 3 3 3.9 3 5V15C3 16.11 3.9 17 5 17H11V19H10C9.45 19 9 19.45 9 20H2V22H9C9 22.55 9.45 23 10 23H14C14.55 23 15 22.55 15 22H22V20H15M5 15V7H19V15H5Z" />
-      </SvgIcon>
-    );
-  }
+  return (
+    <SvgIcon fontSize="inherit" style={{ width: 14, height: 14 }} {...props}>
+      {/* tslint:disable-next-line: max-line-length */}
+      <path fill="currentColor" d="M15 20C15 19.45 14.55 19 14 19H13V17H19C20.11 17 21 16.11 21 15V7C21 5.9 20.11 5 19 5H13L11 3H5C3.9 3 3 3.9 3 5V15C3 16.11 3.9 17 5 17H11V19H10C9.45 19 9 19.45 9 20H2V22H9C9 22.55 9.45 23 10 23H14C14.55 23 15 22.55 15 22H22V20H15M5 15V7H19V15H5Z" />
+    </SvgIcon>
+  );
+}
 
-const TreeViewParent = () => {
+
+const TreeViewParent = ( { appInfo, address } ) => {
     const classes = useStyles();
+    const [rootDirectoryList, setRootDirectoryList] = useState([""]);
+    const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
+
+    useEffect(() => {
+
+    }, []);
+
+    const getRootDirectory = (e) => {
+      console.log(111);
+      e.preventDefault();
+
+      // s: Ajax ----------------------------------
+      fetch(HTTP.SERVER_URL + `/api/file/directory/${address}/root`, {
+          method: HTTP.GET,
+          headers: {
+              'Content-type': MediaType.JSON,
+              'Accept': MediaType.JSON,
+              'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
+              'Uid': cookies.UID
+          },
+      }).then(res => {
+          if(!res.ok){
+              throw res;
+          }
+          return res;
+      }).then(res => {
+          return res.json();
+      }).then(json => {
+        console.log(json);
+        // const list = json.payload.split('^');
+        // var rootTempList = [];
+        // list.forEach(x => {
+        //   rootTempList.push(x);
+        // });
+        // rootTempList.shift();
+        //setRootDirectoryList(rootTempList);
+        setRootDirectoryList(JSON.parse(json.payload));
+        
+      }).catch(error => {
+        console.error(error);
+        alert("Please check information.");
+      });
+      // e: Ajax ----------------------------------
+    }
 
     return (
         <>
-            <StyledTreeItem nodeId="1" label={ <span onClick={event => {console.log(111); event.preventDefault();}} style={{ width: 100}} > <NetworkIcon /> programfiles </span> }>
+            <StyledTreeItem 
+            key={address}
+            nodeId={address} 
+            onClick={getRootDirectory} 
+            label={ <span style={{ width: 100}} >  <NetworkIcon/> {address} </span> }>
 
                 {/* <StyledTreeItem nodeId="2" label={ <span > <FontAwesomeIcon icon={faFolder} /> 11 </span> }  >
                 
                 </StyledTreeItem> */}
-              <TreeViewItem />
+
+                {rootDirectoryList.map( x => {
+                  return <TreeViewItem address={address} upPath={""} currentDirectory={x} no={1}/>;
+                })}
+              {/* <TreeViewItem /> */}
                 
             </StyledTreeItem>
         </>
     );
 }
 
-export default TreeViewParent;
+const mapStateToProps = (state, ownProps) => {
+  return { appInfo: state };
+}
+
+export default connect(mapStateToProps) (TreeViewParent);
