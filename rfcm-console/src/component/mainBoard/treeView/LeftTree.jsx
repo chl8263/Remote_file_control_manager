@@ -3,7 +3,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { PAGE_ROUTE, HTTP, MediaType, SOCK_REQ_TYPE} from "../../../util/Const";
 
 import PropTypes from 'prop-types';
-import SvgIcon from '@material-ui/core/SvgIcon';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
@@ -45,8 +44,8 @@ const StyledTreeItem = withStyles((theme) => ({
     },
   },
   group: {
-    marginLeft: 3,
-    paddingLeft: 8,
+    marginLeft: 7,
+    paddingLeft: 18,
     borderLeft: `1px dashed ${fade(theme.palette.text.primary, 0.4)}`,
   },
 }))((props) => <TreeItem {...props} TransitionComponent={TransitionComponent} />);
@@ -60,75 +59,57 @@ const useStyles = makeStyles({
 });
   
 const LeftTree = () => {
-    const classes = useStyles();
-    const [connectionList, setConnectionList] = useState([]);
-    let sockJS = new SockJS("http://localhost:8081/ws");
+  const classes = useStyles();
+  const [connectionList, setConnectionList] = useState([]);
 
-    useEffect(() => {
-      sockJS.onopen = function () {
-        // send : connection으로 message를 전달
-        // connection이 맺어진 후 가입(JOIN) 메시지를 전달
-        sockJS.send(JSON.stringify(
-          {
-            reqType: SOCK_REQ_TYPE.CONNECTIONS,
-          }
-          ));
-        //sockJS.send("hohoho");
-        
-        // onmessage : message를 받았을 때의 callback
-        sockJS.onmessage = function (e) {
-          if(e !== null && e !== undefined && e.data !== null && e.data !== undefined ){
-            const resultObj = JSON.parse(e.data);
+  useEffect(() => {
+    let  sockJS = new SockJS("http://localhost:8081/ws");
+    sockJS.onopen = function () {
+      // send : connection으로 message를 전달
+      // connection이 맺어진 후 가입(JOIN) 메시지를 전달
+      sockJS.send(JSON.stringify(
+        {
+          reqType: SOCK_REQ_TYPE.CONNECTIONS,
+        }
+        ));
+      //sockJS.send("hohoho");
+    }
 
-            if(resultObj.reqType === SOCK_REQ_TYPE.CONNECTIONS){
-              const connections = resultObj.payload.split('/');
-              var connectionsTempList = [];
-              connections.forEach(x => {
-                connectionsTempList.push(x);
-                console.log(x);
-              });
-              connectionsTempList.shift();
-              setConnectionList(connectionsTempList);
-            }
-          }
+    sockJS.onmessage = function (e) {
+      if(e !== null && e !== undefined && e.data !== null && e.data !== undefined ){
+        const resultObj = JSON.parse(e.data);
+
+        if(resultObj.reqType === SOCK_REQ_TYPE.CONNECTIONS){
+          const connections = resultObj.payload.split('/');
+          var connectionsTempList = [];
+          connections.forEach(x => {
+            connectionsTempList.push(x);
+            console.log(x);
+          });
+          connectionsTempList.shift();
+          setConnectionList(connectionsTempList);
         }
       }
-    }, []);
+    }  
+  }, []);
 
-    return (
-        <>
-            <TreeView
-                className={classes.root}
-                // defaultExpanded={['1']}
-                defaultCollapseIcon={<FontAwesomeIcon icon={faAngleDown} />}
-                defaultExpandIcon={<FontAwesomeIcon icon={faAngleRight} />}
-                //onNodeToggle={handleChange}
-                // defaultEndIcon={<FontAwesomeIcon icon={faFileAlt} />}
-                >
+  return (
+    <>
+      <TreeView
+        className={classes.root}
+        // defaultExpanded={['1']}
+        defaultCollapseIcon={<FontAwesomeIcon icon={faAngleDown} />}
+        defaultExpandIcon={<FontAwesomeIcon icon={faAngleRight} />}
+        //onNodeToggle={handleChange}
+        // defaultEndIcon={<FontAwesomeIcon icon={faFileAlt} />}
+        >
 
-                {connectionList.map( x => {
-                  return <TreeViewParent address={x}  />;
-                })}
-              
-                {/* <TreeViewParent /> */}
-
-                {/* <StyledTreeItem nodeId="1" label={ <span onClick={event => {console.log(111); event.preventDefault();}} style={{ width: 100}} > <FontAwesomeIcon icon={faFolder} /> programfiles </span> }>
-                  <StyledTreeItem nodeId="2" label="Hello" />
-                  <StyledTreeItem nodeId="3" label={ <span > <FontAwesomeIcon icon={faFolder} /> 11 </span> }  >
-                      <StyledTreeItem nodeId="6" label="Hello" />
-                      <StyledTreeItem nodeId="7" label="Sub-subtree with children">
-                      <StyledTreeItem nodeId="9" label="Child 1" />
-                      <StyledTreeItem nodeId="10" label="Child 2" />
-                      <StyledTreeItem nodeId="11" label="Child 3" />
-                      </StyledTreeItem>
-                      <StyledTreeItem nodeId="8" label="Hello" />
-                  </StyledTreeItem>
-                  <StyledTreeItem nodeId="4" label="World" />
-                  <StyledTreeItem nodeId="5" label="Something something" />
-                </StyledTreeItem> */}
-            </TreeView>
-        </>
-    );
+        {connectionList.sort().map( x => {
+          return <TreeViewParent key={x} address={x}  />;
+        })}
+      </TreeView>
+    </>
+  );
 }
 
 export default LeftTree;

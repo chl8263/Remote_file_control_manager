@@ -43,8 +43,8 @@ const StyledTreeItem = withStyles((theme) => ({
     },
   },
   group: {
-    marginLeft: 3,
-    paddingLeft: 8,
+    marginLeft: 5,
+    paddingLeft: 15,
     borderLeft: `1px dashed ${fade(theme.palette.text.primary, 0.4)}`,
   },
 }))((props) => <TreeItem {...props} TransitionComponent={TransitionComponent} />);
@@ -124,7 +124,7 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no} ) => {
               label={ <span   style={{ width: 100}} > <FontAwesomeIcon icon={faFolder} /> {currentDirectory} </span> }>
 
               {items.map( x => {
-                return <TreeViewItem address={address} upPath={upPath+"/"+currentDirectory} currentDirectory={x} no={no+1}/>;
+                return <TreeViewItem key={address + upPath + currentDirectory + no} address={address} upPath={upPath+"/"+currentDirectory} currentDirectory={x} no={no+1}/>;
               })}
 
             </StyledTreeItem>

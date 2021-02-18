@@ -7,7 +7,6 @@ import com.ewan.rfcm.server.protocol.MessagePacker;
 import com.ewan.rfcm.server.protocol.MessageProtocol;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +28,7 @@ public class FileController {
     }
 
     @GetMapping("/directory/{ip}/{path:.+}")
-    public ResponseEntity getRootDirectory(@PathVariable String ip, @PathVariable String path){
+    public ResponseEntity getDirectory(@PathVariable String ip, @PathVariable String path){
         try {
             AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
             path = preProcessing(path);
@@ -46,6 +45,41 @@ public class FileController {
                 msg.setProtocol(MessageProtocol.DIRECTORY);
                 msg.addString(path);
             }
+
+            byte[] data = msg.Finish();
+
+            client.send(data);
+            String result = client.getQueue().poll(1, TimeUnit.MINUTES);
+            if(result == null || result.equals("")){
+                return ResponseEntity.badRequest().body("");
+            }
+
+            String responseResult = objectMapper.writeValueAsString(new FileResponseDto(result));
+
+            return ResponseEntity.ok(responseResult);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok("");
+    }
+
+    @GetMapping("/{ip}/{path:.+}")
+    public ResponseEntity getFiles(@PathVariable String ip, @PathVariable String path){
+        try {
+            AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
+            path = preProcessing(path);
+
+            if(client == null || path == null || path.equals("")){
+                return ResponseEntity.badRequest().body("");
+            }
+
+            MessagePacker msg = new MessagePacker();
+            msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+            msg.setProtocol(MessageProtocol.FILES);
+            msg.addString(path);
 
             byte[] data = msg.Finish();
 

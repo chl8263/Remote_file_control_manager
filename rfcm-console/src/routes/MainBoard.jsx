@@ -8,6 +8,8 @@ import { actionCreators } from "../store";
 
 import TopBar from "../component/mainBoard/topBar/TopBar";
 import LeftTree from "../component/mainBoard/treeView/LeftTree";
+import FileViewFrame from "../component/mainBoard/fileView/FileViewFrame";
+import { Scrollbars } from 'react-custom-scrollbars';
 
 import PropTypes from 'prop-types';
 import AppBar from '@material-ui/core/AppBar';
@@ -26,6 +28,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Modal from '@material-ui/core/Modal';
 
 import PanelGroup from "react-panelgroup";
 import Content from "react-panelgroup";
@@ -71,6 +74,8 @@ const MainBoard = ( { appInfo, window } ) => {
     // const theme = useTheme();
     // const [mobileOpen, setMobileOpen] = React.useState(false);
 
+    //let sockJS = new SockJS("http://localhost:8081/ws");
+
     useEffect(() => {
         history.pushState('','', '/main-board');
         $(".preloader").fadeOut(); // Remove preloader.
@@ -88,6 +93,14 @@ const MainBoard = ( { appInfo, window } ) => {
     //     </div>
     // );
 
+    const handleOpen = () => {
+        setOpen(true);
+      };
+    
+      const handleClose = () => {
+        setOpen(false);
+      };
+
     const container = window !== undefined ? () => window().document.body : undefined;
     
     return (
@@ -96,12 +109,26 @@ const MainBoard = ( { appInfo, window } ) => {
 
             <TopBar />
             <PanelGroup borderColor="grey" panelWidths={[
-                {size: 300, minSize:200, maxSize:500, resize: "dynamic"},
-                {size: 300, minSize:50, resize: "dynamic"}
+                    {size: 300, minSize:200, maxSize:500, resize: "dynamic"},
+                    {size: 300, minSize:50, resize: "dynamic"}
                 ]}>
-                <LeftTree style={{"marginLeft": "40px"}}/>
-                <div>panel 2</div>
+
+                <Scrollbars style={{ width: 500, height: "100vh" }}>
+                    <LeftTree />
+                </Scrollbars>
+
+                <Scrollbars style={{ width: "100vh", height: "100vh", margin: "5px" }}>
+                    <FileViewFrame />
+                </Scrollbars>
+
             </PanelGroup>
+            {/* <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description"
+                >
+            </Modal> */}
         </> 
     );
 };

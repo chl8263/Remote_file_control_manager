@@ -61,12 +61,11 @@ public class AsyncFileControlServer implements Runnable {
                     serverSocketChannel.accept(null, this);
 
                     // Send new client information to connected web socket session
-                    for( String key : WebSocketHandler.sessionList.keySet() ){
-                        WebSocketSession webSocketSession =  WebSocketHandler.sessionList.get(key);
-                        WebSocketHandler.sendConnectedClientInfo(webSocketSession);
-                    }
+                    WebSocketHandler.sendWholeClientInfoToWholeWebSocket();
 
                 } catch (IOException e) {
+                    // Send new client information to connected web socket session
+                    WebSocketHandler.sendWholeClientInfoToWholeWebSocket();
                 }
             }
 

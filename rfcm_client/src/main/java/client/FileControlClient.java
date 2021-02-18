@@ -117,6 +117,24 @@ public class FileControlClient {
 
                                 break;
                             }
+
+                            case MessageProtocol.FILES:{
+
+                                String path = receivedMsg.getString();
+
+                                MessagePacker sendMsg = new MessagePacker();
+                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                sendMsg.setProtocol(MessageProtocol.FILES);
+
+                                String responseData = FileProvider.getFilesInDirectory(path);
+
+                                sendMsg.add(responseData);
+
+                                byte [] sendData = sendMsg.Finish();
+                                send(ByteBuffer.wrap(sendData));
+
+                                break;
+                            }
                         }
 
                         ByteBuffer byteBuffer = ByteBuffer.allocate(1024);

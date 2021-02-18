@@ -3,6 +3,7 @@ package com.ewan.rfcm.server.connection;
 import com.ewan.rfcm.server.AsyncFileControlServer;
 import com.ewan.rfcm.server.FileControlServer;
 import com.ewan.rfcm.server.protocol.MessagePacker;
+import com.ewan.rfcm.server.webSocketController.WebSocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,10 @@ public class AsyncFileControlClient {
                                 log.info(message);
                                 AsyncFileControlServer.connections.remove(socketChannel.getRemoteAddress().toString().substring(1));
                                 socketChannel.close();
+
+                                // Send new client information to connected web socket session
+                                WebSocketHandler.sendWholeClientInfoToWholeWebSocket();
+
                             } catch (Exception e2) {
                             }
                         }
@@ -90,6 +95,10 @@ public class AsyncFileControlClient {
                     log.info(message);
                     AsyncFileControlServer.connections.remove(socketChannel.getRemoteAddress().toString().substring(1));
                     socketChannel.close();
+
+                    // Send new client information to connected web socket session
+                    WebSocketHandler.sendWholeClientInfoToWholeWebSocket();
+
                 } catch (Exception e2) {
                 }
             }

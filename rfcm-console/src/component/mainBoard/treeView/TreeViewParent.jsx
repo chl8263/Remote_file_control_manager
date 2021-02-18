@@ -45,8 +45,8 @@ const StyledTreeItem = withStyles((theme) => ({
     },
   },
   group: {
-    marginLeft: 3,
-    paddingLeft: 8,
+    marginLeft: 5,
+    paddingLeft: 15,
     borderLeft: `1px dashed ${fade(theme.palette.text.primary, 0.4)}`,
   },
 }))((props) => <TreeItem {...props} TransitionComponent={TransitionComponent} />);
@@ -68,7 +68,6 @@ function NetworkIcon(props) {
   );
 }
 
-
 const TreeViewParent = ( { appInfo, address } ) => {
     const classes = useStyles();
     const [rootDirectoryList, setRootDirectoryList] = useState([""]);
@@ -79,6 +78,7 @@ const TreeViewParent = ( { appInfo, address } ) => {
     }, []);
 
     const getRootDirectory = (e) => {
+      console.log(e);
       console.log(111);
       console.log(address);
       e.preventDefault();
@@ -120,17 +120,17 @@ const TreeViewParent = ( { appInfo, address } ) => {
     return (
         <>
             <StyledTreeItem 
-            key={address}
-            nodeId={address} 
-            onClick={getRootDirectory} 
-            label={ <span style={{ width: 100}} >  <NetworkIcon/> {address} </span> }>
+              key={address}
+              nodeId={address} 
+              onClick={getRootDirectory} 
+              label={ <span style={{ width: 100}} >  <NetworkIcon/> {address} </span> }>
 
                 {/* <StyledTreeItem nodeId="2" label={ <span > <FontAwesomeIcon icon={faFolder} /> 11 </span> }  >
                 
                 </StyledTreeItem> */}
 
                 {rootDirectoryList.map( x => {
-                  return <TreeViewItem address={address} upPath={""} currentDirectory={x} no={1}/>;
+                  return <TreeViewItem key={address+x} address={address} upPath={""} currentDirectory={x} no={1}/>;
                 })}
               {/* <TreeViewItem /> */}
                 

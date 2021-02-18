@@ -92,6 +92,10 @@ public class FileControlClient {
                 String message = "[클라이언트 통신 안됨 : " + socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName() + "]";
                 log.info(message);
                 socketChannel.close();
+
+                // Send new client information to connected web socket session
+                WebSocketHandler.sendWholeClientInfoToWholeWebSocket();
+
             } catch (Exception e2) {
             }
         }
@@ -113,6 +117,10 @@ public class FileControlClient {
                 String message = "[클라이언트 통신 안됨 : " + socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName() + "]";
                 log.info(message);
                 socketChannel.close();
+
+                // Send new client information to connected web socket session
+                WebSocketHandler.sendWholeClientInfoToWholeWebSocket();
+
             } catch (Exception e2) {
             }
         }

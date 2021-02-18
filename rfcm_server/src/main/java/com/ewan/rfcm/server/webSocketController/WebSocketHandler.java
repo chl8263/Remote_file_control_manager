@@ -106,4 +106,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
             } catch (IOException ioException) { }
         }
     }
+
+    // Send new client information to connected web socket session
+    public static void sendWholeClientInfoToWholeWebSocket(){
+        for(String key : WebSocketHandler.sessionList.keySet()){
+            WebSocketSession webSocketSession =  WebSocketHandler.sessionList.get(key);
+            WebSocketHandler.sendConnectedClientInfo(webSocketSession);
+        }
+    }
 }

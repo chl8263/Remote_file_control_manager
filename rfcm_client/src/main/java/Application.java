@@ -7,11 +7,12 @@ public class Application {
 
     public static void main(String[] args) {
 
-        ServerInfo serverInfo = PropertiesReader.getServerInfoFromPropertiesValue();
-        new FileControlClient(serverInfo).startClient();
+//        ServerInfo serverInfo = PropertiesReader.getServerInfoFromPropertiesValue();
+//        new FileControlClient(serverInfo).startClient();
 
         //FileProvider.getRootPath();
         //FileProvider.getUnderLineDirectory("C:\\KiwoomHero4bin\\globalticker");
+        FileProvider.getFilesInDirectory("C:\\KiwoomHero4");
 
     }
 }
