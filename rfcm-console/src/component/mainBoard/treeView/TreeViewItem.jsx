@@ -105,10 +105,25 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no} ) => {
         return res.json();
     }).then(json => {
       console.log(json);
-      setItems(JSON.parse(json.payload));
+
+      if(json === null || json === undefined){
+        setItems([]);
+        alert(errorMsg);
+        return;
+      }
+      
+      if(json.error === true){
+        setItems([]);
+        alert(error.errorMsg);
+        return;
+      }
+
+      setItems(json.responseData);
+
     }).catch(error => {
       console.error(error);
-      alert("Please check information.");
+      setItems([]);
+      alert(error.errorMsg);
     });
     // e: Ajax ----------------------------------
   }
@@ -124,7 +139,7 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no} ) => {
               label={ <span   style={{ width: 100}} > <FontAwesomeIcon icon={faFolder} /> {currentDirectory} </span> }>
 
               {items.map( x => {
-                return <TreeViewItem key={address + upPath + currentDirectory + no} address={address} upPath={upPath+"/"+currentDirectory} currentDirectory={x} no={no+1}/>;
+                return <TreeViewItem key={address + upPath + currentDirectory + x + no} address={address} upPath={upPath+"/"+currentDirectory} currentDirectory={x} no={no+1}/>;
               })}
 
             </StyledTreeItem>

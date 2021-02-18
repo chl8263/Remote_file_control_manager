@@ -2,88 +2,81 @@ package client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.FileInfoDto;
+import model.FileInfo;
+import model.DirectoryInfo;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class FileProvider {
 
+    private final static Logger LOG = Logger.getLogger(String.valueOf(FileProvider.class));
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static String getDirectoryInRoot(){
-        String result = "";
-        try {
-            List<String> directoryList = new ArrayList<>();
-            for (Path p : FileSystems.getDefault().getRootDirectories()) {
-                directoryList.add(String.valueOf(p));
-            }
-            result = objectMapper.writeValueAsString(directoryList);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+    public static List<String> getDirectoryInRoot(){
+
+        List<String> directoryList = new ArrayList<>();
+        for (Path p : FileSystems.getDefault().getRootDirectories()) {
+            directoryList.add(String.valueOf(p));
         }
-        return result;
+
+        return directoryList;
     }
 
-    public static String getUnderLineDirectory(String pathName){
+    public static List<String> getUnderLineDirectory(String pathName) throws IOException {
 
-        String result = "";
+        List<String> directoryList = new ArrayList<>();
 
-        try(DirectoryStream<Path> dir = Files.newDirectoryStream(Paths.get(pathName))){
+        DirectoryStream<Path> dir = Files.newDirectoryStream(Paths.get(pathName));
 
-            List<String> directoryList = new ArrayList<>();
+        for (Path file : dir) {
+            if (!Files.isHidden(file) && Files.isDirectory(file)) {
+                directoryList.add(String.valueOf(file.getFileName()));
+            }
+        }
 
-            for(Path file : dir){
-                if(!Files.isHidden(file) && Files.isDirectory(file)){
-                    directoryList.add(String.valueOf(file.getFileName()));
-                    //System.out.println(String.valueOf(file.getFileName()));
+        return directoryList;
+    }
+
+    public static DirectoryInfo getFilesInDirectory(String pathName) throws IOException {
+
+        DirectoryInfo fileInfoDto = new DirectoryInfo();
+
+        DirectoryStream<Path> dir = Files.newDirectoryStream(Paths.get(pathName));
+        for (Path file : dir) {
+            FileInfo fileInfo = new FileInfo();
+            if (!Files.isHidden(file)) {
+                fileInfo.setName(String.valueOf(file.getFileName()));
+
+                if (Files.isDirectory(file)) {
+                    fileInfo.setType("file");
+                } else {
+                    fileInfo.setType("directory");
                 }
-            }
 
-            result = objectMapper.writeValueAsString(directoryList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
+                SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+                var modifiedFileDate = df.format(Files.getLastModifiedTime(file).toMillis());
+                fileInfo.setDateModified(modifiedFileDate);
 
-    public static String getFilesInDirectory(String pathName){
-
-        String result = "";
-        try(DirectoryStream<Path> dir = Files.newDirectoryStream(Paths.get(pathName))){
-            List<FileInfoDto> fileList = new ArrayList<>();
-            for(Path file : dir){
-                if(!Files.isHidden(file)){
-                    System.out.print(file.getFileName());
-                    System.out.print(" ");
-                    if(Files.isDirectory(file)){
-                        System.out.print("Directory");
-                    }else {
-                        System.out.print("File");
-                    }
-                    System.out.print(" ");
-                    SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm");
-                    var a = df.format(Files.getLastModifiedTime(file).toMillis());
-                    System.out.print(a);
-                    System.out.print(" ");
-                    long bytes = Files.size(file);
-                    if(bytes == 0L){
-
-                    }
+                long bytes = Files.size(file);
+                if (bytes > 0L) {
                     String fileSize = String.format("%,dKB", bytes / 1024);
-                    System.out.println(fileSize);
-                    System.out.print(" ");
-                    //fileList.add(String.valueOf(file.getFileName()));
-                    //System.out.println(String.valueOf(file.getFileName()));
+                    fileInfo.setSize(fileSize);
                 }
-                result = objectMapper.writeValueAsString(fileList);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            fileInfoDto.getFileList().add(fileInfo);
         }
-        return result;
+
+        return fileInfoDto;
+    }
+
+    public static String test(String pathName) {
+        Path path = Paths.get("/src/pathexam/PathExample.java");
+        return "true";
     }
 }

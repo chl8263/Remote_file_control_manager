@@ -2,6 +2,7 @@ import client.FileControlClient;
 import client.FileProvider;
 import config.PropertiesReader;
 import model.ServerInfo;
+import service.FileService;
 
 public class Application {
 
@@ -10,9 +11,12 @@ public class Application {
 //        ServerInfo serverInfo = PropertiesReader.getServerInfoFromPropertiesValue();
 //        new FileControlClient(serverInfo).startClient();
 
-        //FileProvider.getRootPath();
-        //FileProvider.getUnderLineDirectory("C:\\KiwoomHero4bin\\globalticker");
-        FileProvider.getFilesInDirectory("C:\\KiwoomHero4");
+        //FileService.getDirectoryInRoot();
+        //FileService.getUnderLineDirectory("C:\\KiwoomHero4bin\\globalticker");
+        //FileService.getFilesInDirectory("C:\\KiwoomHero4");
+        FileService.getFilesInDirectory("C:\\KiwoomHero4");
+
+        //FileService.getDirectoryInRoot();
 
     }
 }

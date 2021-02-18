@@ -78,6 +78,7 @@ const TreeViewParent = ( { appInfo, address } ) => {
     }, []);
 
     const getRootDirectory = (e) => {
+      const errorMsg = "Cannot reach this Directory";
       console.log(e);
       console.log(111);
       console.log(address);
@@ -101,18 +102,24 @@ const TreeViewParent = ( { appInfo, address } ) => {
           return res.json();
       }).then(json => {
         console.log(json);
-        // const list = json.payload.split('^');
-        // var rootTempList = [];
-        // list.forEach(x => {
-        //   rootTempList.push(x);
-        // });
-        // rootTempList.shift();
-        //setRootDirectoryList(rootTempList);
-        setRootDirectoryList(JSON.parse(json.payload));
+        if(json === null || json === undefined){
+          setRootDirectoryList([]);
+          alert(errorMsg);
+          return;
+        }
+        
+        if(json.error === true){
+          setRootDirectoryList([]);
+          alert(error.errorMsg);
+          return;
+        }
+
+        setRootDirectoryList(json.responseData);
         
       }).catch(error => {
         console.error(error);
-        alert("Please check information.");
+        setRootDirectoryList([]);
+        alert(error.errorMsg);
       });
       // e: Ajax ----------------------------------
     }

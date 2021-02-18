@@ -49,18 +49,16 @@ public class FileController {
             byte[] data = msg.Finish();
 
             client.send(data);
-            String result = client.getQueue().poll(1, TimeUnit.MINUTES);
-            if(result == null || result.equals("")){
+            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
+            if(responseResult == null || responseResult.equals("")){
                 return ResponseEntity.badRequest().body("");
             }
 
-            String responseResult = objectMapper.writeValueAsString(new FileResponseDto(result));
+            //String responseResult = objectMapper.writeValueAsString(new FileResponseDto(result));
 
             return ResponseEntity.ok(responseResult);
 
         } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
         return ResponseEntity.ok("");

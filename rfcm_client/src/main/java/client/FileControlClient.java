@@ -3,6 +3,7 @@ package client;
 import model.ServerInfo;
 import protocol.MessagePacker;
 import protocol.MessageProtocol;
+import service.FileService;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -91,7 +92,7 @@ public class FileControlClient {
                                 sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
                                 sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
 
-                                String responseData = FileProvider.getDirectoryInRoot();
+                                String responseData = FileService.getDirectoryInRoot();
                                 sendMsg.add(responseData);
 
                                 byte [] sendData = sendMsg.Finish();
@@ -108,7 +109,7 @@ public class FileControlClient {
                                 sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
                                 sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
 
-                                String responseData = FileProvider.getUnderLineDirectory(path);
+                                String responseData = FileService.getUnderLineDirectory(path);
 
                                 sendMsg.add(responseData);
 
@@ -126,7 +127,7 @@ public class FileControlClient {
                                 sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
                                 sendMsg.setProtocol(MessageProtocol.FILES);
 
-                                String responseData = FileProvider.getFilesInDirectory(path);
+                                String responseData = FileService.getFilesInDirectory(path);
 
                                 sendMsg.add(responseData);
 
