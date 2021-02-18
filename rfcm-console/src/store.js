@@ -5,6 +5,7 @@ const switchMainPageRoute = createAction("SWITCHMAINPAGEROUTE");
 const addJwtToken = createAction("ADDJWTTOKEN");
 const addUserInfo = createAction("ADDUSERINFO");
 const renewCellInfo = createAction("RENEWCELLINFO");
+const renewFileViewInfo = createAction("RENEWFILEVIEWINFO");
 // const addUserName = createAction("ADDUSERNAME");
 // const addUserId = createAction("ADDUSERNAME");
 
@@ -20,10 +21,10 @@ const reducer = createReducer(
             currentUserName: "",
             currentUserRole: ""
         },
-        cellInfo: {
-            cellId: 0,
-            cellName: "",
-            role: "",
+        fileViewInfo: {
+            fileViewAddress: "",
+            fileUpPath: "",
+            fileViewPath: "",
         },
     },
     {
@@ -63,6 +64,15 @@ const reducer = createReducer(
                 },
             };
         },
+        [renewFileViewInfo]: (state, action) => {
+            return { ...state, 
+                fileViewInfo: {
+                    fileViewAddress: action.payload.fileViewAddress,
+                    fileUpPath: action.payload.fileUpPath,
+                    fileViewPath: action.payload.fileViewPath,
+                },
+            };
+        },
         // [addUserName]: (state, action) => {
         //     return { ...state, 
         //         appInfo: {
@@ -81,7 +91,7 @@ export const actionCreators = {
     addJwtToken,
     addUserInfo,
     renewCellInfo,
-    //addUserName,
+    renewFileViewInfo,
 }
 
 export default store;

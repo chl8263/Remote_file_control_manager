@@ -119,7 +119,7 @@ const TreeViewParent = ( { appInfo, address } ) => {
       }).catch(error => {
         console.error(error);
         setRootDirectoryList([]);
-        alert(error.errorMsg);
+        //alert(error.errorMsg);
       });
       // e: Ajax ----------------------------------
     }
@@ -147,7 +147,7 @@ const TreeViewParent = ( { appInfo, address } ) => {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  return { appInfo: state };
+  return { store: state };
 }
 
 export default connect(mapStateToProps) (TreeViewParent);

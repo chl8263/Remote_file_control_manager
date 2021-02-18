@@ -68,7 +68,7 @@ const drawerWidth = 240;
 //     },
 // }));
 
-const MainBoard = ( { appInfo, window } ) => {
+const MainBoard = ( { store, window } ) => {
 
     // const classes = useStyles();
     // const theme = useTheme();
@@ -117,7 +117,7 @@ const MainBoard = ( { appInfo, window } ) => {
                     <LeftTree />
                 </Scrollbars>
 
-                <Scrollbars style={{ width: "100vh", height: "100vh", margin: "5px" }}>
+                <Scrollbars style={{ width: "100vw", height: "100vh", margin: "5px" }}>
                     <FileViewFrame />
                 </Scrollbars>
 
@@ -142,7 +142,7 @@ MainBoard.propTypes = {
 };
 
 const mapStateToProps = (state, ownProps) => {
-    return { appInfo: state };
+    return { store: state };
 }
 
 const mapDispathToProps = (dispatch) => {

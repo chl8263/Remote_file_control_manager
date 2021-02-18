@@ -26,9 +26,13 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileAlt, faFolder } from "@fortawesome/free-regular-svg-icons"
+import { connect } from "react-redux";
 
-function createData(name, date_modified, type, size, hiden) {
-    return { name, date_modified, type, size, hiden };
+import { useCookies } from "react-cookie";
+import { actionCreators } from "../../../store";
+
+function createData(name, dateModified, type, size, hiden) {
+    return { name, dateModified, type, size, hiden };
 }
   
 const rows = [
@@ -190,7 +194,7 @@ createData('...', '', '', '', 'previous'),
   
   const EnhancedTableToolbar = (props) => {
     const classes = useToolbarStyles();
-    const { numSelected } = props;
+    const { numSelected, fileViewInfo } = props;
   
     return (
       <Toolbar
@@ -204,7 +208,12 @@ createData('...', '', '', '', 'previous'),
           </Typography>
         ) : (
           <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-            Nutrition
+              {fileViewInfo.fileViewAddress !== "" && fileViewInfo.fileViewPath !== "" && "["}
+            {fileViewInfo.fileViewAddress}
+            {fileViewInfo.fileViewAddress !== "" && fileViewInfo.fileViewPath !== "" && "] "}
+            {
+                fileViewInfo.fileViewPath.replace(/\\/g, "|").replace(/\//g,"|").replace(/\|/g,"/").substr(1)
+            }
           </Typography>
         )}
   
@@ -253,7 +262,7 @@ createData('...', '', '', '', 'previous'),
     },
   }));
   
-const EnhancedTable = () => {
+const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('name');
@@ -261,6 +270,81 @@ const EnhancedTable = () => {
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+    const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
+
+    const [fileList, setFileList] = useState([]);
+
+    useEffect(() => {
+        console.log("noti at fileView !!!!!!!!");
+        console.log(fileViewInfo.fileViewAddress);
+        console.log(fileViewInfo.fileViewPath);
+
+        getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+
+    }, [fileViewInfo]);
+
+    const getFileData = (address, path) => {
+
+        if(address == null || address == undefined || address == ""
+            || path == null || path == undefined || path == "") return;
+
+        // s: Ajax ----------------------------------
+        var fianlPath = path;
+                
+        fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
+        if(fianlPath.charAt(0) === '|'){
+        fianlPath = fianlPath.substr(1);
+        }
+
+        console.log("final!");
+        console.log(fianlPath);
+
+        fetch(HTTP.SERVER_URL + `/api/file/${address}/${fianlPath}`, {
+            method: HTTP.GET,
+            headers: {
+                'Content-type': MediaType.JSON,
+                'Accept': MediaType.JSON,
+                'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
+                'Uid': cookies.UID
+            },
+        }).then(res => {
+            if(!res.ok){
+                throw res;
+            }
+            return res;
+        }).then(res => {
+            return res.json();
+        }).then(json => {
+            console.log(5555555555);
+            console.log(json);
+
+            if(json === null || json === undefined){
+                setFileList([]);
+                alert(errorMsg);
+                return;
+            }
+            
+            if(json.error === true){
+                setFileList([]);
+                alert(error.errorMsg);
+                return;
+            }
+
+            if(!json.responseData.root){
+                console.log(999999);
+                json.responseData.fileList.unshift(createData('...', '', '', '', 'previous'));
+            }
+
+            setFileList(json.responseData.fileList);
+
+        }).catch(error => {
+        console.error(error);
+        setFileList([]);
+        //alert(error.errorMsg);
+        });
+        // e: Ajax ----------------------------------
+    }
   
     const handleRequestSort = (event, property) => {
         console.log(444444444);
@@ -302,6 +386,40 @@ const EnhancedTable = () => {
     
         setSelected(newSelected);
     };
+
+    const handleDoubleClick = (event, row) => {
+        console.log("더블클릭 !!!!!!!!");
+        console.log(fileViewInfo.fileUpPath.substr(1));
+        const address = fileViewInfo.fileViewAddress;
+        let path = "";
+        let upPath = "";
+        if(row.hiden === "previous") {
+            path = fileViewInfo.fileUpPath;
+            upPath = path.replace(/\\/g, "|").replace(/\//g,"|").split("|");
+            console.log(upPath);
+            if(upPath.length > 2){
+                upPath.pop();
+                upPath = upPath.join('/');
+            }else {
+                upPath = "";
+            }
+        }else {
+            path = fileViewInfo.fileViewPath + '|' + row.name;
+            path = path;
+            upPath = fileViewInfo.fileViewPath;
+        }
+
+        const fileViewInfo2 = {
+            fileViewAddress: address,
+            fileUpPath: upPath,
+            fileViewPath: path,
+        }
+
+        console.log(fileViewInfo2);
+    
+        renewFileViewInfo(fileViewInfo2);
+
+    };
   
     const handleChangePage = (event, newPage) => {
       setPage(newPage);
@@ -323,7 +441,7 @@ const EnhancedTable = () => {
     return (
       <div className={classes.root}>
         <Paper className={classes.paper}>
-          <EnhancedTableToolbar numSelected={selected.length} />
+          <EnhancedTableToolbar numSelected={selected.length} fileViewInfo={fileViewInfo}/>
           <TableContainer>
             <Table
               stickyHeader
@@ -343,7 +461,7 @@ const EnhancedTable = () => {
                 rowCount={rows.length}
               />
               <TableBody>
-                {stableSort(rows, getComparator(order, orderBy))
+                {stableSort(fileList, getComparator(order, orderBy))
                   //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, index) => {
                     const isItemSelected = isSelected(row.name);
@@ -353,6 +471,7 @@ const EnhancedTable = () => {
                       <TableRow                        
                         hover
                         onClick={(event) => handleClick(event, row)}
+                        onDoubleClick={(event) => handleDoubleClick(event, row)}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
@@ -367,10 +486,10 @@ const EnhancedTable = () => {
                         </TableCell> */}
                         <TableCell >
                             {row.type === "directory" && <FontAwesomeIcon icon={faFolder}  style={{"marginRight": "15px"}} />}
-                            {row.type !== "directory" && row.hiden !== "previous" && <FontAwesomeIcon icon={faFileAlt}  style={{"marginRight": "15px"}} />}
+                            {row.type === "file"      && <FontAwesomeIcon icon={faFileAlt}  style={{"marginRight": "15px"}} />}
                             {row.name}
                         </TableCell>
-                        <TableCell align="right">{row.date_modified}</TableCell>
+                        <TableCell align="right">{row.dateModified}</TableCell>
                         <TableCell align="right">{row.type}</TableCell>
                         <TableCell align="right">{row.size}</TableCell>
                       </TableRow>
@@ -402,5 +521,14 @@ const EnhancedTable = () => {
     );
 }
   
+const mapStateToProps = (state, ownProps) => {
+    return { fileViewInfo: state.fileViewInfo };
+}
+  
+const mapDispathToProps = (dispatch) => {
+    return {
+        renewFileViewInfo: (fileViewInfo) => dispatch(actionCreators.renewFileViewInfo(fileViewInfo)),
+    };
+}
 
-export default EnhancedTable;
+export default connect(mapStateToProps, mapDispathToProps) (EnhancedTable);

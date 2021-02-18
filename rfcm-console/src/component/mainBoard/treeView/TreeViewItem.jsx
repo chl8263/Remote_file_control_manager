@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 
+import { actionCreators } from "../../../store";
 import { connect } from "react-redux";
 import { PAGE_ROUTE, HTTP, MediaType, SOCK_REQ_TYPE} from "../../../util/Const";
 
@@ -15,6 +16,7 @@ import { faFileAlt, faFolder } from "@fortawesome/free-regular-svg-icons"
 import { faAngleRight, faAngleDown } from "@fortawesome/free-solid-svg-icons"
 
 import { useCookies } from "react-cookie";
+
 
 function TransitionComponent(props) {
     const style = useSpring({
@@ -57,18 +59,28 @@ const useStyles = makeStyles({
     },
 });
 
-const TreeViewItem = ( { address, upPath, currentDirectory, no} ) => {
+const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInfo} ) => {
   const classes = useStyles();
-  const [items, setItems] = useState([""]);
+  const [directoryList, setDirectoryList] = useState([""]);
   const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
 
   const getFileList = (e) => {
-    console.log(111); 
-      e.preventDefault();
-      var itemsTempList = [];
-      itemsTempList.push(1);
-      itemsTempList.push(2);
-      setItems(itemsTempList);
+    e.preventDefault();
+    console.log(upPath);
+    console.log(currentDirectory);
+
+    const fileViewInfo = {
+      fileViewAddress: address,
+      fileUpPath: upPath,
+      fileViewPath: upPath+"|"+currentDirectory,
+    }
+    console.log("88888888888");
+    console.log(fileViewInfo);
+    console.log(renewFileViewInfo);
+
+    renewFileViewInfo(fileViewInfo);
+
+    
   }
 
   const getUnderDirectory = (e) => {
@@ -107,44 +119,54 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no} ) => {
       console.log(json);
 
       if(json === null || json === undefined){
-        setItems([]);
+        setDirectoryList([]);
         alert(errorMsg);
         return;
       }
       
       if(json.error === true){
-        setItems([]);
+        setDirectoryList([]);
         alert(error.errorMsg);
         return;
       }
 
-      setItems(json.responseData);
+      setDirectoryList(json.responseData);
 
     }).catch(error => {
       console.error(error);
-      setItems([]);
+      setDirectoryList([]);
       alert(error.errorMsg);
     });
     // e: Ajax ----------------------------------
   }
 
-    return (
-        <>
-            <StyledTreeItem
-              key={address + upPath + currentDirectory + no}
-              nodeId={address + upPath + currentDirectory + no}
-              onLabelClick={getFileList}
-              onIconClick={getUnderDirectory}
-              // onClick={test}
-              label={ <span   style={{ width: 100}} > <FontAwesomeIcon icon={faFolder} /> {currentDirectory} </span> }>
+  return (
+      <>
+          <StyledTreeItem
+            key={address + upPath + currentDirectory + no}
+            nodeId={address + upPath + currentDirectory + no}
+            onLabelClick={getFileList}
+            onIconClick={getUnderDirectory}
+            // onClick={test}
+            label={ <span   style={{ width: 100}} > <FontAwesomeIcon icon={faFolder} /> {currentDirectory} </span> }>
 
-              {items.map( x => {
-                return <TreeViewItem key={address + upPath + currentDirectory + x + no} address={address} upPath={upPath+"/"+currentDirectory} currentDirectory={x} no={no+1}/>;
-              })}
+            {directoryList.map( x => {
+              return <TreeViewItem key={address + upPath + currentDirectory + x + no} address={address} upPath={upPath+"/"+currentDirectory} currentDirectory={x} no={no+1} renewFileViewInfo={renewFileViewInfo}/>;
+            })}
 
-            </StyledTreeItem>
-        </>
-    );
+          </StyledTreeItem>
+      </>
+  );
 }
 
-export default TreeViewItem;
+// const mapStateToProps = (state, ownProps) => {
+//   return { state };
+// }
+
+const mapDispathToProps = (dispatch) => {
+  return {
+      renewFileViewInfo: (fileViewInfo) => dispatch(actionCreators.renewFileViewInfo(fileViewInfo)),
+  };
+}
+
+export default connect(null, mapDispathToProps) (TreeViewItem);
