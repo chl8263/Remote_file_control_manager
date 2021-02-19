@@ -75,7 +75,7 @@ createData('...', '', '', '', 'previous'),
   
   function stableSort(array, comparator) {
     console.log("start");
-      console.log(array)
+    if(array === null || array === undefined) return [];
     if(array.length > 1){
         //if(array.length[0])
         console.log("666666666666");
@@ -110,10 +110,24 @@ createData('...', '', '', '', 'previous'),
     }
     return array;
   }
-  
+
+  function getSorting(order, orderBy) {
+    return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
+  }
+
+  function desc(a, b, orderBy) {
+    if (b[orderBy] < a[orderBy]) {
+      return -1;
+    }
+    if (b[orderBy] > a[orderBy]) {
+      return 1;
+    }
+    return 0;
+  }
+
   const headCells = [
     { id: 'name', numeric: false, disablePadding: true, label: 'Name' },
-    { id: 'date_modified', numeric: true, disablePadding: false, label: 'Date modified' },
+    { id: 'dateModified', numeric: true, disablePadding: false, label: 'Date modified' },
     { id: 'type', numeric: true, disablePadding: false, label: 'Type' },
     { id: 'size', numeric: true, disablePadding: false, label: 'Size' },
   ];
@@ -280,7 +294,15 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
         console.log(fileViewInfo.fileViewAddress);
         console.log(fileViewInfo.fileViewPath);
 
-        getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+        const address = fileViewInfo.fileViewAddress;
+        const path = fileViewInfo.fileViewPath;
+        if(address == null || address == undefined || address == "" || path == null || path == undefined || path == "") {
+            setFileList([]);
+            return;
+        }else {
+            getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+        }
+        setSelected([]);
 
     }, [fileViewInfo]);
 
@@ -354,35 +376,45 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
       setOrderBy(property);
     };
   
-    const handleSelectAllClick = (event) => {
-      if (event.target.checked) {
-        const newSelecteds = rows.map((n) => n.name);
-        setSelected(newSelecteds);
-        return;
-      }
-      setSelected([]);
-    };
+    // const handleSelectAllClick = (event) => {
+    //   if (event.target.checked) {
+    //     const newSelecteds = rows.map((n) => n.name);
+    //     setSelected(newSelecteds);
+    //     return;
+    //   }
+    //   setSelected([]);
+    // };
   
     const handleClick = (event, row) => {
         console.log(event);
         console.log(name);
         if(row.hiden === "previous") return;
+        if(row.type === "directory") return;
         var name = row.name;
         const selectedIndex = selected.indexOf(name);
+
         let newSelected = [];
-    
+
         if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, name);
+            newSelected = [name];
         } else if (selectedIndex === 0) {
             newSelected = newSelected.concat(selected.slice(1));
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(
-            selected.slice(0, selectedIndex),
-            selected.slice(selectedIndex + 1),
-            );
         }
+
+        // let newSelected = [];
+    
+        // if (selectedIndex === -1) {
+        //     newSelected = newSelected.concat(selected, name);
+        // } else if (selectedIndex === 0) {
+        //     newSelected = newSelected.concat(selected.slice(1));
+        // } else if (selectedIndex === selected.length - 1) {
+        //     newSelected = newSelected.concat(selected.slice(0, -1));
+        // } else if (selectedIndex > 0) {
+        //     newSelected = newSelected.concat(
+        //     selected.slice(0, selectedIndex),
+        //     selected.slice(selectedIndex + 1),
+        //     );
+        // }
     
         setSelected(newSelected);
     };
@@ -390,6 +422,10 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
     const handleDoubleClick = (event, row) => {
         console.log("더블클릭 !!!!!!!!");
         console.log(fileViewInfo.fileUpPath.substr(1));
+        if(row.type === 'file'){
+            // 파일 다운로드
+            return;
+        }
         const address = fileViewInfo.fileViewAddress;
         let path = "";
         let upPath = "";
@@ -418,7 +454,7 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
         console.log(fileViewInfo2);
     
         renewFileViewInfo(fileViewInfo2);
-
+        
     };
   
     const handleChangePage = (event, newPage) => {
@@ -456,11 +492,13 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
                 numSelected={selected.length}
                 order={order}
                 orderBy={orderBy}
-                onSelectAllClick={handleSelectAllClick}
+                // onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
                 rowCount={rows.length}
               />
               <TableBody>
+                
+                {/* {stableSort(fileList, getSorting(order, orderBy)) */}
                 {stableSort(fileList, getComparator(order, orderBy))
                   //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, index) => {

@@ -16,6 +16,8 @@ import { faAngleRight, faAngleDown } from "@fortawesome/free-solid-svg-icons"
 import TreeViewParent from "../treeView/TreeViewParent"
 
 import SockJS from 'sockjs-client';
+import { actionCreators } from "../../../store";
+import { connect } from "react-redux";
 
 function TransitionComponent(props) {
   const style = useSpring({
@@ -58,7 +60,7 @@ const useStyles = makeStyles({
   },
 });
   
-const LeftTree = () => {
+const LeftTree = ({ renewFileViewInfo }) => {
   const classes = useStyles();
   const [connectionList, setConnectionList] = useState([]);
 
@@ -93,6 +95,20 @@ const LeftTree = () => {
     }  
   }, []);
 
+  useEffect(() => {
+
+    if(connectionList.length <= 0){
+      const fileViewInfo = {
+        fileViewAddress: "",
+        fileUpPath: "",
+        fileViewPath: "",
+      }
+  
+      renewFileViewInfo(fileViewInfo);
+    }
+    
+  }, [connectionList]);
+
   return (
     <>
       <TreeView
@@ -104,6 +120,7 @@ const LeftTree = () => {
         // defaultEndIcon={<FontAwesomeIcon icon={faFileAlt} />}
         >
 
+        {connectionList.length <= 0 && "Nothing connected now.."}
         {connectionList.sort().map( x => {
           return <TreeViewParent key={x} address={x}  />;
         })}
@@ -112,4 +129,10 @@ const LeftTree = () => {
   );
 }
 
-export default LeftTree;
+const mapDispathToProps = (dispatch) => {
+  return {
+      renewFileViewInfo: (fileViewInfo) => dispatch(actionCreators.renewFileViewInfo(fileViewInfo)),
+  };
+}
+
+export default connect(null, mapDispathToProps) (LeftTree);
