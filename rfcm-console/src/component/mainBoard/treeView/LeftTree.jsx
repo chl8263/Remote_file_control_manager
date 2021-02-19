@@ -60,7 +60,7 @@ const useStyles = makeStyles({
   },
 });
   
-const LeftTree = ({ renewFileViewInfo, switchModalState }) => {
+const LeftTree = ({ renewFileViewInfo, switchModalState, renewConnections }) => {
   const classes = useStyles();
   const [connectionList, setConnectionList] = useState([]);
 
@@ -105,9 +105,19 @@ const LeftTree = ({ renewFileViewInfo, switchModalState }) => {
         fileUpPath: "",
         fileViewPath: "",
       }
-  
       renewFileViewInfo(fileViewInfo);
+    }else {
+      console.log("씨발!!!!!!!!!");
+      renewConnections("hiiiiiiiiiiii");
     }
+    // console.log("씨발!!!!!!!!!");
+    // console.log(connectionList);
+    // let connectionListString = "";
+    // connectionList.forEach(x => {
+    //   connectionListString += x
+    //   connectionListString += "^^"
+    // });
+    
     
   }, [connectionList]);
 
@@ -135,6 +145,7 @@ const mapDispathToProps = (dispatch) => {
   return {
       renewFileViewInfo: (fileViewInfo) => dispatch(actionCreators.renewFileViewInfo(fileViewInfo)),
       switchModalState: (modalState) => dispatch(actionCreators.switchModalState(modalState)),
+      renewConnections: (conn) => dispatch(actionCreators.renewConnections(conn)),
   };
 }
 

@@ -7,6 +7,7 @@ const addUserInfo = createAction("ADDUSERINFO");
 const renewCellInfo = createAction("RENEWCELLINFO");
 const renewFileViewInfo = createAction("RENEWFILEVIEWINFO");
 const switchModalState = createAction("SWITCHMODALSTATE");
+const renewConnections = createAction("RENEWCONNECTIONS");
 // const addUserName = createAction("ADDUSERNAME");
 // const addUserId = createAction("ADDUSERNAME");
 
@@ -27,7 +28,8 @@ const reducer = createReducer(
             fileUpPath: "",
             fileViewPath: "",
         },
-        modalState: false,
+        //modalState: false,
+        conn: "",
     },
     {
         [switchMainPageRoute]: (state, action) => {
@@ -80,6 +82,12 @@ const reducer = createReducer(
                 modalState: action.payload.modalState,
             };
         },
+        [renewConnections]: (state, action) => {
+            return { ...state, 
+                conn: action.payload.conn,
+            };
+        },
+        
         // [addUserName]: (state, action) => {
         //     return { ...state, 
         //         appInfo: {
@@ -100,6 +108,7 @@ export const actionCreators = {
     renewCellInfo,
     renewFileViewInfo,
     switchModalState,
+    renewConnections,
 }
 
 export default store;

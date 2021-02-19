@@ -27,6 +27,7 @@ import Button from '@material-ui/core/Button';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import FileMoveIcon from '@material-ui/icons/TrendingUpOutlined';
 import FileNameChangeIcon from '@material-ui/icons/CreateOutlined';
+import UploadIcon from '@material-ui/icons/CloudUploadOutlined';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileAlt, faFolder } from "@fortawesome/free-regular-svg-icons"
@@ -281,6 +282,15 @@ const rows = [
         });
         // e: Ajax ----------------------------------
     };
+
+
+    const onClickFileUpLoad = () => {
+
+    }
+
+    const fileChangedHandler = () =>{
+            
+    };
   
     return (
       <Toolbar
@@ -293,17 +303,30 @@ const rows = [
             {/* {numSelected} selected */}
           </Typography>
         ) : (
-          <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-              {fileViewInfo.fileViewAddress !== "" && fileViewInfo.fileViewPath !== "" && "["}
-            {fileViewInfo.fileViewAddress}
-            {fileViewInfo.fileViewAddress !== "" && fileViewInfo.fileViewPath !== "" && "] "}
-            {
-                fileViewInfo.fileViewPath.replace(/\\/g, "|").replace(/\//g,"|").replace(/\|/g,"/").substr(1)
-            }
-          </Typography>
+            <>
+                <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
+                    {fileViewInfo.fileViewAddress !== "" && fileViewInfo.fileViewPath !== "" && "["}
+                    {fileViewInfo.fileViewAddress}
+                    {fileViewInfo.fileViewAddress !== "" && fileViewInfo.fileViewPath !== "" && "] "}
+                    {
+                        fileViewInfo.fileViewPath.replace(/\\/g, "|").replace(/\//g,"|").replace(/\|/g,"/").substr(1)
+                    }
+                </Typography>
+
+                {fileViewInfo.fileViewAddress !== "" && fileViewInfo.fileViewPath !== "" && (
+                    <>
+                    <Tooltip title="upload">
+                        <IconButton aria-label="upload">
+                            <UploadIcon onClick={onClickFileUpLoad}/>
+                        </IconButton>
+                    </Tooltip>
+                    <input type="file" onChange={fileChangedHandler}></input>
+                    </>
+                )}
+            </>
         )}
   
-        {numSelected > 0 ? (
+        {numSelected > 0 && (
           <Tooltip title="Delete">
               <>
                 
@@ -330,17 +353,8 @@ const rows = [
                 }
                 
               </>
-            {/* <IconButton aria-label="delete">
-              <DeleteIcon />
-            </IconButton> */}
           </Tooltip>
-        ) : (
-          <Tooltip title="Filter list">
-            <IconButton aria-label="filter list">
-              <FilterListIcon />
-            </IconButton>
-          </Tooltip>
-        )}
+        ) }
       </Toolbar>
     );
   };
@@ -373,7 +387,7 @@ const rows = [
     },
   }));
   
-const FileViewFrame = ({ fileViewInfo, renewFileViewInfo }) => {
+const FileViewFrame = ({ fileViewInfo, conn, renewFileViewInfo }) => {
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('name');
@@ -404,6 +418,13 @@ const FileViewFrame = ({ fileViewInfo, renewFileViewInfo }) => {
         setSelected([]);
 
     }, [fileViewInfo]);
+
+    useEffect(() => {
+        console.log("connections in FileView!!!!!!!!!!!");
+        console.log(conn);
+        
+
+    }, [conn]);
 
     const getFileData = (address, path) => {
 
@@ -677,7 +698,10 @@ const FileViewFrame = ({ fileViewInfo, renewFileViewInfo }) => {
 }
   
 const mapStateToProps = (state, ownProps) => {
-    return { fileViewInfo: state.fileViewInfo };
+    return { 
+        fileViewInfo: state.fileViewInfo,
+        conn: state.conn,
+    };
 }
   
 const mapDispathToProps = (dispatch) => {
