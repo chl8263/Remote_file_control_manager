@@ -194,7 +194,93 @@ const rows = [
   
   const EnhancedTableToolbar = (props) => {
     const classes = useToolbarStyles();
-    const { numSelected, fileViewInfo } = props;
+    const { numSelected, fileViewInfo, selectedRow, changeFileName } = props;
+    const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
+
+    const onCLickChangeBtn = (fileName) => {
+        console.log(fileViewInfo);
+        if(fileName === null || fileName === undefined || fileName === "") return;
+        
+        
+        const splitedFileName = selectedRow.name.split(".");
+        const originalFileName = splitedFileName[0];
+        const extension = splitedFileName[1];
+        const changedName = prompt("Please write the name to change.", originalFileName);
+
+        if(changedName === "" || changedName === fileName) return;
+
+        const address = fileViewInfo.fileViewAddress;
+        // s: Ajax ----------------------------------
+        var fianlPath = fileViewInfo.fileViewPath;
+        if(fianlPath !== ""){
+            fianlPath += "|";
+        }
+        console.log("!!!!!!!");
+        console.log(fianlPath);
+        fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
+        if(fianlPath.charAt(0) === '|'){
+        fianlPath = fianlPath.substr(1);
+        }
+        console.log(fianlPath);
+
+        const fileChangeInfo = {
+            path: "",
+            beforeName: originalFileName,
+            afterName: changedName,
+            extension: extension
+        }
+
+        fetch(HTTP.SERVER_URL + `/api/file/${address}/${fianlPath}`, {
+            method: HTTP.PUT,
+            headers: {
+                'Content-type': MediaType.JSON,
+                'Accept': MediaType.JSON,
+                'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
+                'Uid': cookies.UID
+            },
+            body: JSON.stringify(fileChangeInfo)
+        }).then(res => {
+            if(!res.ok){
+                throw res;
+            }
+            return res;
+        }).then(res => {
+            return res.json();
+        }).then(json => {
+            console.log("}{}{}{}{{{}{{");
+            console.log(json);
+
+            console.log(extension);
+
+            let aftername = "";
+            if(extension === undefined || extension === null || extension === ""){
+                aftername = changedName;
+            }else {
+                aftername = changedName + "." + extension;
+            }
+            changeFileName(selectedRow.name, aftername);
+
+        // if(json === null || json === undefined){
+        //     setDirectoryList([]);
+        //     alert(errorMsg);
+        //     return;
+        // }
+        
+        // if(json.error === true){
+        //     setDirectoryList([]);
+        //     alert(error.errorMsg);
+        //     return;
+        // }
+
+        // setDirectoryList(json.responseData);
+
+        }).catch(error => {
+        console.error(error);
+        setDirectoryList([]);
+        alert(error.errorMsg);
+        });
+        // e: Ajax ----------------------------------
+    };
   
     return (
       <Toolbar
@@ -220,7 +306,9 @@ const rows = [
         {numSelected > 0 ? (
           <Tooltip title="Delete">
               <>
+                
                 <Button
+                    onClick={onCLickChangeBtn}
                     variant="contained"
                     color="primary"
                     className={classes.button}
@@ -230,14 +318,17 @@ const rows = [
                     Change
                 </Button>
 
-                <Button
+                {selectedRow.type === 'file' && 
+                    <Button
                     variant="contained"
                     color="default"
                     className={classes.button}
                     startIcon={<FileCopyIcon />}
-                >
-                    Copy
-                </Button>
+                    >
+                        Copy
+                    </Button>
+                }
+                
               </>
             {/* <IconButton aria-label="delete">
               <DeleteIcon />
@@ -282,7 +373,7 @@ const rows = [
     },
   }));
   
-const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
+const FileViewFrame = ({ fileViewInfo, renewFileViewInfo }) => {
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('name');
@@ -290,6 +381,7 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [selectedRow, setSelectedRow] = React.useState({});
 
     const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
 
@@ -304,6 +396,7 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
         const path = fileViewInfo.fileViewPath;
         if(address == null || address == undefined || address == "" || path == null || path == undefined || path == "") {
             setFileList([]);
+            setSelected([]);
             return;
         }else {
             getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
@@ -382,21 +475,13 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
       setOrderBy(property);
     };
   
-    // const handleSelectAllClick = (event) => {
-    //   if (event.target.checked) {
-    //     const newSelecteds = rows.map((n) => n.name);
-    //     setSelected(newSelecteds);
-    //     return;
-    //   }
-    //   setSelected([]);
-    // };
-  
     const handleClick = (event, row) => {
         console.log(event);
         console.log(name);
         if(row.hiden === "previous") return;
-        if(row.type === "directory") return;
+        //if(row.type === "directory") return;
         var name = row.name;
+        setSelectedRow(row);
         const selectedIndex = selected.indexOf(name);
 
         let newSelected = [];
@@ -462,6 +547,31 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
         renewFileViewInfo(fileViewInfo2);
         
     };
+
+    const changeFileName = (beforeName, afterName) => {
+        const newfileList = fileList.slice();
+        // newfileList.forEach(x => {
+        //     if(x.name === beforeName){
+        //         console.log("+++++++++");
+        //         console.log(x.name);
+        //         x.name = afterName;
+        //     } 
+        // });
+
+        for(let i = 0; i < newfileList.length; i++){
+            if(newfileList[i].name === beforeName){
+                console.log("+++++++++");
+                console.log(newfileList[i].name);
+                console.log(afterName);
+                //x.name = afterName;
+                newfileList[i].name = afterName;
+                console.log(newfileList[i].name);
+            } 
+        }
+        console.log(newfileList);
+        setFileList(newfileList);
+        setSelected([]);
+    };
   
     const handleChangePage = (event, newPage) => {
       setPage(newPage);
@@ -483,7 +593,7 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
     return (
       <div className={classes.root}>
         <Paper className={classes.paper}>
-          <EnhancedTableToolbar numSelected={selected.length} fileViewInfo={fileViewInfo}/>
+          <EnhancedTableToolbar numSelected={selected.length} fileViewInfo={fileViewInfo} selectedRow={selectedRow} changeFileName={changeFileName}/>
           <TableContainer>
             <Table
               stickyHeader
@@ -493,7 +603,8 @@ const EnhancedTable = ({ fileViewInfo, renewFileViewInfo }) => {
               size={'small'}
               aria-label="enhanced table"
             >
-              <EnhancedTableHead                
+              <EnhancedTableHead 
+                selectedName={selectedRow.name}
                 classes={classes}
                 numSelected={selected.length}
                 order={order}
@@ -575,4 +686,4 @@ const mapDispathToProps = (dispatch) => {
     };
 }
 
-export default connect(mapStateToProps, mapDispathToProps) (EnhancedTable);
+export default connect(mapStateToProps, mapDispathToProps) (FileViewFrame);

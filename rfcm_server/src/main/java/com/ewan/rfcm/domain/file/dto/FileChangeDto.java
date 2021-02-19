@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class FileResponseDto {
+public class FileChangeDto {
     private String payload;
 }
