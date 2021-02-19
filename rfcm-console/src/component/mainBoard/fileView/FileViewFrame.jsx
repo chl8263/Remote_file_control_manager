@@ -23,6 +23,10 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
+import Button from '@material-ui/core/Button';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import FileMoveIcon from '@material-ui/icons/TrendingUpOutlined';
+import FileNameChangeIcon from '@material-ui/icons/CreateOutlined';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileAlt, faFolder } from "@fortawesome/free-regular-svg-icons"
@@ -36,25 +40,7 @@ function createData(name, dateModified, type, size, hiden) {
 }
   
 const rows = [
-createData('...', '', '', '', 'previous'),
-// createData('Cupcake', 305, 'directory', 67, ''),
-// createData('Donut', 452, 'directory', 51, ''),
-// createData('Eclair', 262, 'directory', 24, ''),
-// createData('Frozen yoghurt', 159, 'directory', 24, ''),
-// createData('Gingerbread', 356, 'directory', 49, ''),
-// createData('Honeycomb', 408, 'excel', 87, ''),
-// createData('Ice cream sandwich', 237, 'excel', 37, ''),
-// createData('Jelly Bean', 375, 'excel', 94, ''),
-// createData('KitKat', 518, 'txt', 65, ''),
-// createData('Lollipop', 392, 'txt', 98, ''),
-// createData('Marshmallow', 318, 'txt', 81, ''),
-// createData('Nougat', 360, 'file', 9, ''),
-// createData('Oreo', 437, 'file', 63, ''),
-// createData('KitKat1', 518, 'file', 65, ''),
-// createData('Lollipop1', 392, 'file', 98, ''),
-// createData('Marshmallow1', 318, 'file', 81, ''),
-// createData('Nougat1', 360, 'file', 9, ''),
-// createData('Oreo1', 437, 'file', 63, ''),
+    createData('...', '', '', '', 'previous'),
 ];
   
   function descendingComparator(a, b, orderBy) {
@@ -218,7 +204,7 @@ createData('...', '', '', '', 'previous'),
       >
         {numSelected > 0 ? (
           <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-            {numSelected} selected
+            {/* {numSelected} selected */}
           </Typography>
         ) : (
           <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
@@ -233,9 +219,29 @@ createData('...', '', '', '', 'previous'),
   
         {numSelected > 0 ? (
           <Tooltip title="Delete">
-            <IconButton aria-label="delete">
+              <>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    className={classes.button}
+                    startIcon={<FileNameChangeIcon />}
+                    style={{"marginRight": "15px"}}
+                >
+                    Change
+                </Button>
+
+                <Button
+                    variant="contained"
+                    color="default"
+                    className={classes.button}
+                    startIcon={<FileCopyIcon />}
+                >
+                    Copy
+                </Button>
+              </>
+            {/* <IconButton aria-label="delete">
               <DeleteIcon />
-            </IconButton>
+            </IconButton> */}
           </Tooltip>
         ) : (
           <Tooltip title="Filter list">

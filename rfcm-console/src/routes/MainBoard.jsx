@@ -10,6 +10,7 @@ import TopBar from "../component/mainBoard/topBar/TopBar";
 import LeftTree from "../component/mainBoard/treeView/LeftTree";
 import FileViewFrame from "../component/mainBoard/fileView/FileViewFrame";
 import { Scrollbars } from 'react-custom-scrollbars';
+import ProgressModal from "../component/modal/ProgressModal";
 
 import PropTypes from 'prop-types';
 import AppBar from '@material-ui/core/AppBar';
@@ -122,6 +123,7 @@ const MainBoard = ( { store, window } ) => {
                 </Scrollbars>
 
             </PanelGroup>
+            <ProgressModal />
             {/* <Modal
                 open={open}
                 onClose={handleClose}

@@ -60,13 +60,14 @@ const useStyles = makeStyles({
   },
 });
   
-const LeftTree = ({ renewFileViewInfo }) => {
+const LeftTree = ({ renewFileViewInfo, switchModalState }) => {
   const classes = useStyles();
   const [connectionList, setConnectionList] = useState([]);
 
   useEffect(() => {
     let  sockJS = new SockJS("http://localhost:8081/ws");
     sockJS.onopen = function () {
+      //switchModalState(true);
       // send : connection으로 message를 전달
       // connection이 맺어진 후 가입(JOIN) 메시지를 전달
       sockJS.send(JSON.stringify(
@@ -91,6 +92,7 @@ const LeftTree = ({ renewFileViewInfo }) => {
           connectionsTempList.shift();
           setConnectionList(connectionsTempList);
         }
+        //switchModalState(false);
       }
     }  
   }, []);
@@ -132,6 +134,7 @@ const LeftTree = ({ renewFileViewInfo }) => {
 const mapDispathToProps = (dispatch) => {
   return {
       renewFileViewInfo: (fileViewInfo) => dispatch(actionCreators.renewFileViewInfo(fileViewInfo)),
+      switchModalState: (modalState) => dispatch(actionCreators.switchModalState(modalState)),
   };
 }
 

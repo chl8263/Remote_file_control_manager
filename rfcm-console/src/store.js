@@ -6,6 +6,7 @@ const addJwtToken = createAction("ADDJWTTOKEN");
 const addUserInfo = createAction("ADDUSERINFO");
 const renewCellInfo = createAction("RENEWCELLINFO");
 const renewFileViewInfo = createAction("RENEWFILEVIEWINFO");
+const switchModalState = createAction("SWITCHMODALSTATE");
 // const addUserName = createAction("ADDUSERNAME");
 // const addUserId = createAction("ADDUSERNAME");
 
@@ -26,6 +27,7 @@ const reducer = createReducer(
             fileUpPath: "",
             fileViewPath: "",
         },
+        modalState: false,
     },
     {
         [switchMainPageRoute]: (state, action) => {
@@ -73,6 +75,11 @@ const reducer = createReducer(
                 },
             };
         },
+        [switchModalState]: (state, action) => {
+            return { ...state, 
+                modalState: action.payload.modalState,
+            };
+        },
         // [addUserName]: (state, action) => {
         //     return { ...state, 
         //         appInfo: {
@@ -92,6 +99,7 @@ export const actionCreators = {
     addUserInfo,
     renewCellInfo,
     renewFileViewInfo,
+    switchModalState,
 }
 
 export default store;
