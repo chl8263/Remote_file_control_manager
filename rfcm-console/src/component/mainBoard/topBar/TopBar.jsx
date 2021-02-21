@@ -9,12 +9,15 @@ import InputBase from '@material-ui/core/InputBase';
 import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
+import Button from '@material-ui/core/Button';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import { connect } from "react-redux";
+import { actionCreators } from "../../../store";
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -80,7 +83,7 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
   
-  export default function TopBar() {
+  const TopBar = ({ fileViewInfo, copyItem, renewCopyItem }) => {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
@@ -103,6 +106,97 @@ const useStyles = makeStyles((theme) => ({
   
     const handleMobileMenuOpen = (event) => {
       setMobileMoreAnchorEl(event.currentTarget);
+    };
+
+    const onClickMove = () => {
+        console.log("click! Move");
+        if(fileViewInfo.address == "" || fileViewInfo.path == ""){
+          resetCopyItem();
+        }
+
+        if(fileViewInfo.fileViewAddress !== copyItem.address){
+          alert("Cannot copy to another address");
+          resetCopyItem();
+        }
+
+        // s: Ajax ----------------------------------
+        var fianlPath = fileViewInfo.fileViewPath;
+        if(fianlPath !== ""){
+            fianlPath += "|";
+        }
+        console.log("!!!!!!!");
+        console.log(fianlPath);
+        fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
+        if(fianlPath.charAt(0) === '|'){
+        fianlPath = fianlPath.substr(1);
+        }
+        console.log(fianlPath);
+
+        const fileChangeInfo = {
+            path: "",
+            beforeName: originalFileName,
+            afterName: changedName,
+            extension: extension
+        }
+
+        fetch(HTTP.SERVER_URL + `/api/file/move/${address}`, {
+            method: HTTP.PUT,
+            headers: {
+                'Content-type': MediaType.JSON,
+                'Accept': MediaType.JSON,
+                'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
+                'Uid': cookies.UID
+            },
+            body: JSON.stringify(fileChangeInfo)
+        }).then(res => {
+            if(!res.ok){
+                throw res;
+            }
+            return res;
+        }).then(res => {
+            return res.json();
+        }).then(json => {
+            console.log("}{}{}{}{{{}{{");
+            console.log(json);
+
+            console.log(extension);
+
+            if(json === null || json === undefined){
+                alert(errorMsg);
+                return;
+            }
+            
+            if(json.error === true){
+                alert(error.errorMsg);
+                return;
+            }
+
+            let aftername = "";
+            if(extension === undefined || extension === null || extension === ""){
+                aftername = changedName;
+            }else {
+                aftername = changedName + "." + extension;
+            }
+            changeFileName(selectedRow.name, aftername);
+
+        }).catch(error => {
+            console.error(error);
+            alert(error.errorMsg);
+        });
+        // e: Ajax ----------------------------------
+    };
+
+    const resetCopyItem = () => {
+      const item = {
+          state: false,
+          address: "",
+          path: "",
+      };
+      renewCopyItem(item);
+    }
+
+    const onClickCopy = () => {
+        console.log("click! Copy");
     };
   
     const menuId = 'primary-search-account-menu';
@@ -166,18 +260,18 @@ const useStyles = makeStyles((theme) => ({
       <div className={classes.grow}>
         <AppBar position="static">
           <Toolbar>
-            <IconButton
+            {/* <IconButton
               edge="start"
               className={classes.menuButton}
               color="inherit"
               aria-label="open drawer"
             >
               <MenuIcon />
-            </IconButton>
-            <Typography className={classes.title} variant="h6" noWrap>
+            </IconButton> */}
+            {/* <Typography className={classes.title} variant="h6" noWrap>
               Material-UI
-            </Typography>
-            <div className={classes.search}>
+            </Typography> */}
+            {/* <div className={classes.search}>
               <div className={classes.searchIcon}>
                 <SearchIcon />
               </div>
@@ -189,29 +283,34 @@ const useStyles = makeStyles((theme) => ({
                 }}
                 inputProps={{ 'aria-label': 'search' }}
               />
-            </div>
+            </div> */}
             <div className={classes.grow} />
             <div className={classes.sectionDesktop}>
-              <IconButton aria-label="show 4 new mails" color="inherit">
-                <Badge badgeContent={4} color="secondary">
-                  <MailIcon />
-                </Badge>
-              </IconButton>
-              <IconButton aria-label="show 17 new notifications" color="inherit">
-                <Badge badgeContent={17} color="secondary">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-              <IconButton
-                edge="end"
-                aria-label="account of current user"
-                aria-controls={menuId}
-                aria-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
+                {copyItem.state && (
+                  <>
+                    <Button
+                      onClick={onClickMove}
+                      variant="contained"
+                      color="secondary"
+                      className={classes.button}
+                      style={{"marginRight": "15px"}}
+                    >
+                        Move
+                    </Button>
+
+                    <Button
+                        onClick={onClickCopy}
+                        variant="contained"
+                        color="inherit"
+                        className={classes.button}
+                        style={{"marginRight": "15px", "color": "black"}}
+                    >
+                        Copy
+                    </Button>
+                  </>
+                )}
+                
+              
             </div>
             <div className={classes.sectionMobile}>
               <IconButton
@@ -231,3 +330,20 @@ const useStyles = makeStyles((theme) => ({
       </div>
     );
   }
+
+
+const mapStateToProps = (state, ownProps) => {
+    return { 
+      fileViewInfo: state.fileViewInfo,
+      copyItem: state.copyItem,
+    };
+}
+  
+const mapDispathToProps = (dispatch) => {
+    return {
+        renewCopyItem: (copyItem) => dispatch(actionCreators.renewCopyItem(copyItem)),
+        renewFileViewInfo: (fileViewInfo) => dispatch(actionCreators.renewFileViewInfo(fileViewInfo)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispathToProps) (TopBar);

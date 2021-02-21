@@ -123,7 +123,7 @@ const MainBoard = ( { store, window } ) => {
                 </Scrollbars>
 
             </PanelGroup>
-            <ProgressModal />
+            {/* <ProgressModal /> */}
             {/* <Modal
                 open={open}
                 onClose={handleClose}

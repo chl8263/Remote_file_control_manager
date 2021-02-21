@@ -80,19 +80,49 @@ const LeftTree = ({ renewFileViewInfo, switchModalState, renewConnections }) => 
 
     sockJS.onmessage = function (e) {
       if(e !== null && e !== undefined && e.data !== null && e.data !== undefined ){
-        const resultObj = JSON.parse(e.data);
+        //const resultObj = JSON.parse(e.data);
 
-        if(resultObj.reqType === SOCK_REQ_TYPE.CONNECTIONS){
-          const connections = resultObj.payload.split('/');
-          var connectionsTempList = [];
-          connections.forEach(x => {
-            connectionsTempList.push(x);
-            console.log(x);
-          });
-          connectionsTempList.shift();
-          setConnectionList(connectionsTempList);
-        }
+        // if(resultObj.reqType === SOCK_REQ_TYPE.CONNECTIONS){
+        //   const connections = resultObj.payload.split('/');
+        //   var connectionsTempList = [];
+        //   console.log(connections.length);
+        //   console.log("===받은 목록 =====");
+        //   connections.forEach(x => {
+        //     connectionsTempList.push(x);
+            
+        //     console.log(x);
+        //   });
+        //   console.log("===받은 목록 : e =====");
+        //   connectionsTempList.shift();
+        //   setConnectionList(connectionsTempList);
+        // }
+        
         //switchModalState(false);
+        console.log("~@!@!@!#!#");
+        
+        const resultObj = JSON.parse(e.data);
+        console.log(resultObj);
+        if(resultObj === null || resultObj === undefined) return;
+
+        if (resultObj.reqType === "ADD") {
+          const address = resultObj.payload;
+          setConnectionList( arr => [...arr, address]);
+        } else if (resultObj.reqType === "REMOVE") {
+          const address = resultObj.payload;
+          connectionList[address];
+
+          setConnectionList(connectionList.filter(x => x !== address));
+
+          // var index = array.indexOf(item);
+          // if (index !== -1) {
+          //   array.splice(index, 1);
+          // }
+
+          // const address = (resultObj.payload).substr(1);
+          // console.log(")())()()(");
+          // console.log(address);
+          // console.log(connectionList.concat(address));
+        }
       }
     }  
   }, []);
@@ -108,7 +138,7 @@ const LeftTree = ({ renewFileViewInfo, switchModalState, renewConnections }) => 
       renewFileViewInfo(fileViewInfo);
     }else {
       console.log("씨발!!!!!!!!!");
-      renewConnections("hiiiiiiiiiiii");
+      //renewConnections("hiiiiiiiiiiii");
     }
     // console.log("씨발!!!!!!!!!");
     // console.log(connectionList);

@@ -39,7 +39,11 @@ const ProgressModal = ({ modalState }) => {
   const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
-    
+    if(modalState === null || modalState === undefined) return;
+    console.log("&&&&&&&&&&&&");
+    console.log(modalState);
+    // if(modalState === true) {  setOpen(true) }
+    // else if(!modalState === false) {  setOpen(false) }
   }, [modalState]);
 
   const handleOpen = () => {
@@ -52,30 +56,56 @@ const ProgressModal = ({ modalState }) => {
 
 
   return (
-    <div>
-      <button type="button" onClick={handleOpen}>
-        Open Modal
-      </button>
-      <Modal
-        open={open}
-        // onClose={handleClose}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh"
-        }}
-      >
-        <CircularProgress />
-      </Modal>
-    </div>
-  );
+        <>
+          <div>
+          <Modal
+              open={open}
+              onClose={handleClose}
+              aria-labelledby="simple-modal-title"
+              aria-describedby="simple-modal-description"
+              style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "100vh"
+              }}
+          >
+              <CircularProgress />
+          </Modal>
+          </div>
+        </>
+);
+//   return (
+//       <>
+//       {modalState && (
+//           <>
+//             <div>
+//             <button type="button" onClick={handleOpen}>
+//                 Open Modal
+//             </button>
+//             <Modal
+//                 open={open}
+//                 // onClose={handleClose}
+//                 aria-labelledby="simple-modal-title"
+//                 aria-describedby="simple-modal-description"
+//                 style={{
+//                 display: "flex",
+//                 justifyContent: "center",
+//                 alignItems: "center",
+//                 minHeight: "100vh"
+//                 }}
+//             >
+//                 <CircularProgress />
+//             </Modal>
+//             </div>
+//           </>
+//       )}
+//     </>
+//   );
 }
 
 const mapStateToProps = (state, ownProps) => {
-    return { modalState: state.modalState };
+    return {  };
 }
 
 const mapDispathToProps = (dispatch) => {

@@ -7,7 +7,9 @@ const addUserInfo = createAction("ADDUSERINFO");
 const renewCellInfo = createAction("RENEWCELLINFO");
 const renewFileViewInfo = createAction("RENEWFILEVIEWINFO");
 const switchModalState = createAction("SWITCHMODALSTATE");
+const renewCopyItem = createAction("RENEWCOPYITEM");
 const renewConnections = createAction("RENEWCONNECTIONS");
+
 // const addUserName = createAction("ADDUSERNAME");
 // const addUserId = createAction("ADDUSERNAME");
 
@@ -28,7 +30,13 @@ const reducer = createReducer(
             fileUpPath: "",
             fileViewPath: "",
         },
-        //modalState: false,
+        copyItem: {
+            state: false,
+            address: "",
+            path: "",
+            fileName: "",
+        },
+        modalState: true,
         conn: "",
     },
     {
@@ -82,6 +90,16 @@ const reducer = createReducer(
                 modalState: action.payload.modalState,
             };
         },
+        [renewCopyItem]: (state, action) => {
+            return { ...state, 
+                copyItem: {
+                    state: action.payload.state,
+                    address: action.payload.address,
+                    path: action.payload.path,
+                    fileName: action.payload.fileName,
+                },
+            };
+        },
         [renewConnections]: (state, action) => {
             return { ...state, 
                 conn: action.payload.conn,
@@ -108,6 +126,7 @@ export const actionCreators = {
     renewCellInfo,
     renewFileViewInfo,
     switchModalState,
+    renewCopyItem,
     renewConnections,
 }
 

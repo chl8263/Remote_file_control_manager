@@ -46,6 +46,7 @@ const MediaType = {
     JSON: "application/json",
     HAL_JSON: "application/hal+json",
     HTML: "text/html",
+    MULTIPART_FORM_DATA: "multipart/form-data",
 }
 
 const CellUnitRoles = {
