@@ -2,14 +2,11 @@ package com.ewan.rfcm.global.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.ewan.rfcm.domain.account.data.domain.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 
 @Component
 public class JwtFactory {

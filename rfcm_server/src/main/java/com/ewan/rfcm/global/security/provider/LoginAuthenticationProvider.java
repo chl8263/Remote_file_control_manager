@@ -31,18 +31,15 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-
         LoginPreAuthenticationToken token = (LoginPreAuthenticationToken) authentication;
 
         String userId = token.getUserId();
         String password = token.getUserPassword();
-
         Account account = accountService.findByUserId(userId).orElseThrow(() -> new NoSuchElementException("Cannot find account with this id"));
 
-        if(isCorrectPassword(password, account)){
+        if (isCorrectPassword(password, account)) {
             return LoginPostAuthenticationToken.getTokenFromAccountContext(AccountContext.fromAccountModel(account));
         }
-
         throw new NoSuchElementException("Not match with this information");
     }
 

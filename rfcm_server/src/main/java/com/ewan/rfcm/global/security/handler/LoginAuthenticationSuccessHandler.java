@@ -1,6 +1,5 @@
 package com.ewan.rfcm.global.security.handler;
 
-import com.ewan.rfcm.Application;
 import com.ewan.rfcm.global.constant.UserConnection;
 import com.ewan.rfcm.global.security.AccountContext;
 import com.ewan.rfcm.global.security.JwtFactory;
@@ -12,15 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -49,12 +44,6 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
         String userId = accountContext.getUsername();
         String uid = UUID.randomUUID().toString();
         UserConnection.userConnections.put(userId, uid);
-
-//        if(storedSession == null || storedSession.isEmpty() || storedSession.isBlank() || !sessionId.equals(storedSession)){
-//            session.invalidate();
-//            if(storedSession != null) session.removeAttribute(sessionId);
-//            throw new SessionAuthenticationException("This session isn't valid session");
-//        }
 
         processResponse(response, writeDto(tokenString, uid));
     }

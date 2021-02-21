@@ -10,8 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpSession;
-
 @Component
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 
@@ -24,10 +22,8 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-
         String token = (String) authentication.getPrincipal();
         AccountContext accountContext = jwtDecoder.decodeJwt(token);
-
         return JwtPostProcessingToken.getTokenFromAccountContext(accountContext);
     }
 

@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileChangeDto {
-    private String path = "";
-    private String beforeName = "";
-    private String afterName = "";
-    private String extension = "";
+public class FileMoveCopyDto {
+    private String fileName = "";
+    private String fromFilePath = "";
+    private String toDirectoryPath = "";
 }

@@ -1,6 +1,5 @@
 package com.ewan.rfcm.global.security.token;
 
-import com.ewan.rfcm.domain.account.data.domain.Account;
 import com.ewan.rfcm.domain.account.data.domain.AccountRole;
 import com.ewan.rfcm.global.security.AccountContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

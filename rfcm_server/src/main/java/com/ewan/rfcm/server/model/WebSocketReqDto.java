@@ -5,9 +5,7 @@ import lombok.Data;
 
 @Data
 public class WebSocketReqDto {
-
-    private WebsocketRequestType reqType = WebsocketRequestType.NOTHING;
+    private WebsocketRequestType reqType = WebsocketRequestType.CONNECTIONS;
     private String ip = "";
     private String payload = "";
-
 }

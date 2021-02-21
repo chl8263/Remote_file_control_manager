@@ -1,8 +1,6 @@
 package com.ewan.rfcm.global.security.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 public class ErrorDto {
@@ -14,5 +12,4 @@ public class ErrorDto {
         this.errorCode = errorCode;
         this.errorMsg = errorMsg;
     }
-
 }

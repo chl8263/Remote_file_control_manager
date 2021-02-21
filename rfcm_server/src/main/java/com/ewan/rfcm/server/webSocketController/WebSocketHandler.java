@@ -1,12 +1,8 @@
 package com.ewan.rfcm.server.webSocketController;
 
 import com.ewan.rfcm.server.AsyncFileControlServer;
-import com.ewan.rfcm.server.FileControlServer;
-import com.ewan.rfcm.server.model.FileControlClient;
 import com.ewan.rfcm.server.model.WebSocketReqDto;
-import com.ewan.rfcm.server.protocol.MessagePacker;
-import com.ewan.rfcm.server.protocol.MessageProtocol;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ewan.rfcm.server.protocol.WebsocketRequestType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,16 +13,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-
-import static com.ewan.rfcm.server.protocol.WebsocketRequestType.CONNECTIONS;
 
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
@@ -57,13 +44,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         try {
             String payload = message.getPayload();
-            System.out.println("payload : " + payload);
-//            TextMessage textMessage = new TextMessage("Welcome !");
-//            session.sendMessage(textMessage);
-
             WebSocketReqDto requestData = objectMapper.readValue(payload, WebSocketReqDto.class);
-            System.out.println(requestData);
-
             switch (requestData.getReqType()){
                 case CONNECTIONS:{
                     sendConnectedClientInfo(session);
@@ -76,29 +57,24 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     public static void sendConnectedClientInfo(WebSocketSession session){
-
         try {
-            WebSocketReqDto resultObj = new WebSocketReqDto();
-            String temp = "";
-
-            //Iterator<String> keys = AsyncFileControlServer.connections.keySet().iterator();
             for( String key : AsyncFileControlServer.connections.keySet() ){
-                System.out.println(key);
-                temp += AsyncFileControlServer.connections.get(key).getSocketChannel().getRemoteAddress();
+                String address = String.valueOf(AsyncFileControlServer.connections.get(key).getSocketChannel().getRemoteAddress()).substring(1);
+
+                WebSocketReqDto resultObj = new WebSocketReqDto();
+
+                resultObj.setReqType(WebsocketRequestType.ADD);
+                resultObj.setPayload(address);
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                String result = "";
+                result = objectMapper.writeValueAsString(resultObj);
+
+                TextMessage textMessage = new TextMessage(result);
+                synchronized (session) {
+                    session.sendMessage(textMessage);
+                }
             }
-
-            System.out.println(temp);
-
-            resultObj.setReqType(CONNECTIONS);
-            resultObj.setPayload(temp);
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            String result = "";
-            result = objectMapper.writeValueAsString(resultObj);
-
-            TextMessage textMessage = new TextMessage(result);
-            session.sendMessage(textMessage);
-
         } catch (Exception e) {
             try {
                 log.info("[Websocket] 전송실패로 접속 해제 : " + session.getId());
@@ -107,11 +83,33 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    // Send new client information to connected web socket session
     public static void sendWholeClientInfoToWholeWebSocket(){
         for(String key : WebSocketHandler.sessionList.keySet()){
             WebSocketSession webSocketSession =  WebSocketHandler.sessionList.get(key);
             WebSocketHandler.sendConnectedClientInfo(webSocketSession);
+        }
+    }
+
+    public static void sendClientInfo(String address, WebsocketRequestType requestType){
+        try {
+            for(String key : WebSocketHandler.sessionList.keySet()){
+                WebSocketSession webSocketSession =  WebSocketHandler.sessionList.get(key);
+
+                WebSocketReqDto resultObj = new WebSocketReqDto();
+                resultObj.setReqType(requestType);
+                resultObj.setPayload(address);
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                String result = "";
+                result = objectMapper.writeValueAsString(resultObj);
+
+                TextMessage textMessage = new TextMessage(result);
+                synchronized (webSocketSession) {
+                    webSocketSession.sendMessage(textMessage);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

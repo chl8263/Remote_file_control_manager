@@ -1,11 +1,10 @@
 package com.ewan.rfcm.server;
 
 import com.ewan.rfcm.server.connection.AsyncFileControlClient;
-import com.ewan.rfcm.server.model.FileControlClient;
+import com.ewan.rfcm.server.protocol.WebsocketRequestType;
 import com.ewan.rfcm.server.webSocketController.WebSocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,7 +12,7 @@ import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -23,7 +22,7 @@ public class AsyncFileControlServer implements Runnable {
 
     AsynchronousChannelGroup channelGroup;
     AsynchronousServerSocketChannel serverSocketChannel;
-    public static final HashMap<String, AsyncFileControlClient> connections = new HashMap<>();
+    public static final ConcurrentHashMap<String, AsyncFileControlClient> connections = new ConcurrentHashMap<>();
 
     @Override
     public void run() {
@@ -53,20 +52,17 @@ public class AsyncFileControlServer implements Runnable {
             @Override
             public void completed(AsynchronousSocketChannel socketChannel, Void attachment) {
                 try {
-                    log.info("[Async Server] 연결 수락 : " + socketChannel.getRemoteAddress());
+                    String address = socketChannel.getRemoteAddress().toString().substring(1);
+                    log.info("[Async Server] 연결 수락 : " + address);
                     AsyncFileControlClient client = new AsyncFileControlClient(socketChannel, new LinkedBlockingQueue<>());
-                    connections.put(client.getSocketChannel().getRemoteAddress().toString().substring(1), client);
+                    connections.put(address, client);
                     log.info("[Async Server] 연결 갯수 : " + connections.size());
 
                     serverSocketChannel.accept(null, this);
 
-                    // Send new client information to connected web socket session
-                    WebSocketHandler.sendWholeClientInfoToWholeWebSocket();
+                    WebSocketHandler.sendClientInfo(address, WebsocketRequestType.ADD);
 
-                } catch (IOException e) {
-                    // Send new client information to connected web socket session
-                    WebSocketHandler.sendWholeClientInfoToWholeWebSocket();
-                }
+                } catch (IOException e) { }
             }
 
             @Override
@@ -95,5 +91,4 @@ public class AsyncFileControlServer implements Runnable {
             return connections.get(ip);
         }else return null;
     }
-
 }

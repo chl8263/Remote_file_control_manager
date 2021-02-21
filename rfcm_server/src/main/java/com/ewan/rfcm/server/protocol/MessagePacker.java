@@ -5,12 +5,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class MessagePacker {
-    private int bufferSize = 1024; // 버퍼의 초기사이즈(변경가능)
+    private int bufferSize = 9999; // 버퍼의 초기사이즈(변경가능)
     private static ByteBuffer buffer; // 한번만 생성해서 사용하고자 함.
     private int offset = 0;
 
     public MessagePacker() {
-        // TODO Auto-generated constructor stub
         buffer = ByteBuffer.allocate(bufferSize);
         buffer.clear();
     }
@@ -55,6 +54,10 @@ public class MessagePacker {
         }
     }
 
+    public void setPosition(int position){
+        buffer.position(position);
+    }
+
     public void add(int param){
         if(buffer.remaining() > Integer.SIZE / Byte.SIZE) // 남은 공간이 있을 경우
             buffer.putInt(param);
@@ -78,19 +81,28 @@ public class MessagePacker {
         }
     }
 
+    public void addByte(byte[] bytes){
+        try {
+            int len = bytes.length;
+            if(buffer.remaining() > len){ // 남은 공간이 있을 경우
+                buffer.put(bytes);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void add(Object param){
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutput out = new ObjectOutputStream(bos);
             out.writeObject(param);
             byte[] yourBytes = bos.toByteArray();
-            buffer.put(yourBytes);
-
-//            int len = param.getBytes().length;
-//            if(buffer.remaining() > len){ // 남은 공간이 있을 경우
-//                buffer.putInt(len);
-//                buffer.put(param.getBytes());
-//            }
+            int len = yourBytes.length;
+            if(buffer.remaining() > len){ // 남은 공간이 있을 경우
+                buffer.putInt(len);
+                buffer.put(yourBytes);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -110,6 +122,10 @@ public class MessagePacker {
 
     public float getFloat(){
         return buffer.getFloat();
+    }
+
+    public long getLong(){
+        return buffer.getLong();
     }
 
     public double getDouble(){
@@ -139,6 +155,13 @@ public class MessagePacker {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public byte[] getByte(int len){
+        byte[] temp = new byte[len];
+
+        buffer.get(temp);
+        return temp;
     }
 
 }
