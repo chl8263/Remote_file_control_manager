@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 
 import { PAGE_ROUTE, HTTP, MediaType, SOCK_REQ_TYPE} from "../../../util/Const";
+import axios from 'axios';
 
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
@@ -238,14 +239,10 @@ const EnhancedTableToolbar = (props) => {
         if(fianlPath !== ""){
             fianlPath += "|";
         }
-        console.log("!!!!!!!");
-        console.log(fianlPath);
         fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
         if(fianlPath.charAt(0) === '|'){
         fianlPath = fianlPath.substr(1);
         }
-        console.log(fianlPath);
-        console.log(uploadFile[0]);
 
         const formData = new FormData();
         formData.append('file', uploadFile[0]);
@@ -253,15 +250,10 @@ const EnhancedTableToolbar = (props) => {
         fetch(HTTP.SERVER_URL + `/api/file/upload/${address}/${fianlPath}`, {
             method: HTTP.POST,
             headers: {
-                //'Content-type': MediaType.MULTIPART_FORM_DATA,
-                //'Content-type': false,
-                //'Accept': MediaType.JSON,
                 'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
                 'Uid': cookies.UID,
-                //'processData': false,
-
             },
-            body: formData//JSON.stringify(formData)
+            body: formData
         }).then(res => {
             if(!res.ok){
                 throw res;
@@ -270,29 +262,10 @@ const EnhancedTableToolbar = (props) => {
         }).then(res => {
             return res.json();
         }).then(json => {
-            console.log("response upload!!!!!");
-            console.log(json);
-
-            // console.log(extension);
-
-            // if(json === null || json === undefined){
-            //     alert(errorMsg);
-            //     return;
-            // }
-            
-            // if(json.error === true){
-            //     alert(error.errorMsg);
-            //     return;
-            // }
-
-            // let aftername = "";
-            // if(extension === undefined || extension === null || extension === ""){
-            //     aftername = changedName;
-            // }else {
-            //     aftername = changedName + "." + extension;
-            // }
-            // changeFileName(selectedRow.name, aftername);
-
+            if(json) {
+                alert("Success upload");
+                getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+            }
         }).catch(error => {
             console.error(error);
             alert(error.errorMsg);
@@ -306,23 +279,14 @@ const EnhancedTableToolbar = (props) => {
         if(fianlPath !== ""){
             fianlPath += "|";
         }
-        console.log("!!!!!!!");
-        console.log(fianlPath);
         fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
         if(fianlPath.charAt(0) === '|'){
         fianlPath = fianlPath.substr(1);
         }
-        
-
-        console.log("jwtttttttt");
-        console.log(selectedRow);
-        console.log(fianlPath);
-        console.log(fianlPath+selectedRow.name);
         setCopyItem(true, address ,fianlPath+selectedRow.name, selectedRow.name);
     }
 
     const onClickMove = () => {
-        console.log("click! Move");
         if(fileViewInfo.address == "" || fileViewInfo.path == ""){
           resetCopyItem();
         }
@@ -337,13 +301,10 @@ const EnhancedTableToolbar = (props) => {
         if(fianlPath !== ""){
             fianlPath += "|";
         }
-        console.log("!!!!!!!");
-        console.log(fianlPath);
         fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
         if(fianlPath.charAt(0) === '|'){
         fianlPath = fianlPath.substr(1);
         }
-        console.log(fianlPath);
 
         const FileMoveCopyInfo = {
             fileName: copyItem.fileName,
@@ -368,9 +329,6 @@ const EnhancedTableToolbar = (props) => {
         }).then(res => {
             return res.json();
         }).then(json => {
-            console.log("}{}{}{}{{{}{{");
-            console.log(json);
-
             if(json === null || json === undefined){
                 alert("Cannot move file");
                 return;
@@ -399,13 +357,75 @@ const EnhancedTableToolbar = (props) => {
     }
 
     const onClickCopy = () => {
-        console.log("click! Copy");
+        if(fileViewInfo.address == "" || fileViewInfo.path == ""){
+          resetCopyItem();
+        }
+
+        if(fileViewInfo.fileViewAddress !== copyItem.address){
+          alert("Cannot move to another address");
+          resetCopyItem();
+        }
+
+        // s: Ajax ----------------------------------
+        var fianlPath = fileViewInfo.fileViewPath;
+        if(fianlPath !== ""){
+            fianlPath += "|";
+        }
+        fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
+        if(fianlPath.charAt(0) === '|'){
+        fianlPath = fianlPath.substr(1);
+        }
+
+        const FileMoveCopyInfo = {
+            fileName: copyItem.fileName,
+            fromFilePath: copyItem.path,
+            toDirectoryPath: fianlPath,
+        }
+
+        fetch(HTTP.SERVER_URL + `/api/file/copy/${copyItem.address}`, {
+            method: HTTP.PUT,
+            headers: {
+                'Content-type': MediaType.JSON,
+                'Accept': MediaType.JSON,
+                'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
+                'Uid': cookies.UID
+            },
+            body: JSON.stringify(FileMoveCopyInfo)
+        }).then(res => {
+            if(!res.ok){
+                throw res;
+            }
+            return res;
+        }).then(res => {
+            return res.json();
+        }).then(json => {
+
+            if(json === null || json === undefined){
+                alert("Cannot copy file");
+                return;
+            }
+            
+            if(json.error === true){
+                alert("Cannot copy file");
+                return;
+            }
+
+            if(json.responseData){
+                alert("Copy success");
+                getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+                resetCopyItem();
+            }
+
+        }).catch(error => {
+            console.error(error.errorMsg);
+            alert("Cannot copy file");
+        });
+        // e: Ajax ----------------------------------
     };
 
     const fileChangedHandler = (e) =>{
         const files = e.target.files;
         setUploadFile(files);
-        console.log(files);
     };
   
     return (
@@ -555,13 +575,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
 
     }, [fileViewInfo]);
 
-    // useEffect(() => {
-    //     console.log("connections in FileView!!!!!!!!!!!");
-    //     console.log(conn);
-        
-
-    // }, [conn]);
-
     const getFileData = (address, path) => {
 
         if(address == null || address == undefined || address == "" || path == null || path == undefined || path == "") return;
@@ -628,8 +641,34 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
     };
 
     const handleDoubleClick = (event, row) => {
+
         if(row.type === 'file'){
-            // 파일 다운로드
+            //파일 다운로드
+            //axios.get();
+            const address = fileViewInfo.fileViewAddress;
+            const path = fileViewInfo.fileViewPath;
+
+            var fianlPath = path;
+            fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
+            if(fianlPath.charAt(0) === '|'){ fianlPath = fianlPath.substr(1); }
+
+            fetch(HTTP.SERVER_URL + `/api/file/download/${address}/${fianlPath}/${row.name}`, {
+                method: HTTP.GET,
+                headers: {
+                    'Content-type': MediaType.JSON,
+                    //'Accept': MediaType.JSON,
+                    'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
+                    'Uid': cookies.UID
+                },
+            }).then(response => {
+                response.blob().then(blob => {
+                    let url = window.URL.createObjectURL(blob);
+                    let a = document.createElement('a');
+                    a.href = url;
+                    a.download = row.name;
+                    a.click();
+                });
+            });
             return;
         }
         const address = fileViewInfo.fileViewAddress;
@@ -638,7 +677,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
         if(row.hiden === "previous") {
             path = fileViewInfo.fileUpPath;
             upPath = path.replace(/\\/g, "|").replace(/\//g,"|").split("|");
-            console.log(upPath);
             if(upPath.length > 2){
                 upPath.pop();
                 upPath = upPath.join('/');
@@ -657,8 +695,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
             fileViewPath: path,
         }
 
-        console.log(fileViewInfo2);
-    
         renewFileViewInfo(fileViewInfo2);
         
     };
@@ -676,9 +712,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
     };
 
     const setCopyItem = (state, address, path, fileName) => {
-        console.log("::::::");
-        console.log(address);
-        console.log(path);
         const copyData = {
             state: state,
             address: address,
@@ -729,7 +762,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
                 numSelected={selected.length}
                 order={order}
                 orderBy={orderBy}
-                // onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
                 rowCount={rows.length}
               />

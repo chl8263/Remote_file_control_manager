@@ -32,11 +32,8 @@ function TransitionComponent(props) {
 }
 
 TransitionComponent.propTypes = {
-    /**
-     * Show the component; triggers the enter or exit states
-     */
     in: PropTypes.bool,
-  };
+};
   
 const StyledTreeItem = withStyles((theme) => ({
   iconContainer: {
@@ -74,14 +71,10 @@ const TreeViewParent = ( { appInfo, address } ) => {
     const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
 
     useEffect(() => {
-
     }, []);
 
     const getRootDirectory = (e) => {
       const errorMsg = "Cannot reach this Directory";
-      console.log(e);
-      console.log(111);
-      console.log(address);
       e.preventDefault();
 
       // s: Ajax ----------------------------------
@@ -93,15 +86,9 @@ const TreeViewParent = ( { appInfo, address } ) => {
               'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
               'Uid': cookies.UID
           },
-      }).then(res => {
-          if(!res.ok){
-              throw res;
-          }
-          return res;
-      }).then(res => {
-          return res.json();
+      }).then(res => { if(!res.ok){ throw res; } return res;
+      }).then(res => { return res.json();
       }).then(json => {
-        console.log(json);
         if(json === null || json === undefined){
           setRootDirectoryList([]);
           alert(errorMsg);
@@ -119,7 +106,6 @@ const TreeViewParent = ( { appInfo, address } ) => {
       }).catch(error => {
         console.error(error);
         setRootDirectoryList([]);
-        //alert(error.errorMsg);
       });
       // e: Ajax ----------------------------------
     }
@@ -130,17 +116,10 @@ const TreeViewParent = ( { appInfo, address } ) => {
               key={address}
               nodeId={address} 
               onClick={getRootDirectory} 
-              label={ <span style={{ width: 100}} >  <NetworkIcon/> {address} </span> }>
-
-                {/* <StyledTreeItem nodeId="2" label={ <span > <FontAwesomeIcon icon={faFolder} /> 11 </span> }  >
-                
-                </StyledTreeItem> */}
-
+              label={ <span style={{ width: 100}} > <NetworkIcon/> {address} </span> }>
                 {rootDirectoryList.map( x => {
                   return <TreeViewItem key={address+x} address={address} upPath={""} currentDirectory={x} no={1}/>;
                 })}
-              {/* <TreeViewItem /> */}
-                
             </StyledTreeItem>
         </>
     );

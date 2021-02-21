@@ -11,10 +11,6 @@ import { CookiesProvider } from 'react-cookie';
 
 const Hot = hot(App);
 
-const a = () => {
-    console.log(3333333333333);
-}
-
 ReactDom.render(
     <CookiesProvider>
         <Provider store={store}>

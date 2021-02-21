@@ -10,10 +10,6 @@ const switchModalState = createAction("SWITCHMODALSTATE");
 const renewCopyItem = createAction("RENEWCOPYITEM");
 const renewConnections = createAction("RENEWCONNECTIONS");
 
-// const addUserName = createAction("ADDUSERNAME");
-// const addUserId = createAction("ADDUSERNAME");
-
-
 const reducer = createReducer(
     {
         mainPageRoute: PAGE_ROUTE.LODING,
@@ -59,12 +55,6 @@ const reducer = createReducer(
                     currentUserName: action.payload.accountName,
                     currentUserRole: action.payload.role,
                 }
-                // appInfo: {
-                //     ...state.appInfo,
-                //     currentUserId: action.payload.accountId,
-                //     currentUserName: action.payload.accountName,
-                //     currentUserRole: action.payload.role,
-                // },
             };
         },
         [renewCellInfo]: (state, action) => {
@@ -105,15 +95,6 @@ const reducer = createReducer(
                 conn: action.payload.conn,
             };
         },
-        
-        // [addUserName]: (state, action) => {
-        //     return { ...state, 
-        //         appInfo: {
-        //             ...state.appInfo,
-        //             currentUserName: action.payload,
-        //         },
-        //     };
-        // },
     }
 );
 

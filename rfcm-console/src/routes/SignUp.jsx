@@ -97,13 +97,6 @@ const SignUp = ( {switchLogin} ) => {
                                         </div>
                                         <input type="text" className="form-control form-control-lg" onChange={onChangeUserNameInput} value={userName} placeholder="Username" aria-label="Username" aria-describedby="basic-addon1" required/>
                                     </div>
-                                    {/* <!-- email --> */}
-                                    {/* <div className="input-group mb-3">
-                                        <div className="input-group-prepend">
-                                            <span className="input-group-text bg-danger text-white" id="basic-addon1"><i className="ti-email"></i></span>
-                                        </div>
-                                        <input type="text" className="form-control form-control-lg" placeholder="Email Address" aria-label="Username" aria-describedby="basic-addon1" required/>
-                                    </div> */}
                                     <div className="input-group mb-3">
                                         <div className="input-group-prepend">
                                             <span className="input-group-text bg-warning text-white" id="basic-addon2"><i className="ti-pencil"></i></span>

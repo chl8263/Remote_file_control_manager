@@ -23,20 +23,17 @@ function TransitionComponent(props) {
       from: { opacity: 0, transform: 'translate3d(20px,0,0)' },
       to: { opacity: props.in ? 1 : 0, transform: `translate3d(${props.in ? 0 : 20}px,0,0)` },
     });
-  
+
     return (
       <animated.div style={style}>
         <Collapse {...props} />
       </animated.div>
     );
-  }
+};
 
 TransitionComponent.propTypes = {
-    /**
-     * Show the component; triggers the enter or exit states
-     */
     in: PropTypes.bool,
-  };
+};
   
 const StyledTreeItem = withStyles((theme) => ({
   iconContainer: {
@@ -66,39 +63,26 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
 
   const getFileList = (e) => {
     e.preventDefault();
-    console.log(upPath);
-    console.log(currentDirectory);
 
     const fileViewInfo = {
       fileViewAddress: address,
       fileUpPath: upPath,
       fileViewPath: upPath+"|"+currentDirectory,
     }
-    console.log("88888888888");
-    console.log(fileViewInfo);
-    console.log(renewFileViewInfo);
-
     renewFileViewInfo(fileViewInfo);
-
-    
   }
 
   const getUnderDirectory = (e) => {
-    console.log(upPath);
-    console.log(currentDirectory);
     // s: Ajax ----------------------------------
     var fianlPath = upPath;
     if(fianlPath !== ""){
       fianlPath += "|";
     }
     fianlPath += currentDirectory;
-    console.log("!!!!!!!");
-    console.log(fianlPath);
     fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
     if(fianlPath.charAt(0) === '|'){
       fianlPath = fianlPath.substr(1);
     }
-    console.log(fianlPath);
 
     fetch(HTTP.SERVER_URL + `/api/file/directory/${address}/${fianlPath}`, {
         method: HTTP.GET,
@@ -108,16 +92,9 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
             'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
             'Uid': cookies.UID
         },
-    }).then(res => {
-        if(!res.ok){
-            throw res;
-        }
-        return res;
-    }).then(res => {
-        return res.json();
+    }).then(res => { if(!res.ok){ throw res; } return res;
+    }).then(res => { return res.json();
     }).then(json => {
-      console.log(json);
-
       if(json === null || json === undefined){
         setDirectoryList([]);
         alert(errorMsg);
@@ -138,7 +115,7 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
       alert(error.errorMsg);
     });
     // e: Ajax ----------------------------------
-  }
+  };
 
   return (
       <>
@@ -158,10 +135,6 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
       </>
   );
 }
-
-// const mapStateToProps = (state, ownProps) => {
-//   return { state };
-// }
 
 const mapDispathToProps = (dispatch) => {
   return {

@@ -16,15 +16,8 @@ const App = ( { page, switchLogin, switchMainBoard } ) => {
     const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
 
     useEffect(() => {
-        
-        console.log("========!!!!!!");
-        console.log(cookies.JWT_TOKEN);
-        console.log(cookies.UID);
-        console.log("========!!!!=======");
-
         if(cookies.JWT_TOKEN === undefined || cookies.JWT_TOKEN === null || cookies.UID === undefined || cookies.UID === null){
             switchLogin();
-            
         }else {
             // s: Ajax ----------------------------------
             fetch(HTTP.SERVER_URL + "/api/accounts/check", {
@@ -36,34 +29,16 @@ const App = ( { page, switchLogin, switchMainBoard } ) => {
                 },
                 // body: JSON.stringify(accountInfo)
                 
-            }).then(res => {
-                if(!res.ok){
-                    throw res;
-                }
-                return res;
-            }).then(res => {
-
-                console.log("========");
-                console.log(res);
-                console.log("========");
-                switchMainBoard();
-
-            }).catch(error => {
-
-                switchLogin();
-
-            }).finally( () => {
-                $(".preloader").fadeOut(); // Remove preloader.        
+            }).then(res => { if(!res.ok){ throw res; } return res; })
+            .then(res => { switchMainBoard(); })
+            .catch(error => { switchLogin(); })
+            .finally(() => { $(".preloader").fadeOut();
             });
             // e: Ajax ----------------------------------
         }
-        
     }, []);
 
     useEffect(() => {
-        console.log(cookies);
-        console.log(cookies.name);
-
     }, [cookies]);
 
     if(page === PAGE_ROUTE.LODING){

@@ -88,21 +88,21 @@ const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
                 },
                 body: JSON.stringify(accountInfo)
                 
-            }).then(res => {
-                if(!res.ok){
-                    throw res;
-                }
-                return res;
-            }).then(res => {
-                return res.json();
-            }).then(json => {
-                console.log("22222222");
+            }).then(res => { if(!res.ok){ throw res; } return res; })
+            .then(res => { return res.json(); })
+            .then(json => {
                 var JWT_TOKEN = json.token;
                 var UID = json.uid;
                 setCookie('JWT_TOKEN', JWT_TOKEN, { path: '/' });
                 setCookie('UID', UID, { path: '/' });
                 addJwtToken(JWT_TOKEN);
                 switchMainBoard();
+
+                const userInfo = {
+                    accountId: userId,
+                    accountName: userId,
+                }
+                addUserInfo(userInfo);
                 
             }).catch(error => {
                 alert("Please check account information.");
@@ -127,8 +127,6 @@ const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
           </Typography>
         );
     }
-
-    
 
     const classes = useStyles();
 
@@ -173,10 +171,6 @@ const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
                         onChange={onChangePasswordInput}
                         value={password}
                     />
-                    {/* <FormControlLabel
-                        control={<Checkbox value="remember" color="primary" />}
-                        label="Remember me"
-                    /> */}
                     <Button
                         type="submit"
                         fullWidth
@@ -189,14 +183,8 @@ const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
                     </Button>
                     <Grid container>
                         <Grid item xs>
-                        {/* <Link href="#" variant="body2">
-                            Forgot password?
-                        </Link> */}
                         </Grid>
                         <Grid item>
-                        {/* <Link href="#" variant="body2">
-                            {"Don't have an account? Sign Up"}
-                        </Link> */}
                         </Grid>
                     </Grid>
                     </form>

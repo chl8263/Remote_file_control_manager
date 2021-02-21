@@ -36,63 +36,12 @@ import Content from "react-panelgroup";
 
 const drawerWidth = 240;
 
-// const useStyles = makeStyles((theme) => ({
-//     root: {
-//         display: 'flex',
-//     },
-//     drawer: {
-//         [theme.breakpoints.up('sm')]: {
-//         width: drawerWidth,
-//         flexShrink: 0,
-//         },
-//     },
-//     appBar: {
-//         [theme.breakpoints.up('sm')]: {
-//         width: `calc(100% - ${drawerWidth}px)`,
-//         marginLeft: drawerWidth,
-//         },
-//     },
-//     menuButton: {
-//         marginRight: theme.spacing(2),
-//         [theme.breakpoints.up('sm')]: {
-//         display: 'none',
-//         },
-//     },
-//     // necessary for content to be below app bar
-//     toolbar: theme.mixins.toolbar,
-//     drawerPaper: {
-//         width: drawerWidth,
-//     },
-//     content: {
-//         flexGrow: 1,
-//         padding: theme.spacing(3),
-//     },
-// }));
-
 const MainBoard = ( { store, window } ) => {
-
-    // const classes = useStyles();
-    // const theme = useTheme();
-    // const [mobileOpen, setMobileOpen] = React.useState(false);
-
-    //let sockJS = new SockJS("http://localhost:8081/ws");
 
     useEffect(() => {
         history.pushState('','', '/main-board');
         $(".preloader").fadeOut(); // Remove preloader.
     }, []);
-
-    // const handleDrawerToggle = () => {
-    //     setMobileOpen(!mobileOpen);
-    // };
-
-    // const drawer = (
-    //     <div>
-    //       <div className={classes.toolbar} />
-    //       <Divider />
-    //       <LeftTree />
-    //     </div>
-    // );
 
     const handleOpen = () => {
         setOpen(true);
@@ -123,23 +72,11 @@ const MainBoard = ( { store, window } ) => {
                 </Scrollbars>
 
             </PanelGroup>
-            {/* <ProgressModal /> */}
-            {/* <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="simple-modal-title"
-                aria-describedby="simple-modal-description"
-                >
-            </Modal> */}
         </> 
     );
 };
 
 MainBoard.propTypes = {
-    /**
-     * Injected by the documentation to work in an iframe.
-     * You won't need it on your project.
-     */
     window: PropTypes.func,
 };
 
