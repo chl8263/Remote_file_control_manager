@@ -84,13 +84,13 @@ const LeftTree = ({ renewFileViewInfo, switchModalState, renewConnections }) => 
         if(resultObj === null || resultObj === undefined) return;
 
         if (resultObj.reqType === "ADD") {
+
           const address = resultObj.payload;
           setConnectionList( arr => [...arr, address]);
+
         } else if (resultObj.reqType === "REMOVE") {
           const address = resultObj.payload;
-          connectionList[address];
-
-          setConnectionList(connectionList.filter(x => x !== address));
+          setConnectionList(arr => arr.filter(x => x !== address));
         }
       }
     }  

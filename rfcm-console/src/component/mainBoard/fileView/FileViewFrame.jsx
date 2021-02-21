@@ -136,7 +136,6 @@ EnhancedTableHead.propTypes = {
     classes: PropTypes.object.isRequired,
     numSelected: PropTypes.number.isRequired,
     onRequestSort: PropTypes.func.isRequired,
-    onSelectAllClick: PropTypes.func.isRequired,
     order: PropTypes.oneOf(['asc', 'desc']).isRequired,
     orderBy: PropTypes.string.isRequired,
     rowCount: PropTypes.number.isRequired,
@@ -704,7 +703,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
         for(let i = 0; i < newfileList.length; i++){
             if(newfileList[i].name === beforeName){
                 newfileList[i].name = afterName;
-                console.log(newfileList[i].name);
             } 
         }
         setFileList(newfileList);
