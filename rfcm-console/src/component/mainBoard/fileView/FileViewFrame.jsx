@@ -253,14 +253,9 @@ const EnhancedTableToolbar = (props) => {
                 'Uid': cookies.UID,
             },
             body: formData
-        }).then(res => {
-            if(!res.ok){
-                throw res;
-            }
-            return res;
-        }).then(res => {
-            return res.json();
-        }).then(json => {
+        }).then(res => { if(!res.ok){ throw res; } return res; })
+        .then(res => { return res.json(); })
+        .then(json => {
             if(json) {
                 alert("Success upload");
                 getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
@@ -320,14 +315,9 @@ const EnhancedTableToolbar = (props) => {
                 'Uid': cookies.UID
             },
             body: JSON.stringify(FileMoveCopyInfo)
-        }).then(res => {
-            if(!res.ok){
-                throw res;
-            }
-            return res;
-        }).then(res => {
-            return res.json();
-        }).then(json => {
+        }).then(res => { if(!res.ok){ throw res; } return res; })
+        .then(res => { return res.json(); })
+        .then(json => {
             if(json === null || json === undefined){
                 alert("Cannot move file");
                 return;
@@ -359,12 +349,10 @@ const EnhancedTableToolbar = (props) => {
         if(fileViewInfo.address == "" || fileViewInfo.path == ""){
           resetCopyItem();
         }
-
         if(fileViewInfo.fileViewAddress !== copyItem.address){
           alert("Cannot move to another address");
           resetCopyItem();
         }
-
         // s: Ajax ----------------------------------
         var fianlPath = fileViewInfo.fileViewPath;
         if(fianlPath !== ""){
@@ -390,31 +378,22 @@ const EnhancedTableToolbar = (props) => {
                 'Uid': cookies.UID
             },
             body: JSON.stringify(FileMoveCopyInfo)
-        }).then(res => {
-            if(!res.ok){
-                throw res;
-            }
-            return res;
-        }).then(res => {
-            return res.json();
-        }).then(json => {
-
+        }).then(res => { if(!res.ok){ throw res; } return res; })
+        .then(res => { return res.json(); })
+        .then(json => {
             if(json === null || json === undefined){
                 alert("Cannot copy file");
                 return;
             }
-            
             if(json.error === true){
                 alert("Cannot copy file");
                 return;
             }
-
             if(json.responseData){
                 alert("Copy success");
                 getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
                 resetCopyItem();
             }
-
         }).catch(error => {
             console.error(error.errorMsg);
             alert("Cannot copy file");
@@ -594,22 +573,21 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
         }).then(res => { if(!res.ok){ throw res; } return res;
         }).then(res => { return res.json();
         }).then(json => {
+            console.log(json);
             if(json === null || json === undefined) {
                 setFileList([]);
                 alert(errorMsg);
                 return;
             }
-            
             if(json.error === true){
                 setFileList([]);
                 alert(error.errorMsg);
                 return;
             }
-
+            if(json.responseData.root == undefined || json.responseData.root == null) return;
             if(!json.responseData.root){
                 json.responseData.fileList.unshift(createData('...', '', '', '', 'previous'));
             }
-
             setFileList(json.responseData.fileList);
 
         }).catch(error => {
@@ -642,8 +620,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
     const handleDoubleClick = (event, row) => {
 
         if(row.type === 'file'){
-            //파일 다운로드
-            //axios.get();
             const address = fileViewInfo.fileViewAddress;
             const path = fileViewInfo.fileViewPath;
 
@@ -655,7 +631,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
                 method: HTTP.GET,
                 headers: {
                     'Content-type': MediaType.JSON,
-                    //'Accept': MediaType.JSON,
                     'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
                     'Uid': cookies.UID
                 },
@@ -693,9 +668,7 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
             fileUpPath: upPath,
             fileViewPath: path,
         }
-
         renewFileViewInfo(fileViewInfo2);
-        
     };
 
     const changeFileName = (beforeName, afterName) => {
@@ -720,7 +693,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
     };
 
     const settingModalState = (x) => {
-
         setModalState(x);
     };
   

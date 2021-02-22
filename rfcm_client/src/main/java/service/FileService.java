@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.DirectoryInfo;
 import model.ResponseModel;
-
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -17,7 +16,6 @@ public class FileService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static String getDirectoryInRoot(){
-
         ResponseModel<List<String>> responseModel = new ResponseModel<>();
         try{
             List<String> data = FileProvider.getDirectoryInRoot();
@@ -27,19 +25,16 @@ public class FileService {
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
         }
-
         String result = null;
         try {
             result = objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
             LOG.warning(e.getMessage());
         }
-
         return result;
     }
 
     public static String getUnderLineDirectory(String pathName){
-
         ResponseModel<List<String>> responseModel = new ResponseModel<>();
         try{
             List<String> data = FileProvider.getUnderLineDirectory(pathName);
@@ -49,37 +44,84 @@ public class FileService {
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
         }
-
         String result = null;
         try {
             result = objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
             LOG.warning(e.getMessage());
         }
-
         return result;
     }
 
     public static String getFilesInDirectory(String pathName) {
-
         ResponseModel<DirectoryInfo> responseModel = new ResponseModel<>();
-
         try{
             DirectoryInfo data = FileProvider.getFilesInDirectory(pathName);
             responseModel.setResponseData(data);
-
         }catch (Exception e){
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
         }
-
         String result = null;
         try {
             result = objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
             LOG.warning(e.getMessage());
         }
+        return result;
+    }
 
+    public static String changeFileName(String pathName, String beforeName, String afterName, String extension) {
+        ResponseModel<Boolean> responseModel = new ResponseModel<>();
+        try{
+            boolean isChanged = FileProvider.changeFileName(pathName, beforeName, afterName, extension);
+            responseModel.setResponseData(isChanged);
+        }catch (Exception e){
+            responseModel.setError(true);
+            responseModel.setErrorMsg(e.getMessage());
+        }
+        String result = null;
+        try {
+            result = objectMapper.writeValueAsString(responseModel);
+        } catch (JsonProcessingException e) {
+            LOG.warning(e.getMessage());
+        }
+        return result;
+    }
+
+    public static String moveFile(String fromFilePath, String toDirectoryPath, String fileName) {
+        ResponseModel<Boolean> responseModel = new ResponseModel<>();
+        try{
+            boolean isMoved = FileProvider.moveFile(fromFilePath, toDirectoryPath, fileName);
+            responseModel.setResponseData(isMoved);
+        }catch (Exception e){
+            responseModel.setError(true);
+            responseModel.setErrorMsg(e.getMessage());
+        }
+        String result = null;
+        try {
+            result = objectMapper.writeValueAsString(responseModel);
+        } catch (JsonProcessingException e) {
+            LOG.warning(e.getMessage());
+        }
+        return result;
+    }
+
+    public static String copyFile(String fromFilePath, String toDirectoryPath, String fileName) {
+        ResponseModel<Boolean> responseModel = new ResponseModel<>();
+        try{
+            boolean isCopied = FileProvider.copyFile(fromFilePath, toDirectoryPath, fileName);
+            responseModel.setResponseData(isCopied);
+        }catch (Exception e){
+            responseModel.setError(true);
+            responseModel.setErrorMsg(e.getMessage());
+        }
+        String result = null;
+        try {
+            result = objectMapper.writeValueAsString(responseModel);
+        } catch (JsonProcessingException e) {
+            LOG.warning(e.getMessage());
+        }
         return result;
     }
 }

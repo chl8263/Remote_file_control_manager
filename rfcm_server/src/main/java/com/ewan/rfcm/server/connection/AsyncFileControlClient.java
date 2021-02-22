@@ -20,13 +20,20 @@ public class AsyncFileControlClient {
 
     private int bufferSize = 9999;
 
-    AsynchronousSocketChannel socketChannel;
-    BlockingQueue<String> queue;
-    BlockingQueue<byte[]> byteQueue;
+    private AsynchronousSocketChannel socketChannel;
+    private BlockingQueue<String> queue;
+    private BlockingQueue<byte[]> byteQueue;
 
-    public AsyncFileControlClient(AsynchronousSocketChannel socketChannel, BlockingQueue<String> queue){
+//    public AsyncFileControlClient(AsynchronousSocketChannel socketChannel, BlockingQueue<String> queue){
+//        this.socketChannel = socketChannel;
+//        this.queue = queue;
+//        this.byteQueue = new LinkedBlockingQueue<>();
+//        receive();
+//    }
+
+    public AsyncFileControlClient(AsynchronousSocketChannel socketChannel){
         this.socketChannel = socketChannel;
-        this.queue = queue;
+        this.queue = new LinkedBlockingQueue<>();
         this.byteQueue = new LinkedBlockingQueue<>();
         receive();
     }
@@ -46,14 +53,13 @@ public class AsyncFileControlClient {
 
                                 byte protocol = msg.getProtocol();
                                 if(protocol == MessageProtocol.FILE_DOWN_LOAD){
-
                                     try {
                                         float fileSize = msg.getLong();
                                         int offSet = msg.getInt();
 
                                         if(offSet == -1){
                                             queue.put("success");
-                                            queue.put(String.valueOf(fileSize));
+                                            //queue.put(String.valueOf(fileSize));
                                         }else {
                                             int payloadLength = msg.getInt();
                                             byte [] buff = msg.getByte(payloadLength);

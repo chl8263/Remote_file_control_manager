@@ -1,22 +1,33 @@
 import client.FileControlClient;
-import client.FileProvider;
 import config.PropertiesReader;
 import model.ServerInfo;
-import service.FileService;
 
 public class Application {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-//        ServerInfo serverInfo = PropertiesReader.getServerInfoFromPropertiesValue();
-//        new FileControlClient(serverInfo).startClient();
+        ServerInfo serverInfo = PropertiesReader.getServerInfoFromPropertiesValue();
 
-        //FileService.getDirectoryInRoot();
-        //FileService.getUnderLineDirectory("C:\\KiwoomHero4bin\\globalticker");
-        //FileService.getFilesInDirectory("C:\\KiwoomHero4");
-        FileService.getFilesInDirectory("C:\\KiwoomHero4");
+        new FileControlClient(serverInfo).startClient();
 
-        //FileService.getDirectoryInRoot();
+//        for(int i = 0; i<100; i++){
+//            Thread thread = new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    new FileControlClient(serverInfo).startClient();
+//                }
+//            });
+//            thread.start();
+//        }
 
+//        for(int i = 0; i<2; i++){
+//            Thread thread = new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    new FileControlClient(serverInfo).startClient();
+//                }
+//            });
+//            thread.start();
+//        }
     }
 }

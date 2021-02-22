@@ -1,4 +1,4 @@
-package com.ewan.rfcm.domain.file.dto;
+package com.ewan.rfcm.domain.file.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

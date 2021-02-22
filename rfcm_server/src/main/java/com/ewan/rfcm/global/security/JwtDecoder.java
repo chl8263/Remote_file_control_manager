@@ -33,7 +33,7 @@ public class JwtDecoder {
 
             jwt = jwtVerifier.verify(token);
         }catch (Exception e){
-            log.error(e.getMessage());
+            log.error("[~~ ERROR]", e);
         }
 
         return Optional.ofNullable(jwt);

@@ -23,15 +23,11 @@ public class PropertiesReader {
             } else {
                 throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
             }
-
             serverInfo.setIp(prop.getProperty("ip"));
             serverInfo.setPort(Integer.parseInt(prop.getProperty("port")));
-
         } catch(Exception e){
             LOG.warning("Cannot trace [app.properties] file");
-            System.out.println("Exception : " + e);
         }
         return serverInfo;
     }
-
 }

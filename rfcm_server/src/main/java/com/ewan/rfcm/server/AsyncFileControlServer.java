@@ -54,7 +54,7 @@ public class AsyncFileControlServer implements Runnable {
                 try {
                     String address = socketChannel.getRemoteAddress().toString().substring(1);
                     log.info("[Async Server] 연결 수락 : " + address);
-                    AsyncFileControlClient client = new AsyncFileControlClient(socketChannel, new LinkedBlockingQueue<>());
+                    AsyncFileControlClient client = new AsyncFileControlClient(socketChannel);
                     connections.put(address, client);
                     log.info("[Async Server] 연결 갯수 : " + connections.size());
 

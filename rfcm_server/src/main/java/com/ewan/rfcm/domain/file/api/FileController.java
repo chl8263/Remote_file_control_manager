@@ -1,7 +1,7 @@
 package com.ewan.rfcm.domain.file.api;
 
-import com.ewan.rfcm.domain.file.dto.FileChangeDto;
-import com.ewan.rfcm.domain.file.dto.FileMoveCopyDto;
+import com.ewan.rfcm.domain.file.model.FileChangeDto;
+import com.ewan.rfcm.domain.file.model.FileMoveCopyDto;
 import com.ewan.rfcm.server.AsyncFileControlServer;
 import com.ewan.rfcm.server.connection.AsyncFileControlClient;
 import com.ewan.rfcm.server.protocol.MessagePacker;
@@ -353,8 +353,7 @@ public class FileController {
                 public void failed(Throwable exc, ByteBuffer attachment) { }
             });
 
-            String result = client.getQueue().poll(10, TimeUnit.MINUTES);
-            //String size = client.getQueue().poll(10, TimeUnit.MINUTES);
+            String result = client.getQueue().poll(2, TimeUnit.MINUTES);
             if(result.equals("success")){
                 var byteQueue = client.getByteQueue();
                 //int countSize = 0;

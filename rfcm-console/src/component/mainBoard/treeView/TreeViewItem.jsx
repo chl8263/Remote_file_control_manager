@@ -61,6 +61,10 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
   const [directoryList, setDirectoryList] = useState([""]);
   const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
 
+  // useEffect(() => {
+  //   setDirectoryList([]);
+  // }, []);
+
   const getFileList = (e) => {
     e.preventDefault();
 
@@ -112,7 +116,7 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
     }).catch(error => {
       console.error(error);
       setDirectoryList([]);
-      alert(error.errorMsg);
+      //alert(error.errorMsg);
     });
     // e: Ajax ----------------------------------
   };

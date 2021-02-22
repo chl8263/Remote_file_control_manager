@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServerInfo {
-
     private String ip = "";
     private int port = 0;
 }

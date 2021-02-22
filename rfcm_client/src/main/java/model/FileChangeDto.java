@@ -1,9 +1,9 @@
-package protocol;
+package model;
 
 import lombok.Data;
 
 @Data
-public class FileChangeProtocol {
+public class FileChangeDto {
     private String path = "";
     private String beforeName = "";
     private String afterName = "";

@@ -67,15 +67,11 @@ const LeftTree = ({ renewFileViewInfo, switchModalState, renewConnections }) => 
   useEffect(() => {
     let  sockJS = new SockJS("http://localhost:8081/ws");
     sockJS.onopen = function () {
-      //switchModalState(true);
-      // send : connection으로 message를 전달
-      // connection이 맺어진 후 가입(JOIN) 메시지를 전달
       sockJS.send(JSON.stringify(
         {
           reqType: SOCK_REQ_TYPE.CONNECTIONS,
         }
         ));
-      //sockJS.send("hohoho");
     }
 
     sockJS.onmessage = function (e) {
