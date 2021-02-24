@@ -287,76 +287,67 @@ const EnhancedTableToolbar = (props) => {
         });
 
         setCopyItem(true, address, convertPathRow);
-
-        // const address = fileViewInfo.fileViewAddress;
-        // var fianlPath = fileViewInfo.fileViewPath;
-        // if(fianlPath !== ""){
-        //     fianlPath += "|";
-        // }
-        // fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
-        // if(fianlPath.charAt(0) === '|'){
-        // fianlPath = fianlPath.substr(1);
-        // }
-        // setCopyItem(true, address ,fianlPath+selectedRow.name, selectedRow.name);
     }
 
-    // const onClickMove = () => {
-    //     if(fileViewInfo.address == "" || fileViewInfo.path == ""){
-    //       resetCopyItem();
-    //     }
-
-    //     if(fileViewInfo.fileViewAddress !== copyItem.address){
-    //       alert("Cannot move to another address");
-    //       resetCopyItem();
-    //     }
-
-    //     // s: Ajax ----------------------------------
-    //     var fianlPath = fileViewInfo.fileViewPath;
-    //     if(fianlPath !== ""){
-    //         fianlPath += "|";
-    //     }
-    //     fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
-    //     if(fianlPath.charAt(0) === '|'){
-    //     fianlPath = fianlPath.substr(1);
-    //     }
-
-    //     const FileMoveCopyInfo = {
-    //         fileName: copyItem.fileName,
-    //         fromFilePath: copyItem.path,
-    //         toDirectoryPath: fianlPath,
-    //     }
-
-    //     fetch(HTTP.SERVER_URL + `/api/file/move/${copyItem.address}`, {
-    //         method: HTTP.PUT,
-    //         headers: {
-    //             'Content-type': MediaType.JSON,
-    //             'Accept': MediaType.JSON,
-    //             'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
-    //             'Uid': cookies.UID
-    //         },
-    //         body: JSON.stringify(FileMoveCopyInfo)
-    //     }).then(res => { if(!res.ok){ throw res; } return res; })
-    //     .then(res => { return res.json(); })
-    //     .then(json => {
-    //         if(json === null || json === undefined){
-    //             alert("Cannot move file");
-    //             return;
-    //         }
-    //         if(json.error === true){
-    //             alert("Cannot move file");
-    //             return;
-    //         }
-    //         if(json.responseData){
-    //             alert("Move success");
-    //             getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
-    //             resetCopyItem();
-    //         }
-    //     }).catch(error => {
-    //         console.error(error.errorMsg);
-    //         alert("Cannot move file");
-    //     });
-    //     // e: Ajax ----------------------------------
-    // };
+    const onClickDeleteBtn = () => {
+        if(numSelected <= 0 || selectedRow === null || selectedRow === undefined || selectedRow.length <= 0) {
+            alert("Please check selected item in row");
+            return;
+        }
+        const paths = [];
+        const tPath = fileViewInfo.fileViewPath;
+        let fianlPath = tPath.replace(/\\/g, "|").replace(/\//g,"|").replace(/\|/g,"/");
+        if(fianlPath.charAt(0) === '/'){
+            fianlPath = fianlPath.substr(1);
+        }
+        selectedRow.forEach(x => {
+            paths.push(fianlPath+"/"+x);
+        });
+        // s: Ajax ----------------------------------
+        const FileDeleteInfo = {
+            paths: paths,
+        }
+        fetch(HTTP.SERVER_URL + `/api/file/${fileViewInfo.fileViewAddress}`, {
+            method: HTTP.DELETE,
+            headers: {
+                'Content-type': MediaType.JSON,
+                'Accept': MediaType.JSON,
+                'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
+                'Uid': cookies.UID
+            },
+            body: JSON.stringify(FileDeleteInfo)
+        }).then(res => { if(!res.ok){ throw res; } return res; })
+        .then(res => { return res.json(); })
+        .then(json => {
+            if(json === null || json === undefined){
+                alert("Cannot delete file");
+                return;
+            }
+            if(json.error === true){
+                if(json.responseData.length > 0){
+                    let showErrorMsg = "";
+                    json.responseData.forEach(x => {
+                        showErrorMsg += x;
+                        showErrorMsg += "\n";
+                    });
+                    alert(showErrorMsg);
+                }else {
+                    alert("Cannot delete file");
+                }
+                return;
+            }
+            if(json.responseData){
+                alert("delete success");
+            }
+        }).catch(error => {
+            console.error(error.errorMsg);
+            alert("Cannot copy file");
+        }).finally(X => {
+            getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+            resetCopyItem();
+        });
+        // e: Ajax ----------------------------------
+    }
 
     const resetCopyItem = () => {
         setCopyItem(false, "", "", "");
@@ -577,7 +568,8 @@ const EnhancedTableToolbar = (props) => {
                 )}
 
                 <IconButton 
-                    aria-label="delete">
+                    aria-label="delete"
+                    onClick={onClickDeleteBtn}>
                     <DeleteIcon />
                 </IconButton>
 
