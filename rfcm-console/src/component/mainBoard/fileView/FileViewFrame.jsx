@@ -30,6 +30,7 @@ import FileMoveIcon from '@material-ui/icons/TrendingUpOutlined';
 import FileNameChangeIcon from '@material-ui/icons/CreateOutlined';
 import UploadIcon from '@material-ui/icons/CloudUploadOutlined';
 import CheckIcon from '@material-ui/icons/DoneAll';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileAlt, faFolder } from "@fortawesome/free-regular-svg-icons"
@@ -173,13 +174,10 @@ const EnhancedTableToolbar = (props) => {
     }, [fileViewInfo]);
 
     const onCLickChangeBtn = () => {
-        console.log(selectedRow);
         if(selectedRow === null || selectedRow === undefined || selectedRow.length <= 0) {
             alert("There are not selected row.");
             return;
         }
-        console.log(selectedRow[0]);
-
         const splitedFileName = selectedRow[0].split(".");
         const originalFileName = splitedFileName[0];
         const extension = splitedFileName[1];
@@ -215,22 +213,16 @@ const EnhancedTableToolbar = (props) => {
         }).then(res => { if(!res.ok){ throw res; } return res;})
         .then(res => { return res.json();})
         .then(json => {
-            if(json === null || json === undefined || json.error === true || json.responseData === false){
+            if(json === null || json === undefined){
                 alert("Cannot change file name");
                 return;
             }
-            
-            let aftername = "";
-            if(extension === undefined || extension === null || extension === ""){
-                aftername = changedName;
+            if(!json.error){
+                alert("Success change name");    
             }else {
-                aftername = changedName + "." + extension;
+                alert(json.errorMsg);
             }
-            alert("Success change name");
             changeFileName();
-            //changeFileName(selectedRow.name, aftername);
-            //getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
-
         }).catch(error => {
             alert("Cannot change file name");
         })
@@ -270,6 +262,13 @@ const EnhancedTableToolbar = (props) => {
             console.error(error);
             alert(error.errorMsg);
         });
+    }
+
+    const onClickFileRefresh = () => {
+        if(fileViewInfo !== null || fileViewInfo !== undefined 
+            || fileViewInfo.fileViewAddress !== null || fileViewInfo.fileViewAddress !== undefined
+            || fileViewInfo.fileViewPath !== null || fileViewInfo.fileViewPath !== undefined) return;
+        getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
     }
 
     const onCLickFileCopy = () => {
@@ -418,6 +417,12 @@ const EnhancedTableToolbar = (props) => {
           [classes.highlight]: numSelected > 0,
         })}
       >
+          <Tooltip title="refresh">
+                <IconButton aria-label="refresh">
+                    <RefreshIcon onClick={onClickFileUpLoad}/>
+                </IconButton>
+            </Tooltip>
+        
         {numSelected > 0 ? (
           <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
             {numSelected} selected
@@ -471,7 +476,7 @@ const EnhancedTableToolbar = (props) => {
         )}
   
         {numSelected > 0 && (
-          <Tooltip>
+          <Tooltip title="topselected">
               <>
                 {numSelected === 1 && (
                     <IconButton
