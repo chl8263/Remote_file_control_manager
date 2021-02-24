@@ -1,6 +1,7 @@
 package com.ewan.rfcm.domain.file.api;
 
 import com.ewan.rfcm.domain.file.model.FileChangeDto;
+import com.ewan.rfcm.domain.file.model.FileDeleteDto;
 import com.ewan.rfcm.domain.file.model.FileMoveCopyDto;
 import com.ewan.rfcm.domain.file.model.FileMoveCopyRole;
 import com.ewan.rfcm.server.AsyncFileControlServer;
@@ -44,7 +45,6 @@ public class FileController {
         try {
             AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
             path = preProcessing(path);
-
             if(client == null || path == null || path.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
@@ -59,7 +59,6 @@ public class FileController {
             }
 
             byte[] data = msg.Finish();
-
             client.send(data);
             String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
             if(responseResult == null || responseResult.equals(EMPTY)){
@@ -78,7 +77,6 @@ public class FileController {
         try {
             AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
             path = preProcessing(path);
-
             if(client == null || path == null || path.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
@@ -89,7 +87,6 @@ public class FileController {
             msg.addString(path);
 
             byte[] data = msg.Finish();
-
             client.send(data);
             String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
             if(responseResult == null || responseResult.equals(EMPTY)){
@@ -115,7 +112,6 @@ public class FileController {
 
             AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
             path = preProcessing(path);
-
             if(client == null || path == null || path.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
@@ -128,9 +124,7 @@ public class FileController {
             String tranData = objectMapper.writeValueAsString(fileChangeDto);
 
             msg.addString(tranData);
-
             byte[] data = msg.Finish();
-
             client.send(data);
             String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
             if(responseResult == null || responseResult.equals(EMPTY)){
@@ -156,7 +150,6 @@ public class FileController {
             // e: validations
 
             AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
-
             if (client == null) {
                 return ResponseEntity.badRequest().body(EMPTY);
             }
@@ -171,7 +164,42 @@ public class FileController {
             String tranData = objectMapper.writeValueAsString(fileMoveCopyDto);
 
             msg.addString(tranData);
+            byte[] data = msg.Finish();
+            client.send(data);
+            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
 
+            if (responseResult == null || responseResult.equals(EMPTY)) {
+                return ResponseEntity.badRequest().body(EMPTY);
+            }
+            return ResponseEntity.ok(responseResult);
+        } catch (InterruptedException e) {
+            return ResponseEntity.badRequest().body(EMPTY);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.badRequest().body(EMPTY);
+        }
+    }
+
+    @DeleteMapping("/{ip}")
+    public ResponseEntity deleteFile(@PathVariable String ip, @RequestBody FileDeleteDto fileDeleteDto){
+        try {
+            // s: validations
+            if ((fileDeleteDto.getPaths().length <= 0)){
+                return ResponseEntity.badRequest().body(EMPTY);
+            }
+            // e: validations
+
+            AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
+            if (client == null) {
+                return ResponseEntity.badRequest().body(EMPTY);
+            }
+
+            MessagePacker msg = new MessagePacker();
+            msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+            msg.setProtocol(MessageProtocol.DELETE_FILE);
+
+            String tranData = objectMapper.writeValueAsString(fileDeleteDto);
+
+            msg.addString(tranData);
             byte[] data = msg.Finish();
             client.send(data);
             String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
