@@ -3,6 +3,7 @@ package client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.dto.FileChangeDto;
+import model.dto.FileDeleteDto;
 import model.dto.FileMoveCopyDto;
 import model.info.ServerInfo;
 import protocol.MessagePacker;
@@ -143,8 +144,8 @@ public class FileControlClient {
                             case MessageProtocol.CHANGE_FILE_NAME:{
 
                                 try {
-                                    String fileChangeJson = receivedMsg.getString();
-                                    FileChangeDto fileChangeProtocol = objectMapper.readValue(fileChangeJson, FileChangeDto.class);
+                                    String convertedJson = receivedMsg.getString();
+                                    FileChangeDto fileChangeProtocol = objectMapper.readValue(convertedJson, FileChangeDto.class);
 
                                     MessagePacker sendMsg = new MessagePacker();
                                     sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
@@ -164,9 +165,8 @@ public class FileControlClient {
 
                             case MessageProtocol.MOVE_COPY_FILE:{
                                 try {
-                                    String moveFileJson = receivedMsg.getString();
-
-                                    FileMoveCopyDto fileMoveCopyDto = objectMapper.readValue(moveFileJson, FileMoveCopyDto.class);
+                                    String convertedJson = receivedMsg.getString();
+                                    FileMoveCopyDto fileMoveCopyDto = objectMapper.readValue(convertedJson, FileMoveCopyDto.class);
 
                                     MessagePacker sendMsg = new MessagePacker();
                                     sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
@@ -206,18 +206,39 @@ public class FileControlClient {
 //                                break;
 //                            }
 
-                            case MessageProtocol.COPY_FILE:{
-                                try {
-                                    String moveFileJson = receivedMsg.getString();
+//                            case MessageProtocol.COPY_FILE:{
+//                                try {
+//                                    String moveFileJson = receivedMsg.getString();
+//
+//                                    FileMoveCopyDto fileMoveCopyDto = objectMapper.readValue(moveFileJson, FileMoveCopyDto.class);
+//
+//                                    MessagePacker sendMsg = new MessagePacker();
+//                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+//                                    sendMsg.setProtocol(MessageProtocol.COPY_FILE);
+//
+//                                    //String responseData = FileService.copyFile(fileMoveCopyDto.getFromFilePath(), fileMoveCopyDto.getToDirectoryPath(), fileMoveCopyDto.getFileName());
+//                                    //sendMsg.add(responseData);
+//
+//                                    byte[] sendData = sendMsg.Finish();
+//                                    send(ByteBuffer.wrap(sendData));
+//
+//                                } catch (JsonProcessingException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                break;
+//                            }
 
-                                    FileMoveCopyDto fileMoveCopyDto = objectMapper.readValue(moveFileJson, FileMoveCopyDto.class);
+                            case MessageProtocol.DELETE_FILE:{
+                                try {
+                                    String convertedJson = receivedMsg.getString();
+                                    FileDeleteDto fileDeleteDto = objectMapper.readValue(convertedJson, FileDeleteDto.class);
 
                                     MessagePacker sendMsg = new MessagePacker();
                                     sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
-                                    sendMsg.setProtocol(MessageProtocol.COPY_FILE);
+                                    sendMsg.setProtocol(MessageProtocol.DELETE_FILE);
 
-                                    //String responseData = FileService.copyFile(fileMoveCopyDto.getFromFilePath(), fileMoveCopyDto.getToDirectoryPath(), fileMoveCopyDto.getFileName());
-                                    //sendMsg.add(responseData);
+                                    String responseData = FileService.deleteFile(fileDeleteDto.getPaths());
+                                    sendMsg.add(responseData);
 
                                     byte[] sendData = sendMsg.Finish();
                                     send(ByteBuffer.wrap(sendData));

@@ -405,9 +405,6 @@ const EnhancedTableToolbar = (props) => {
         }).then(res => { if(!res.ok){ throw res; } return res; })
         .then(res => { return res.json(); })
         .then(json => {
-            console.log("~~~~~~~");
-            console.log(json);
-            console.log("~~~~~~~");
             if(json === null || json === undefined){
                 alert("Cannot copy file");
                 return;
@@ -703,7 +700,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
         }).then(res => { if(!res.ok){ throw res; } return res;
         }).then(res => { return res.json();
         }).then(json => {
-            console.log(json);
             if(json === null || json === undefined) {
                 setFileList([]);
                 alert("Cannot get data");
@@ -719,13 +715,8 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
                         fileViewPath: fileViewInfo.beforefileViewPath,
                         beforefileViewPath: fileViewInfo.beforefileViewPath,
                     }
-                    console.log("~~~~@#@#@");
-                    console.log(tFileViewInfo);
-                    console.log("~~~~@#@#@");
                     renewFileViewInfo(tFileViewInfo);
-                    //return;
                 }
-                //setFileList([]);
                 return;
             }
             if(json.responseData.root == undefined || json.responseData.root == null) return;
@@ -765,18 +756,13 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
         const selectedIndex = selected.indexOf(name);
         let newSelected = [];
 
-        console.log(111);
         if (selectedIndex === -1) {
-            console.log(222);
             newSelected = newSelected.concat(selected, name);
         } else if (selectedIndex === 0) {
-            console.log(3333);
             newSelected = newSelected.concat(selected.slice(1));
         } else if (selectedIndex === selected.length - 1) {
-            console.log(4444);
             newSelected = newSelected.concat(selected.slice(0, -1));
         } else if (selectedIndex > 0) {
-            console.log(5555);
             newSelected = newSelected.concat(
                 selected.slice(0, selectedIndex),
                 selected.slice(selectedIndex + 1),
@@ -836,9 +822,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
             fileViewPath: path,
             beforefileViewPath: upPath,
         }
-        console.log("~~~~((((((((((");
-        console.log(tFileViewInfo);
-        console.log("~~~~((((((((((");
         renewFileViewInfo(tFileViewInfo);
     };
 

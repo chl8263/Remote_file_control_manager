@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import model.dto.FileMoveCopyRole;
 import model.info.DirectoryInfo;
 import model.dto.FileMoveCopyDto;
-import model.info.ResponseModel;
+import model.ResponseModel;
+
+import java.nio.file.AccessDeniedException;
 import java.util.List;
-import java.util.OptionalInt;
 import java.util.logging.Logger;
 
 public class FileService {
@@ -43,6 +44,9 @@ public class FileService {
             List<String> data = FileProvider.getUnderLineDirectory(pathName);
             responseModel.setResponseData(data);
 
+        }catch (AccessDeniedException ed){
+            responseModel.setError(true);
+            responseModel.setErrorMsg("Access denied to reach");
         }catch (Exception e){
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
@@ -61,7 +65,10 @@ public class FileService {
         try{
             DirectoryInfo data = FileProvider.getFilesInDirectory(pathName);
             responseModel.setResponseData(data);
-        }catch (Exception e){
+        }catch (AccessDeniedException ed){
+            responseModel.setError(true);
+            responseModel.setErrorMsg("Access denied to reach");
+        } catch (Exception e){
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
         }
@@ -79,6 +86,9 @@ public class FileService {
         try{
             boolean isChanged = FileProvider.changeFileName(pathName, beforeName, afterName, extension);
             responseModel.setResponseData(isChanged);
+        }catch (AccessDeniedException ed){
+            responseModel.setError(true);
+            responseModel.setErrorMsg("Access denied");
         }catch (Exception e){
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
@@ -99,6 +109,25 @@ public class FileService {
                 throw new IllegalArgumentException("Invalid type NOTHING.");
             }
             List<String> result = FileProvider.moveCopyFile(fileMoveCopyDto);
+            responseModel.setResponseData(result);
+            if(result.size() > 0) responseModel.setError(true);
+        }catch (Exception e){
+            responseModel.setError(true);
+            responseModel.setErrorMsg(e.getMessage());
+        }
+        String result = null;
+        try {
+            result = objectMapper.writeValueAsString(responseModel);
+        } catch (JsonProcessingException e) {
+            LOG.warning(e.getMessage());
+        }
+        return result;
+    }
+
+    public static String deleteFile(String [] paths) {
+        ResponseModel<List<String>> responseModel = new ResponseModel<>();
+        try{
+            List<String> result = FileProvider.deleteFile(paths);
             responseModel.setResponseData(result);
             if(result.size() > 0) responseModel.setError(true);
         }catch (Exception e){

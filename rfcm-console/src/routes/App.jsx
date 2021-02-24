@@ -17,7 +17,6 @@ const App = ( { page, switchLogin, switchMainBoard } ) => {
 
     useEffect(() => {
         if(cookies.JWT_TOKEN === undefined || cookies.JWT_TOKEN === null || cookies.UID === undefined || cookies.UID === null){
-            console.log("aaaaaa");
             switchLogin();
         }else {
             // s: Ajax ----------------------------------

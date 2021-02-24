@@ -12,6 +12,7 @@ import java.io.InvalidObjectException;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -30,6 +31,11 @@ public class FileProvider {
     }
 
     public static List<String> getUnderLineDirectory(String pathName) throws IOException {
+        File tFile = new File(pathName);
+        if(!tFile.canRead()){
+            throw new AccessDeniedException("Access denied to read");
+        }
+
         List<String> directoryList = new ArrayList<>();
         DirectoryStream<Path> dir = Files.newDirectoryStream(Paths.get(pathName));
 
@@ -42,6 +48,11 @@ public class FileProvider {
     }
 
     public static DirectoryInfo getFilesInDirectory(String pathName) throws IOException {
+        File tFile = new File(pathName);
+        if(!tFile.canRead()){
+            throw new AccessDeniedException("Access denied to read");
+        }
+
         DirectoryInfo fileInfoDto = new DirectoryInfo();
         if (Paths.get(pathName).getParent() == null) fileInfoDto.setRoot(true);
 
@@ -71,7 +82,6 @@ public class FileProvider {
     }
 
     public static boolean changeFileName(String pathName, String beforeName, String afterName, String extension) throws Exception {
-
         String finalExtension = "";
         if (!extension.equals("")) {
             finalExtension = "." + extension;
@@ -141,7 +151,7 @@ public class FileProvider {
                 }
             }
             return errorMsgList;
-        }catch (Exception e){
+        } catch (Exception e){
             errorMsgList.add(e.getMessage());
             return errorMsgList;
         }
@@ -220,6 +230,64 @@ public class FileProvider {
         Files.walkFileTree(sourcePath, visitor);
         return true;
     }
+
+    public static List<String> deleteFile(String[] paths) throws IOException {
+        List<String> errorMsgList = new ArrayList<>();
+        try {
+            for(String path: paths){
+                File tempFile = new File(path);
+                if(!tempFile.exists()){
+                    errorMsgList.add("Cannot find file : [" + path + "]");
+                    continue;
+                }
+                if(!tempFile.canWrite()){
+                    errorMsgList.add("Write access deny [" + path + "]");
+                    continue;
+                }
+                try{
+                    File rootDir = new File("path");
+                    Files.walk(rootDir.toPath())
+                            .sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(File::delete);
+                }catch (IOException e) {
+                    errorMsgList.add("Cannot move file [" + path + "]");
+                }
+            }
+        } catch (Exception e){
+            errorMsgList.add(e.getMessage());
+            return errorMsgList;
+        }
+        return errorMsgList;
+    }
+
+    //    public static boolean copyFolderTest2() throws IOException {
+//        try {
+//            String folderName = "test14";
+//            String targetString = "C:\\test6" + "\\" + folderName;
+//            File directory = new File(targetString);
+//            if (directory.exists()) {
+//                System.out.println("Already exist with same directory");
+//                return false;
+//            }
+//            if (directory.mkdir()) {
+//                System.out.println("Success Create");
+//            } else {
+//                System.out.println("Fail");
+//                return false;
+//            }
+//
+//            Path source = Paths.get("C:\\test14");
+//            Path target = Paths.get(targetString);
+//
+//            CopyFileVisitor visitor = new CopyFileVisitor(source, target);
+//            Files.walkFileTree(source, visitor);
+//
+//            return true;
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
 
 //    public static boolean copyFolderTest(String fromFilePath, String toDirectoryPath) throws IOException {
 //        int index = fromFilePath.lastIndexOf("/");

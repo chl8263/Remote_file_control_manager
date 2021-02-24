@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileMoveCopyDto {
-    private FileMoveCopyRole role = FileMoveCopyRole.NOTHING;
+public class FileDeleteDto {
     private String [] paths;
-    private String toDirectoryPath = "";
 }
