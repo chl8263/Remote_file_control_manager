@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * @author Wongyun Choi
- */
+
 @RestController
 @RequestMapping(value = {"/api/accounts"}, produces = {MediaType.APPLICATION_JSON_VALUE})
 public class AccountController {

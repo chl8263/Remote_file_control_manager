@@ -2,6 +2,7 @@ package com.ewan.rfcm.domain.file.api;
 
 import com.ewan.rfcm.domain.file.model.FileChangeDto;
 import com.ewan.rfcm.domain.file.model.FileMoveCopyDto;
+import com.ewan.rfcm.domain.file.model.FileMoveCopyRole;
 import com.ewan.rfcm.server.AsyncFileControlServer;
 import com.ewan.rfcm.server.connection.AsyncFileControlClient;
 import com.ewan.rfcm.server.protocol.MessagePacker;
@@ -22,7 +23,9 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.CompletionHandler;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping(value = {"/api/file"}, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -143,11 +146,11 @@ public class FileController {
         }
     }
 
-    @PutMapping("/move/{ip}")
-    public ResponseEntity moveFile(@PathVariable String ip, @RequestBody FileMoveCopyDto fileMoveCopyDto){
+    @PutMapping("/move-copy/{ip}")
+    public ResponseEntity moveCopyFile(@PathVariable String ip, @RequestBody FileMoveCopyDto fileMoveCopyDto){
         try {
             // s: validations
-            if (fileMoveCopyDto.getFromFilePath().equals("") || fileMoveCopyDto.getToDirectoryPath().equals("")) {
+            if ((fileMoveCopyDto.getPaths().length <= 0 || fileMoveCopyDto.getToDirectoryPath().equals("") || fileMoveCopyDto.getRole() == FileMoveCopyRole.NOTHING)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
             // e: validations
@@ -158,13 +161,12 @@ public class FileController {
                 return ResponseEntity.badRequest().body(EMPTY);
             }
 
-            fileMoveCopyDto.setFromFilePath(preProcessing(fileMoveCopyDto.getFromFilePath()));
+            fileMoveCopyDto.setPaths(Arrays.stream(fileMoveCopyDto.getPaths()).map(x -> preProcessing(x)).toArray(String[]::new));
             fileMoveCopyDto.setToDirectoryPath(preProcessing(fileMoveCopyDto.getToDirectoryPath()));
-
 
             MessagePacker msg = new MessagePacker();
             msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
-            msg.setProtocol(MessageProtocol.MOVE_FILE);
+            msg.setProtocol(MessageProtocol.MOVE_COPY_FILE);
 
             String tranData = objectMapper.writeValueAsString(fileMoveCopyDto);
 
@@ -185,47 +187,89 @@ public class FileController {
         }
     }
 
-    @PutMapping("/copy/{ip}")
-    public ResponseEntity copyFile(@PathVariable String ip, @RequestBody FileMoveCopyDto fileMoveCopyDto){
-        try {
-            // s: validations
-            if (fileMoveCopyDto.getFromFilePath().equals("") || fileMoveCopyDto.getToDirectoryPath().equals("")) {
-                return ResponseEntity.badRequest().body(EMPTY);
-            }
-            // e: validations
-
-            AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
-
-            if (client == null) {
-                return ResponseEntity.badRequest().body(EMPTY);
-            }
-
-            fileMoveCopyDto.setFromFilePath(preProcessing(fileMoveCopyDto.getFromFilePath()));
-            fileMoveCopyDto.setToDirectoryPath(preProcessing(fileMoveCopyDto.getToDirectoryPath()));
-
-
-            MessagePacker msg = new MessagePacker();
-            msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
-            msg.setProtocol(MessageProtocol.COPY_FILE);
-
-            String tranData = objectMapper.writeValueAsString(fileMoveCopyDto);
-
-            msg.addString(tranData);
-
-            byte[] data = msg.Finish();
-            client.send(data);
-            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
-
-            if (responseResult == null || responseResult.equals(EMPTY)) {
-                return ResponseEntity.badRequest().body(EMPTY);
-            }
-            return ResponseEntity.ok(responseResult);
-        } catch (InterruptedException e) {
-            return ResponseEntity.badRequest().body(EMPTY);
-        } catch (JsonProcessingException e) {
-            return ResponseEntity.badRequest().body(EMPTY);
-        }
-    }
+//    @PutMapping("/move/{ip}")
+//    public ResponseEntity moveFile(@PathVariable String ip, @RequestBody FileMoveCopyDto fileMoveCopyDto){
+//        try {
+//            // s: validations
+//            if (fileMoveCopyDto.getFromFilePath().equals("") || fileMoveCopyDto.getToDirectoryPath().equals("")) {
+//                return ResponseEntity.badRequest().body(EMPTY);
+//            }
+//            // e: validations
+//
+//            AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
+//
+//            if (client == null) {
+//                return ResponseEntity.badRequest().body(EMPTY);
+//            }
+//
+//            fileMoveCopyDto.setFromFilePath(preProcessing(fileMoveCopyDto.getFromFilePath()));
+//            fileMoveCopyDto.setToDirectoryPath(preProcessing(fileMoveCopyDto.getToDirectoryPath()));
+//
+//
+//            MessagePacker msg = new MessagePacker();
+//            msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+//            msg.setProtocol(MessageProtocol.MOVE_FILE);
+//
+//            String tranData = objectMapper.writeValueAsString(fileMoveCopyDto);
+//
+//            msg.addString(tranData);
+//
+//            byte[] data = msg.Finish();
+//            client.send(data);
+//            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
+//
+//            if (responseResult == null || responseResult.equals(EMPTY)) {
+//                return ResponseEntity.badRequest().body(EMPTY);
+//            }
+//            return ResponseEntity.ok(responseResult);
+//        } catch (InterruptedException e) {
+//            return ResponseEntity.badRequest().body(EMPTY);
+//        } catch (JsonProcessingException e) {
+//            return ResponseEntity.badRequest().body(EMPTY);
+//        }
+//    }
+//
+//    @PutMapping("/copy/{ip}")
+//    public ResponseEntity copyFile(@PathVariable String ip, @RequestBody FileMoveCopyDto fileMoveCopyDto){
+//        try {
+//            // s: validations
+//            if (fileMoveCopyDto.getFromFilePath().equals("") || fileMoveCopyDto.getToDirectoryPath().equals("")) {
+//                return ResponseEntity.badRequest().body(EMPTY);
+//            }
+//            // e: validations
+//
+//            AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
+//
+//            if (client == null) {
+//                return ResponseEntity.badRequest().body(EMPTY);
+//            }
+//
+//            fileMoveCopyDto.setFromFilePath(preProcessing(fileMoveCopyDto.getFromFilePath()));
+//            fileMoveCopyDto.setToDirectoryPath(preProcessing(fileMoveCopyDto.getToDirectoryPath()));
+//
+//
+//            MessagePacker msg = new MessagePacker();
+//            msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+//            msg.setProtocol(MessageProtocol.COPY_FILE);
+//
+//            String tranData = objectMapper.writeValueAsString(fileMoveCopyDto);
+//
+//            msg.addString(tranData);
+//
+//            byte[] data = msg.Finish();
+//            client.send(data);
+//            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
+//
+//            if (responseResult == null || responseResult.equals(EMPTY)) {
+//                return ResponseEntity.badRequest().body(EMPTY);
+//            }
+//            return ResponseEntity.ok(responseResult);
+//        } catch (InterruptedException e) {
+//            return ResponseEntity.badRequest().body(EMPTY);
+//        } catch (JsonProcessingException e) {
+//            return ResponseEntity.badRequest().body(EMPTY);
+//        }
+//    }
 
     @PostMapping("/upload/{ip}/{path:.+}")
     public ResponseEntity uploadFile(@PathVariable String ip, @PathVariable String path,

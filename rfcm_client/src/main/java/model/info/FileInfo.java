@@ -1,4 +1,4 @@
-package model;
+package model.info;
 
 import lombok.Data;
 
@@ -8,5 +8,4 @@ public class FileInfo{
     private String dateModified;
     private String type;
     private String size = "";
-
 }

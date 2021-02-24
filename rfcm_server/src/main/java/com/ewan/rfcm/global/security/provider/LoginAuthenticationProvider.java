@@ -43,10 +43,6 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
         throw new NoSuchElementException("Not match with this information");
     }
 
-    /**
-    * Define class type for support this provider.
-    * The class that returned from this method will be filtered to authenticate method on this class.
-    * */
     @Override
     public boolean supports(Class<?> authentication) {
         return LoginPreAuthenticationToken.class.isAssignableFrom(authentication);

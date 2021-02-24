@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FileMoveCopyDto {
-    private String fileName = "";
-    private String fromFilePath = "";
+    private FileMoveCopyRole role = FileMoveCopyRole.NOTHING;
+    private String [] paths;
+    //private String fromFilePath = "";
     private String toDirectoryPath = "";
 }

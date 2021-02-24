@@ -3,9 +3,12 @@ package service;
 import client.FileProvider;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.DirectoryInfo;
-import model.ResponseModel;
+import model.dto.FileMoveCopyRole;
+import model.info.DirectoryInfo;
+import model.dto.FileMoveCopyDto;
+import model.info.ResponseModel;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.logging.Logger;
 
 public class FileService {
@@ -89,11 +92,15 @@ public class FileService {
         return result;
     }
 
-    public static String moveFile(String fromFilePath, String toDirectoryPath, String fileName) {
-        ResponseModel<Boolean> responseModel = new ResponseModel<>();
+    public static String moveCopyFile(FileMoveCopyDto fileMoveCopyDto) {
+        ResponseModel<List<String>> responseModel = new ResponseModel<>();
         try{
-            boolean isMoved = FileProvider.moveFile(fromFilePath, toDirectoryPath, fileName);
-            responseModel.setResponseData(isMoved);
+            if(fileMoveCopyDto.getRole() == FileMoveCopyRole.NOTHING) {
+                throw new IllegalArgumentException("Invalid type NOTHING.");
+            }
+            List<String> result = FileProvider.moveCopyFile(fileMoveCopyDto);
+            responseModel.setResponseData(result);
+            if(result.size() > 0) responseModel.setError(true);
         }catch (Exception e){
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
@@ -107,21 +114,39 @@ public class FileService {
         return result;
     }
 
-    public static String copyFile(String fromFilePath, String toDirectoryPath, String fileName) {
-        ResponseModel<Boolean> responseModel = new ResponseModel<>();
-        try{
-            boolean isCopied = FileProvider.copyFile(fromFilePath, toDirectoryPath, fileName);
-            responseModel.setResponseData(isCopied);
-        }catch (Exception e){
-            responseModel.setError(true);
-            responseModel.setErrorMsg(e.getMessage());
-        }
-        String result = null;
-        try {
-            result = objectMapper.writeValueAsString(responseModel);
-        } catch (JsonProcessingException e) {
-            LOG.warning(e.getMessage());
-        }
-        return result;
-    }
+//    public static String moveFile(String fromFilePath, String toDirectoryPath, String fileName) {
+//        ResponseModel<Boolean> responseModel = new ResponseModel<>();
+//        try{
+//            boolean isMoved = FileProvider.moveFile(fromFilePath, toDirectoryPath, fileName);
+//            responseModel.setResponseData(isMoved);
+//        }catch (Exception e){
+//            responseModel.setError(true);
+//            responseModel.setErrorMsg(e.getMessage());
+//        }
+//        String result = null;
+//        try {
+//            result = objectMapper.writeValueAsString(responseModel);
+//        } catch (JsonProcessingException e) {
+//            LOG.warning(e.getMessage());
+//        }
+//        return result;
+//    }
+//
+//    public static String copyFile(String fromFilePath, String toDirectoryPath, String fileName) {
+//        ResponseModel<Boolean> responseModel = new ResponseModel<>();
+//        try{
+//            boolean isCopied = FileProvider.copyFile(fromFilePath, toDirectoryPath, fileName);
+//            responseModel.setResponseData(isCopied);
+//        }catch (Exception e){
+//            responseModel.setError(true);
+//            responseModel.setErrorMsg(e.getMessage());
+//        }
+//        String result = null;
+//        try {
+//            result = objectMapper.writeValueAsString(responseModel);
+//        } catch (JsonProcessingException e) {
+//            LOG.warning(e.getMessage());
+//        }
+//        return result;
+//    }
 }

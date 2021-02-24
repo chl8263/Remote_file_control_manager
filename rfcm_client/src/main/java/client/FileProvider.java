@@ -1,11 +1,14 @@
 package client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.DirectoryInfo;
-import model.FileInfo;
+import model.dto.FileMoveCopyDto;
+import model.dto.FileMoveCopyRole;
+import model.info.DirectoryInfo;
+import model.info.FileInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -88,31 +91,186 @@ public class FileProvider {
         return result;
     }
 
-    public static boolean moveFile(String fromFilePath, String toDirectoryPath, String fileName) {
+    public static List<String> moveCopyFile(FileMoveCopyDto fileMoveCopyDto) {
+        List<String> errorMsgList = new ArrayList<>();
         try {
-            Path file = Paths.get(fromFilePath);
-            Path movePath = Paths.get(toDirectoryPath+ "/" + fileName);
+            //File fromFile = new File(fileMoveCopyDto.getFromFilePath());
+            String toPath = fileMoveCopyDto.getToDirectoryPath();
+            File toFile = new File(toPath);
+//            if(!fromFile.exists()){
+//                throw new IllegalArgumentException("Not exists from file, please check again.");
+//            }
+            if(!toFile.exists()){
+                throw new IllegalArgumentException("Not exists folder to move, please check again.");
+            }
 
-            if (file == null || movePath == null) throw new NullPointerException();
-
-            Files.move(file, movePath, StandardCopyOption.REPLACE_EXISTING);
-            return true;
+            for(String path: fileMoveCopyDto.getPaths()){
+                File tempFile = new File(path);
+                if(!tempFile.exists()){
+                    errorMsgList.add("Cannot find file : [" + path + "]");
+                    continue;
+                }
+                if(!tempFile.canWrite()){
+                    errorMsgList.add("Write access deny [" + path + "]");
+                    continue;
+                }
+                try{
+                    if(fileMoveCopyDto.getRole() == FileMoveCopyRole.MOVE){
+                        if(tempFile.isFile()){
+                            if(!moveFile(path, toPath)){
+                                errorMsgList.add("Cannot move file [" + path + "]");
+                            }
+                        }else if(tempFile.isDirectory()){
+                            if(!moveFolder(path, toPath)){
+                                errorMsgList.add("Cannot move file [" + path + "]");
+                            }
+                        }
+                    }else if (fileMoveCopyDto.getRole() == FileMoveCopyRole.COPY){
+                        if(tempFile.isFile()){
+                            if(!copyFile(path, toPath)){
+                                errorMsgList.add("Cannot move file [" + path + "]");
+                            }
+                        }else if(tempFile.isDirectory()){
+                            if(!copyFolder(path, toPath)){
+                                errorMsgList.add("Cannot move file [" + path + "]");
+                            }
+                        }
+                    }
+                }catch (Exception e){
+                    errorMsgList.add("Cannot move file [" + path + "]" + e.getMessage());
+                }
+            }
+            return errorMsgList;
         }catch (Exception e){
-            return false;
+            errorMsgList.add(e.getMessage());
+            return errorMsgList;
         }
     }
 
-    public static boolean copyFile(String fromFilePath, String toDirectoryPath, String fileName) {
-        try {
-            Path file = Paths.get(fromFilePath);
-            Path movePath = Paths.get(toDirectoryPath+ "/" + fileName);
+    public static boolean moveFile(String fromFilePath, String toDirectoryPath) throws IOException {
+        int index = fromFilePath.lastIndexOf("/");
+        String fileName = fromFilePath.substring(index + 1);
 
-            if (file == null || movePath == null) throw new NullPointerException();
+        Path file = Paths.get(fromFilePath);
+        Path movePath = Paths.get(toDirectoryPath+ "/" + fileName);
 
-            Files.copy(file, movePath);
-            return true;
-        }catch (Exception e){
-            return false;
-        }
+        if (file == null || movePath == null) throw new NullPointerException("Please check path");
+
+        Files.move(file, movePath, StandardCopyOption.REPLACE_EXISTING);
+        return true;
     }
+
+    public static boolean copyFile(String fromFilePath, String toDirectoryPath) throws IOException {
+        int index = fromFilePath.lastIndexOf("/");
+        String fileName = fromFilePath.substring(index + 1);
+
+        Path file = Paths.get(fromFilePath);
+        Path movePath = Paths.get(toDirectoryPath+ "/" + fileName);
+
+        if (file == null || movePath == null) throw new NullPointerException("Please check path");
+
+        Files.copy(file, movePath, StandardCopyOption.REPLACE_EXISTING);
+        return true;
+    }
+
+    public static boolean moveFolder(String fromFilePath, String toDirectoryPath) throws IOException {
+        int index = fromFilePath.lastIndexOf("/");
+        String fileName = fromFilePath.substring(index + 1);
+
+        String source = fromFilePath;
+        String target = toDirectoryPath;
+        File targetDirectory = new File(toDirectoryPath + "/" + fileName);
+
+        if(targetDirectory.exists()){
+            throw new InvalidObjectException("Already exist with same directory");
+        }
+        if(!targetDirectory.mkdir()) {
+            throw new InvalidObjectException("Fail to create directory");
+        }
+
+        target += "/" + fileName;
+        Path sourcePath = Paths.get(source);
+        Path targetPath = Paths.get(target);
+
+        MoveFileVisitor visitor = new MoveFileVisitor(sourcePath, targetPath);
+        Files.walkFileTree(sourcePath, visitor);
+        return true;
+    }
+
+    public static boolean copyFolder(String fromFilePath, String toDirectoryPath) throws IOException {
+        int index = fromFilePath.lastIndexOf("/");
+        String fileName = fromFilePath.substring(index + 1);
+
+        String source = fromFilePath;
+        String target = toDirectoryPath;
+        File targetDirectory = new File(toDirectoryPath + "/" + fileName);
+
+        if (targetDirectory.exists()) {
+            throw new InvalidObjectException("Already exist with same directory");
+        }
+        if (!targetDirectory.mkdir()) {
+            throw new InvalidObjectException("Fail to create directory");
+        }
+
+        target += ("/" + fileName);
+        Path sourcePath = Paths.get(source);
+        Path targetPath = Paths.get(target);
+
+        CopyFileVisitor visitor = new CopyFileVisitor(sourcePath, targetPath);
+        Files.walkFileTree(sourcePath, visitor);
+        return true;
+    }
+
+//    public static boolean copyFolderTest(String fromFilePath, String toDirectoryPath) throws IOException {
+//        int index = fromFilePath.lastIndexOf("/");
+//        String fileName = fromFilePath.substring(index + 1);
+//
+//        String source = fromFilePath;
+//        String target = toDirectoryPath;
+//        File targetDirectory = new File(toDirectoryPath + "/" + fileName);
+//
+//        if (targetDirectory.exists()) {
+//            throw new InvalidObjectException("Already exist with same directory");
+//        }
+//        if (!targetDirectory.mkdir()) {
+//            throw new InvalidObjectException("Fail to create directory");
+//        }
+//
+//
+//        target += "/" + fileName;
+//        Path sourcePath = Paths.get(source);
+//        Path targetPath = Paths.get(target);
+//
+//        CopyFileVisitor visitor = new CopyFileVisitor(sourcePath, targetPath);
+//        Files.walkFileTree(sourcePath, visitor);
+//        return true;
+//    }
+//
+//    public static boolean copyFolderTest2() throws IOException {
+//        try {
+//            String folderName = "test14";
+//            String targetString = "C:\\test6" + "\\" + folderName;
+//            File directory = new File(targetString);
+//            if (directory.exists()) {
+//                System.out.println("Already exist with same directory");
+//                return false;
+//            }
+//            if (directory.mkdir()) {
+//                System.out.println("Success Create");
+//            } else {
+//                System.out.println("Fail");
+//                return false;
+//            }
+//
+//            Path source = Paths.get("C:\\test14");
+//            Path target = Paths.get(targetString);
+//
+//            CopyFileVisitor visitor = new CopyFileVisitor(source, target);
+//            Files.walkFileTree(source, visitor);
+//
+//            return true;
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
 }

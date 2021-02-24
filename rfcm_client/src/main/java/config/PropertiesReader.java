@@ -1,6 +1,6 @@
 package config;
 
-import model.ServerInfo;
+import model.info.ServerInfo;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;

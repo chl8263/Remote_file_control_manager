@@ -1,10 +1,16 @@
 import client.FileControlClient;
+import client.FileProvider;
 import config.PropertiesReader;
-import model.ServerInfo;
+import model.info.ServerInfo;
 
 public class Application {
 
     public static void main(String[] args) throws Exception {
+
+        //FileProvider.copyFile("C:\\test14\\ES_최원균.jpg", "C:\\test6");
+        //FileProvider.test();
+        //FileProvider.copyFolderTest("C:/test14", "C:/test6");
+        //FileProvider.copyFolderTest2();
 
         ServerInfo serverInfo = PropertiesReader.getServerInfoFromPropertiesValue();
 
@@ -29,5 +35,7 @@ public class Application {
 //            });
 //            thread.start();
 //        }
+
+
     }
 }

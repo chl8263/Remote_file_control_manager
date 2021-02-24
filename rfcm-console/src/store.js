@@ -29,8 +29,7 @@ const reducer = createReducer(
         copyItem: {
             state: false,
             address: "",
-            path: "",
-            fileName: "",
+            paths: [],
         },
         modalState: true,
         conn: "",
@@ -85,8 +84,7 @@ const reducer = createReducer(
                 copyItem: {
                     state: action.payload.state,
                     address: action.payload.address,
-                    path: action.payload.path,
-                    fileName: action.payload.fileName,
+                    paths: action.payload.paths,
                 },
             };
         },

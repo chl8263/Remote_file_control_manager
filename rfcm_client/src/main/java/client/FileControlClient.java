@@ -2,9 +2,9 @@ package client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.FileChangeDto;
-import model.FileMoveCopyDto;
-import model.ServerInfo;
+import model.dto.FileChangeDto;
+import model.dto.FileMoveCopyDto;
+import model.info.ServerInfo;
 import protocol.MessagePacker;
 import protocol.MessageProtocol;
 import service.FileService;
@@ -19,7 +19,6 @@ import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -163,7 +162,7 @@ public class FileControlClient {
                                 break;
                             }
 
-                            case MessageProtocol.MOVE_FILE:{
+                            case MessageProtocol.MOVE_COPY_FILE:{
                                 try {
                                     String moveFileJson = receivedMsg.getString();
 
@@ -171,9 +170,9 @@ public class FileControlClient {
 
                                     MessagePacker sendMsg = new MessagePacker();
                                     sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
-                                    sendMsg.setProtocol(MessageProtocol.MOVE_FILE);
+                                    sendMsg.setProtocol(MessageProtocol.MOVE_COPY_FILE);
 
-                                    String responseData = FileService.moveFile(fileMoveCopyDto.getFromFilePath(), fileMoveCopyDto.getToDirectoryPath(), fileMoveCopyDto.getFileName());
+                                    String responseData = FileService.moveCopyFile(fileMoveCopyDto);
                                     sendMsg.add(responseData);
 
                                     byte[] sendData = sendMsg.Finish();
@@ -185,6 +184,28 @@ public class FileControlClient {
                                 break;
                             }
 
+//                            case MessageProtocol.MOVE_FILE:{
+//                                try {
+//                                    String moveFileJson = receivedMsg.getString();
+//
+//                                    FileMoveCopyDto fileMoveCopyDto = objectMapper.readValue(moveFileJson, FileMoveCopyDto.class);
+//
+//                                    MessagePacker sendMsg = new MessagePacker();
+//                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+//                                    sendMsg.setProtocol(MessageProtocol.MOVE_FILE);
+//
+//                                    String responseData = FileService.moveFile(fileMoveCopyDto.getFromFilePath(), fileMoveCopyDto.getToDirectoryPath(), fileMoveCopyDto.getFileName());
+//                                    sendMsg.add(responseData);
+//
+//                                    byte[] sendData = sendMsg.Finish();
+//                                    send(ByteBuffer.wrap(sendData));
+//
+//                                } catch (JsonProcessingException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                break;
+//                            }
+
                             case MessageProtocol.COPY_FILE:{
                                 try {
                                     String moveFileJson = receivedMsg.getString();
@@ -195,8 +216,8 @@ public class FileControlClient {
                                     sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
                                     sendMsg.setProtocol(MessageProtocol.COPY_FILE);
 
-                                    String responseData = FileService.copyFile(fileMoveCopyDto.getFromFilePath(), fileMoveCopyDto.getToDirectoryPath(), fileMoveCopyDto.getFileName());
-                                    sendMsg.add(responseData);
+                                    //String responseData = FileService.copyFile(fileMoveCopyDto.getFromFilePath(), fileMoveCopyDto.getToDirectoryPath(), fileMoveCopyDto.getFileName());
+                                    //sendMsg.add(responseData);
 
                                     byte[] sendData = sendMsg.Finish();
                                     send(ByteBuffer.wrap(sendData));

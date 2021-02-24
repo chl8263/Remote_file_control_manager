@@ -173,7 +173,7 @@ const EnhancedTableToolbar = (props) => {
         setUploadFile(null);
     }, [fileViewInfo]);
 
-    const onCLickChangeBtn = () => {
+    const onClickChangeBtn = () => {
         if(selectedRow === null || selectedRow === undefined || selectedRow.length <= 0) {
             alert("There are not selected row.");
             return;
@@ -265,92 +265,111 @@ const EnhancedTableToolbar = (props) => {
     }
 
     const onClickFileRefresh = () => {
-        if(fileViewInfo !== null || fileViewInfo !== undefined 
-            || fileViewInfo.fileViewAddress !== null || fileViewInfo.fileViewAddress !== undefined
-            || fileViewInfo.fileViewPath !== null || fileViewInfo.fileViewPath !== undefined) return;
+        if(fileViewInfo === null || fileViewInfo === undefined 
+            || fileViewInfo.fileViewAddress === null || fileViewInfo.fileViewAddress === undefined
+            || fileViewInfo.fileViewPath === null || fileViewInfo.fileViewPath === undefined) return;
+
         getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
     }
 
-    const onCLickFileCopy = () => {
+    const onClickCheckBtn = () => {
         const address = fileViewInfo.fileViewAddress;
-        // s: Ajax ----------------------------------
-        var fianlPath = fileViewInfo.fileViewPath;
-        if(fianlPath !== ""){
-            fianlPath += "|";
-        }
-        fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
-        if(fianlPath.charAt(0) === '|'){
-        fianlPath = fianlPath.substr(1);
-        }
-        setCopyItem(true, address ,fianlPath+selectedRow.name, selectedRow.name);
+        const convertPathRow = selectedRow.map(x => {
+            var fianlPath = fileViewInfo.fileViewPath;
+            if(fianlPath !== ""){
+                fianlPath += "|";
+            }
+            fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
+            if(fianlPath.charAt(0) === '|'){
+                fianlPath = fianlPath.substr(1);
+            }
+            return fianlPath + x;
+        });
+
+        setCopyItem(true, address, convertPathRow);
+
+        // const address = fileViewInfo.fileViewAddress;
+        // var fianlPath = fileViewInfo.fileViewPath;
+        // if(fianlPath !== ""){
+        //     fianlPath += "|";
+        // }
+        // fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
+        // if(fianlPath.charAt(0) === '|'){
+        // fianlPath = fianlPath.substr(1);
+        // }
+        // setCopyItem(true, address ,fianlPath+selectedRow.name, selectedRow.name);
     }
 
-    const onClickMove = () => {
-        if(fileViewInfo.address == "" || fileViewInfo.path == ""){
-          resetCopyItem();
-        }
+    // const onClickMove = () => {
+    //     if(fileViewInfo.address == "" || fileViewInfo.path == ""){
+    //       resetCopyItem();
+    //     }
 
-        if(fileViewInfo.fileViewAddress !== copyItem.address){
-          alert("Cannot move to another address");
-          resetCopyItem();
-        }
+    //     if(fileViewInfo.fileViewAddress !== copyItem.address){
+    //       alert("Cannot move to another address");
+    //       resetCopyItem();
+    //     }
 
-        // s: Ajax ----------------------------------
-        var fianlPath = fileViewInfo.fileViewPath;
-        if(fianlPath !== ""){
-            fianlPath += "|";
-        }
-        fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
-        if(fianlPath.charAt(0) === '|'){
-        fianlPath = fianlPath.substr(1);
-        }
+    //     // s: Ajax ----------------------------------
+    //     var fianlPath = fileViewInfo.fileViewPath;
+    //     if(fianlPath !== ""){
+    //         fianlPath += "|";
+    //     }
+    //     fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
+    //     if(fianlPath.charAt(0) === '|'){
+    //     fianlPath = fianlPath.substr(1);
+    //     }
 
-        const FileMoveCopyInfo = {
-            fileName: copyItem.fileName,
-            fromFilePath: copyItem.path,
-            toDirectoryPath: fianlPath,
-        }
+    //     const FileMoveCopyInfo = {
+    //         fileName: copyItem.fileName,
+    //         fromFilePath: copyItem.path,
+    //         toDirectoryPath: fianlPath,
+    //     }
 
-        fetch(HTTP.SERVER_URL + `/api/file/move/${copyItem.address}`, {
-            method: HTTP.PUT,
-            headers: {
-                'Content-type': MediaType.JSON,
-                'Accept': MediaType.JSON,
-                'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
-                'Uid': cookies.UID
-            },
-            body: JSON.stringify(FileMoveCopyInfo)
-        }).then(res => { if(!res.ok){ throw res; } return res; })
-        .then(res => { return res.json(); })
-        .then(json => {
-            if(json === null || json === undefined){
-                alert("Cannot move file");
-                return;
-            }
-            
-            if(json.error === true){
-                alert("Cannot move file");
-                return;
-            }
-
-            if(json.responseData){
-                alert("Move success");
-                getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
-                resetCopyItem();
-            }
-
-        }).catch(error => {
-            console.error(error.errorMsg);
-            alert("Cannot move file");
-        });
-        // e: Ajax ----------------------------------
-    };
+    //     fetch(HTTP.SERVER_URL + `/api/file/move/${copyItem.address}`, {
+    //         method: HTTP.PUT,
+    //         headers: {
+    //             'Content-type': MediaType.JSON,
+    //             'Accept': MediaType.JSON,
+    //             'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
+    //             'Uid': cookies.UID
+    //         },
+    //         body: JSON.stringify(FileMoveCopyInfo)
+    //     }).then(res => { if(!res.ok){ throw res; } return res; })
+    //     .then(res => { return res.json(); })
+    //     .then(json => {
+    //         if(json === null || json === undefined){
+    //             alert("Cannot move file");
+    //             return;
+    //         }
+    //         if(json.error === true){
+    //             alert("Cannot move file");
+    //             return;
+    //         }
+    //         if(json.responseData){
+    //             alert("Move success");
+    //             getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+    //             resetCopyItem();
+    //         }
+    //     }).catch(error => {
+    //         console.error(error.errorMsg);
+    //         alert("Cannot move file");
+    //     });
+    //     // e: Ajax ----------------------------------
+    // };
 
     const resetCopyItem = () => {
         setCopyItem(false, "", "", "");
     }
 
+    const onClickMove = () => {
+        sendMoveCopyRequest("MOVE");
+    }
     const onClickCopy = () => {
+        sendMoveCopyRequest("COPY");
+    }
+
+    const sendMoveCopyRequest = (TYPE) => {
         if(fileViewInfo.address == "" || fileViewInfo.path == ""){
           resetCopyItem();
         }
@@ -369,12 +388,12 @@ const EnhancedTableToolbar = (props) => {
         }
 
         const FileMoveCopyInfo = {
-            fileName: copyItem.fileName,
-            fromFilePath: copyItem.path,
+            role: TYPE,
+            paths: copyItem.paths,
             toDirectoryPath: fianlPath,
         }
 
-        fetch(HTTP.SERVER_URL + `/api/file/copy/${copyItem.address}`, {
+        fetch(HTTP.SERVER_URL + `/api/file/move-copy/${copyItem.address}`, {
             method: HTTP.PUT,
             headers: {
                 'Content-type': MediaType.JSON,
@@ -406,6 +425,62 @@ const EnhancedTableToolbar = (props) => {
         // e: Ajax ----------------------------------
     };
 
+    // const onClickCopy = () => {
+    //     if(fileViewInfo.address == "" || fileViewInfo.path == ""){
+    //       resetCopyItem();
+    //     }
+    //     if(fileViewInfo.fileViewAddress !== copyItem.address){
+    //       alert("Cannot move to another address");
+    //       resetCopyItem();
+    //     }
+    //     // s: Ajax ----------------------------------
+    //     var fianlPath = fileViewInfo.fileViewPath;
+    //     if(fianlPath !== ""){
+    //         fianlPath += "|";
+    //     }
+    //     fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
+    //     if(fianlPath.charAt(0) === '|'){
+    //     fianlPath = fianlPath.substr(1);
+    //     }
+
+    //     const FileMoveCopyInfo = {
+    //         fileName: copyItem.fileName,
+    //         fromFilePath: copyItem.path,
+    //         toDirectoryPath: fianlPath,
+    //     }
+
+    //     fetch(HTTP.SERVER_URL + `/api/file/copy/${copyItem.address}`, {
+    //         method: HTTP.PUT,
+    //         headers: {
+    //             'Content-type': MediaType.JSON,
+    //             'Accept': MediaType.JSON,
+    //             'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
+    //             'Uid': cookies.UID
+    //         },
+    //         body: JSON.stringify(FileMoveCopyInfo)
+    //     }).then(res => { if(!res.ok){ throw res; } return res; })
+    //     .then(res => { return res.json(); })
+    //     .then(json => {
+    //         if(json === null || json === undefined){
+    //             alert("Cannot copy file");
+    //             return;
+    //         }
+    //         if(json.error === true){
+    //             alert("Cannot copy file");
+    //             return;
+    //         }
+    //         if(json.responseData){
+    //             alert("Copy success");
+    //             getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+    //             resetCopyItem();
+    //         }
+    //     }).catch(error => {
+    //         console.error(error.errorMsg);
+    //         alert("Cannot copy file");
+    //     });
+    //     // e: Ajax ----------------------------------
+    // };
+
     const fileChangedHandler = (e) =>{
         const files = e.target.files;
         setUploadFile(files);
@@ -417,11 +492,14 @@ const EnhancedTableToolbar = (props) => {
           [classes.highlight]: numSelected > 0,
         })}
       >
+
+        {numSelected <= 0 && (
           <Tooltip title="refresh">
                 <IconButton aria-label="refresh">
-                    <RefreshIcon onClick={onClickFileUpLoad}/>
+                    <RefreshIcon onClick={onClickFileRefresh}/>
                 </IconButton>
             </Tooltip>
+        )}
         
         {numSelected > 0 ? (
           <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
@@ -481,7 +559,7 @@ const EnhancedTableToolbar = (props) => {
                 {numSelected === 1 && (
                     <IconButton
                         aria-label="change"
-                        onClick={onCLickChangeBtn}>
+                        onClick={onClickChangeBtn}>
                         <FileNameChangeIcon />
                     </IconButton>
                 )}
@@ -493,12 +571,12 @@ const EnhancedTableToolbar = (props) => {
 
                 <IconButton
                     aria-label="check"
-                    onClick={onCLickFileCopy}>
+                    onClick={onClickCheckBtn}>
                     <CheckIcon />
                 </IconButton>
                 
                 {/* <Button
-                    onClick={onCLickChangeBtn}
+                    onClick={onClickChangeBtn}
                     variant="contained"
                     color="primary"
                     className={classes.button}
@@ -510,7 +588,7 @@ const EnhancedTableToolbar = (props) => {
 
                 {/* {selectedRow.type === 'file' && 
                     <Button
-                    onClick={onCLickFileCopy}
+                    onClick={onClickFileCopy}
                     variant="contained"
                     color="default"
                     className={classes.button}
@@ -571,7 +649,7 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
-    const [selectedRow, setSelectedRow] = React.useState([]);
+    //const [selectedRow, setSelectedRow] = React.useState([]);
     const [modalState, setModalState] = useState(false);
 
     const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
@@ -628,6 +706,7 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
                 json.responseData.fileList.unshift(createData('...', '', '', '', 'previous'));
             }
             setFileList(json.responseData.fileList);
+            setSelected([]);
 
         }).catch(error => {
             console.error(error);
@@ -749,12 +828,11 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
         // setSelected([]);
     };
 
-    const setCopyItem = (state, address, path, fileName) => {
+    const setCopyItem = (state, address, paths) => {
         const copyData = {
             state: state,
             address: address,
-            path: path,
-            fileName: fileName
+            paths: paths,
         }
         renewCopyItem(copyData);
     };
@@ -793,8 +871,7 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
               size={'small'}
               aria-label="enhanced table"
             >
-              <EnhancedTableHead 
-                selectedName={selectedRow.name}
+              <EnhancedTableHead
                 classes={classes}
                 numSelected={selected.length}
                 order={order}
