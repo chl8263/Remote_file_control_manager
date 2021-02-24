@@ -1,4 +1,4 @@
-package com.ewan.rfcm.domain.account.dao;
+package com.ewan.rfcm.domain.account.repository;
 
 import com.ewan.rfcm.domain.account.data.domain.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
