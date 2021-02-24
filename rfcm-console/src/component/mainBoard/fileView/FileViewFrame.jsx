@@ -29,6 +29,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import FileMoveIcon from '@material-ui/icons/TrendingUpOutlined';
 import FileNameChangeIcon from '@material-ui/icons/CreateOutlined';
 import UploadIcon from '@material-ui/icons/CloudUploadOutlined';
+import CheckIcon from '@material-ui/icons/DoneAll';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileAlt, faFolder } from "@fortawesome/free-regular-svg-icons"
@@ -171,15 +172,20 @@ const EnhancedTableToolbar = (props) => {
         setUploadFile(null);
     }, [fileViewInfo]);
 
-    const onCLickChangeBtn = (fileName) => {
-        if(fileName === null || fileName === undefined || fileName === "") return;
-        
-        const splitedFileName = selectedRow.name.split(".");
+    const onCLickChangeBtn = () => {
+        console.log(selectedRow);
+        if(selectedRow === null || selectedRow === undefined || selectedRow.length <= 0) {
+            alert("There are not selected row.");
+            return;
+        }
+        console.log(selectedRow[0]);
+
+        const splitedFileName = selectedRow[0].split(".");
         const originalFileName = splitedFileName[0];
         const extension = splitedFileName[1];
         const changedName = prompt("Please write the name to change.", originalFileName);
 
-        if(changedName === null || changedName === undefined || changedName === "" || changedName === fileName) return;
+        if(changedName === null || changedName === undefined || changedName === "" || changedName === splitedFileName) return;
 
         settingModalState(true);
 
@@ -206,9 +212,9 @@ const EnhancedTableToolbar = (props) => {
                 'Uid': cookies.UID
             },
             body: JSON.stringify(fileChangeInfo)
-        }).then(res => { if(!res.ok){ throw res; } return res;
-        }).then(res => { return res.json();
-        }).then(json => {
+        }).then(res => { if(!res.ok){ throw res; } return res;})
+        .then(res => { return res.json();})
+        .then(json => {
             if(json === null || json === undefined || json.error === true || json.responseData === false){
                 alert("Cannot change file name");
                 return;
@@ -220,14 +226,14 @@ const EnhancedTableToolbar = (props) => {
             }else {
                 aftername = changedName + "." + extension;
             }
-            changeFileName(selectedRow.name, aftername);
+            alert("Success change name");
+            changeFileName();
+            //changeFileName(selectedRow.name, aftername);
+            //getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
 
         }).catch(error => {
             alert("Cannot change file name");
         })
-        // .finally(() => {
-        //     settingModalState(false);
-        // });;
         // e: Ajax ----------------------------------
     };
 
@@ -414,7 +420,7 @@ const EnhancedTableToolbar = (props) => {
       >
         {numSelected > 0 ? (
           <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-            {/* {numSelected} selected */}
+            {numSelected} selected
           </Typography>
         ) : (
             <>
@@ -465,9 +471,28 @@ const EnhancedTableToolbar = (props) => {
         )}
   
         {numSelected > 0 && (
-          <Tooltip title="Delete">
+          <Tooltip>
               <>
-                <Button
+                {numSelected === 1 && (
+                    <IconButton
+                        aria-label="change"
+                        onClick={onCLickChangeBtn}>
+                        <FileNameChangeIcon />
+                    </IconButton>
+                )}
+
+                <IconButton 
+                    aria-label="delete">
+                    <DeleteIcon />
+                </IconButton>
+
+                <IconButton
+                    aria-label="check"
+                    onClick={onCLickFileCopy}>
+                    <CheckIcon />
+                </IconButton>
+                
+                {/* <Button
                     onClick={onCLickChangeBtn}
                     variant="contained"
                     color="primary"
@@ -476,9 +501,9 @@ const EnhancedTableToolbar = (props) => {
                     style={{"marginRight": "15px"}}
                 >
                     Change
-                </Button>
+                </Button> */}
 
-                {selectedRow.type === 'file' && 
+                {/* {selectedRow.type === 'file' && 
                     <Button
                     onClick={onCLickFileCopy}
                     variant="contained"
@@ -488,7 +513,16 @@ const EnhancedTableToolbar = (props) => {
                     >
                         Copy
                     </Button>
-                }
+                } */}
+
+                {/* {selectedRow.type === 'file' && 
+                    <IconButton 
+                        aria-label="delete"
+                        onClick={onCLickFileCopy}>
+                        <CheckIcon />
+                    </IconButton>
+                } */}
+                
               </>
           </Tooltip>
         ) }
@@ -532,7 +566,7 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
-    const [selectedRow, setSelectedRow] = React.useState({});
+    const [selectedRow, setSelectedRow] = React.useState([]);
     const [modalState, setModalState] = useState(false);
 
     const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
@@ -605,15 +639,39 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
   
     const handleClick = (event, row) => {
         if(row.hiden === "previous") return;
+        // var name = row.name;
+        // setSelectedRow(row);
+        // const selectedIndex = selected.indexOf(name);
+        // let newSelected = [];
+        // if (selectedIndex === -1) {
+        //     newSelected = [name];
+        // } else if (selectedIndex === 0) {
+        //     newSelected = newSelected.concat(selected.slice(1));
+        // }
+        // setSelected(newSelected);
+
         var name = row.name;
-        setSelectedRow(row);
         const selectedIndex = selected.indexOf(name);
         let newSelected = [];
+
+        console.log(111);
         if (selectedIndex === -1) {
-            newSelected = [name];
+            console.log(222);
+            newSelected = newSelected.concat(selected, name);
         } else if (selectedIndex === 0) {
+            console.log(3333);
             newSelected = newSelected.concat(selected.slice(1));
+        } else if (selectedIndex === selected.length - 1) {
+            console.log(4444);
+            newSelected = newSelected.concat(selected.slice(0, -1));
+        } else if (selectedIndex > 0) {
+            console.log(5555);
+            newSelected = newSelected.concat(
+                selected.slice(0, selectedIndex),
+                selected.slice(selectedIndex + 1),
+            );
         }
+
         setSelected(newSelected);
     };
 
@@ -671,15 +729,19 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
         renewFileViewInfo(fileViewInfo2);
     };
 
-    const changeFileName = (beforeName, afterName) => {
-        const newfileList = fileList.slice();
-        for(let i = 0; i < newfileList.length; i++){
-            if(newfileList[i].name === beforeName){
-                newfileList[i].name = afterName;
-            } 
-        }
-        setFileList(newfileList);
+    const changeFileName = () => {
+
         setSelected([]);
+        getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+
+        // const newfileList = fileList.slice();
+        // for(let i = 0; i < newfileList.length; i++){
+        //     if(newfileList[i].name === beforeName){
+        //         newfileList[i].name = afterName;
+        //     } 
+        // }
+        // setFileList(newfileList);
+        // setSelected([]);
     };
 
     const setCopyItem = (state, address, path, fileName) => {
@@ -716,7 +778,7 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
     return (
       <div className={classes.root}>
         <Paper className={classes.paper}>
-          <EnhancedTableToolbar numSelected={selected.length} fileViewInfo={fileViewInfo} selectedRow={selectedRow} changeFileName={changeFileName} setCopyItem={setCopyItem} copyItem={copyItem} settingModalState={settingModalState} getFileData={getFileData}/>
+          <EnhancedTableToolbar numSelected={selected.length} fileViewInfo={fileViewInfo} selectedRow={selected} changeFileName={changeFileName} setCopyItem={setCopyItem} copyItem={copyItem} settingModalState={settingModalState} getFileData={getFileData}/>
           <TableContainer>
             <Table
               stickyHeader
