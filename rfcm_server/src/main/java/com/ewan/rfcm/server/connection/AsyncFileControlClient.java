@@ -18,7 +18,8 @@ public class AsyncFileControlClient {
 
     private static final Logger log = LoggerFactory.getLogger(AsyncFileControlClient.class);
 
-    private int bufferSize = 9999;
+    //private int bufferSize = 2097152;
+    private int bufferSize = 2100000;
 
     private AsynchronousSocketChannel socketChannel;
     private BlockingQueue<String> queue;

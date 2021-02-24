@@ -1,4 +1,0 @@
-GET http://localhost:8081/api/accounts/ewan
-Content-Type: application/json
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJSRkNNIiwiVVNFUl9JRCI6ImFkbWluIiwiVVNFUl9ST0xFIjoiUk9MRV9BRE1JTiJ9.7nFBC3glOLkx582iIclZ-29VlWgeMHiy5ROS_iF13DI
-

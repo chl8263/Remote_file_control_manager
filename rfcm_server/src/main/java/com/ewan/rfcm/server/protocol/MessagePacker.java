@@ -5,7 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class MessagePacker {
-    private int bufferSize = 9999; // 버퍼의 초기사이즈(변경가능)
+    //private int bufferSize = 9999; // 버퍼의 초기사이즈(변경가능)
+    private int bufferSize = 2100000; // 버퍼의 초기사이즈(변경가능)
     private static ByteBuffer buffer; // 한번만 생성해서 사용하고자 함.
     private int offset = 0;
 

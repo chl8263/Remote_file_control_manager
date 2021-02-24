@@ -68,12 +68,22 @@ public class FileProvider {
     }
 
     public static boolean changeFileName(String pathName, String beforeName, String afterName, String extension) throws Exception {
+
         String finalExtension = "";
         if (!extension.equals("")) {
             finalExtension = "." + extension;
         }
         File file1 = new File(pathName + "/" + beforeName + finalExtension);
+        if(!file1.exists()){
+            throw new IllegalArgumentException("The file want to change not found");
+        }
+        if(!file1.canWrite()){
+            throw new IllegalArgumentException("The file access deny");
+        }
         File file2 = new File(pathName + "/" + afterName + finalExtension);
+        if(file2.exists()){
+            throw new IllegalArgumentException("Cannot change file name because of already exist same file name");
+        }
         var result = file1.renameTo(file2);
         return result;
     }

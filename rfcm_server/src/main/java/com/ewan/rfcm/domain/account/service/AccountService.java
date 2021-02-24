@@ -1,6 +1,6 @@
 package com.ewan.rfcm.domain.account.service;
 
-import com.ewan.rfcm.domain.account.dao.AccountRepository;
+import com.ewan.rfcm.domain.account.repository.AccountRepository;
 import com.ewan.rfcm.domain.account.data.domain.Account;
 import com.ewan.rfcm.global.security.AccountContext;
 import org.springframework.beans.factory.annotation.Autowired;

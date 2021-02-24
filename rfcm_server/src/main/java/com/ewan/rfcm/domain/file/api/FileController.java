@@ -246,7 +246,9 @@ public class FileController {
             try {
                 InputStream is = file.getInputStream();
                 int readCount = 0;
-                byte[] buffer = new byte[9000];
+
+                byte[] buffer = new byte[2097152];
+                //byte[] buffer = new byte[9000];
 
                 final int[] offSet = {0};
 
@@ -268,7 +270,8 @@ public class FileController {
                         public void completed(Integer result, ByteBuffer attachment) {
                             try {
                                 int readCount = 0;
-                                byte [] newBuff = new byte[9000];
+                                //byte [] newBuff = new byte[9000];
+                                byte[] newBuff = new byte[2097152];
                                 if ((readCount = is.read(newBuff)) != -1) {
                                     MessagePacker msg = new MessagePacker();
                                     msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM

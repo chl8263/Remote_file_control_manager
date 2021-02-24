@@ -36,6 +36,8 @@ public class FileControlClient {
     private final ServerInfo serverInfo;
     BlockingQueue<String> queue;
 
+    private int bufferSize = 2100000;
+
     public FileControlClient(ServerInfo serverInfo){
 
         this.serverInfo = serverInfo;
@@ -87,7 +89,7 @@ public class FileControlClient {
     }
 
     public void receive(){
-        ByteBuffer byteBuffer = ByteBuffer.allocate(9999);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
         socketChannel.read(byteBuffer, byteBuffer,
                 new CompletionHandler<Integer, ByteBuffer>() {
                     @Override
@@ -246,7 +248,7 @@ public class FileControlClient {
                                     FileInputStream fis = new FileInputStream(file);
 
                                     int readCount = 0;
-                                    byte [] buffer = new byte[9000];
+                                    byte [] buffer = new byte[2097152];
                                     final int[] offSet = {0};
                                     if ((readCount = fis.read(buffer)) != -1) {
                                         MessagePacker msg = new MessagePacker();
@@ -264,7 +266,7 @@ public class FileControlClient {
                                             public void completed(Integer result, ByteBuffer attachment) {
                                                 try {
                                                     int readCount = 0;
-                                                    byte [] newBuff = new byte[9000];
+                                                    byte [] newBuff = new byte[2097152];
                                                     if ((readCount = fis.read(newBuff)) != -1) {
 
                                                         MessagePacker msg = new MessagePacker();
@@ -316,7 +318,7 @@ public class FileControlClient {
                             }
                         }
 
-                        ByteBuffer byteBuffer = ByteBuffer.allocate(9999);
+                        ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
                         socketChannel.read(byteBuffer, byteBuffer, this);
                     }
 
