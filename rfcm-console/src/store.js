@@ -6,6 +6,7 @@ const addJwtToken = createAction("ADDJWTTOKEN");
 const addUserInfo = createAction("ADDUSERINFO");
 const renewCellInfo = createAction("RENEWCELLINFO");
 const renewFileViewInfo = createAction("RENEWFILEVIEWINFO");
+const renewFileViewInfoAtTree = createAction("RENEWFILEVIEWINFOATTREE");
 const switchModalState = createAction("SWITCHMODALSTATE");
 const renewCopyItem = createAction("RENEWCOPYITEM");
 const renewConnections = createAction("RENEWCONNECTIONS");
@@ -71,6 +72,17 @@ const reducer = createReducer(
                     fileViewAddress: action.payload.fileViewAddress,
                     fileUpPath: action.payload.fileUpPath,
                     fileViewPath: action.payload.fileViewPath,
+                    beforefileViewPath: action.payload.beforefileViewPath,
+                },
+            };
+        },
+        [renewFileViewInfoAtTree]: (state, action) => {
+            return { ...state, 
+                fileViewInfo: {
+                    fileViewAddress: action.payload.fileViewAddress,
+                    fileUpPath: action.payload.fileUpPath,
+                    fileViewPath: action.payload.fileViewPath,
+                    beforefileViewPath: state.fileViewInfo.fileViewPath,
                 },
             };
         },
@@ -104,6 +116,7 @@ export const actionCreators = {
     addUserInfo,
     renewCellInfo,
     renewFileViewInfo,
+    renewFileViewInfoAtTree,
     switchModalState,
     renewCopyItem,
     renewConnections,

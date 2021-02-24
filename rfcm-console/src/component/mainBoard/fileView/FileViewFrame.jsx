@@ -405,22 +405,37 @@ const EnhancedTableToolbar = (props) => {
         }).then(res => { if(!res.ok){ throw res; } return res; })
         .then(res => { return res.json(); })
         .then(json => {
+            console.log("~~~~~~~");
+            console.log(json);
+            console.log("~~~~~~~");
             if(json === null || json === undefined){
                 alert("Cannot copy file");
                 return;
             }
             if(json.error === true){
-                alert("Cannot copy file");
+                if(json.responseData.length > 0){
+                    let showErrorMsg = "";
+                    json.responseData.forEach(x => {
+                        showErrorMsg += x;
+                        showErrorMsg += "\n";
+                    });
+                    alert(showErrorMsg);
+                }else {
+                    alert("Cannot copy file");
+                }
                 return;
             }
             if(json.responseData){
                 alert("Copy success");
-                getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
-                resetCopyItem();
+                // getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+                // resetCopyItem();
             }
         }).catch(error => {
             console.error(error.errorMsg);
             alert("Cannot copy file");
+        }).finally(X => {
+            getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
+            resetCopyItem();
         });
         // e: Ajax ----------------------------------
     };
@@ -494,7 +509,7 @@ const EnhancedTableToolbar = (props) => {
       >
 
         {numSelected <= 0 && (
-          <Tooltip title="refresh">
+            <Tooltip title="refresh">
                 <IconButton aria-label="refresh">
                     <RefreshIcon onClick={onClickFileRefresh}/>
                 </IconButton>
@@ -671,9 +686,7 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
     }, [fileViewInfo]);
 
     const getFileData = (address, path) => {
-
         if(address == null || address == undefined || address == "" || path == null || path == undefined || path == "") return;
-
         // s: Ajax ----------------------------------
         var fianlPath = path;
         fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
@@ -693,12 +706,26 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
             console.log(json);
             if(json === null || json === undefined) {
                 setFileList([]);
-                alert(errorMsg);
+                alert("Cannot get data");
                 return;
             }
             if(json.error === true){
-                setFileList([]);
-                alert(error.errorMsg);
+                alert(json.errorMsg);
+                if(fileViewInfo.beforefileViewPath !== ""){
+                    
+                    const tFileViewInfo = {
+                        fileViewAddress: fileViewInfo.fileViewAddress,
+                        fileUpPath: fileViewInfo.fileUpPath,
+                        fileViewPath: fileViewInfo.beforefileViewPath,
+                        beforefileViewPath: fileViewInfo.beforefileViewPath,
+                    }
+                    console.log("~~~~@#@#@");
+                    console.log(tFileViewInfo);
+                    console.log("~~~~@#@#@");
+                    renewFileViewInfo(tFileViewInfo);
+                    //return;
+                }
+                //setFileList([]);
                 return;
             }
             if(json.responseData.root == undefined || json.responseData.root == null) return;
@@ -755,12 +782,10 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
                 selected.slice(selectedIndex + 1),
             );
         }
-
         setSelected(newSelected);
     };
 
     const handleDoubleClick = (event, row) => {
-
         if(row.type === 'file'){
             const address = fileViewInfo.fileViewAddress;
             const path = fileViewInfo.fileViewPath;
@@ -801,20 +826,23 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
             }
         }else {
             path = fileViewInfo.fileViewPath + '|' + row.name;
-            path = path;
+            //path = path;
             upPath = fileViewInfo.fileViewPath;
         }
 
-        const fileViewInfo2 = {
+        const tFileViewInfo = {
             fileViewAddress: address,
             fileUpPath: upPath,
             fileViewPath: path,
+            beforefileViewPath: upPath,
         }
-        renewFileViewInfo(fileViewInfo2);
+        console.log("~~~~((((((((((");
+        console.log(tFileViewInfo);
+        console.log("~~~~((((((((((");
+        renewFileViewInfo(tFileViewInfo);
     };
 
     const changeFileName = () => {
-
         setSelected([]);
         getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
 

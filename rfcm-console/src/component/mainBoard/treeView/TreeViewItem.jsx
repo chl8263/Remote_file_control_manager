@@ -56,7 +56,7 @@ const useStyles = makeStyles({
     },
 });
 
-const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInfo} ) => {
+const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInfo, renewFileViewInfoAtTree} ) => {
   const classes = useStyles();
   const [directoryList, setDirectoryList] = useState([""]);
   const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
@@ -73,7 +73,7 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
       fileUpPath: upPath,
       fileViewPath: upPath+"|"+currentDirectory,
     }
-    renewFileViewInfo(fileViewInfo);
+    renewFileViewInfoAtTree(fileViewInfo);
   }
 
   const getUnderDirectory = (e) => {
@@ -101,18 +101,15 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
     }).then(json => {
       if(json === null || json === undefined){
         setDirectoryList([]);
-        alert(errorMsg);
+        alert("Cannot get directory");
         return;
       }
-      
       if(json.error === true){
         setDirectoryList([]);
-        alert(error.errorMsg);
+        alert(json.errorMsg);
         return;
       }
-
       setDirectoryList(json.responseData);
-
     }).catch(error => {
       console.error(error);
       setDirectoryList([]);
@@ -132,7 +129,7 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
             label={ <span   style={{ width: 100}} > <FontAwesomeIcon icon={faFolder} /> {currentDirectory} </span> }>
 
             {directoryList.map( x => {
-              return <TreeViewItem key={address + upPath + currentDirectory + x + no} address={address} upPath={upPath+"/"+currentDirectory} currentDirectory={x} no={no+1} renewFileViewInfo={renewFileViewInfo}/>;
+              return <TreeViewItem key={address + upPath + currentDirectory + x + no} address={address} upPath={upPath+"/"+currentDirectory} currentDirectory={x} no={no+1} renewFileViewInfoAtTree={renewFileViewInfoAtTree}/>;
             })}
 
           </StyledTreeItem>
@@ -143,6 +140,7 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
 const mapDispathToProps = (dispatch) => {
   return {
       renewFileViewInfo: (fileViewInfo) => dispatch(actionCreators.renewFileViewInfo(fileViewInfo)),
+      renewFileViewInfoAtTree: (fileViewInfo) => dispatch(actionCreators.renewFileViewInfoAtTree(fileViewInfo)),
   };
 }
 
