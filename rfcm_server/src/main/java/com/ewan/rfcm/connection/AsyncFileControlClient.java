@@ -1,10 +1,8 @@
-package com.ewan.rfcm.server.connection;
+package com.ewan.rfcm.connection;
 
-import com.ewan.rfcm.server.AsyncFileControlServer;
-import com.ewan.rfcm.server.protocol.MessagePacker;
-import com.ewan.rfcm.server.protocol.MessageProtocol;
-import com.ewan.rfcm.server.protocol.WebsocketRequestType;
-import com.ewan.rfcm.server.webSocketController.WebSocketHandler;
+import com.ewan.rfcm.connection.protocol.MessagePacker;
+import com.ewan.rfcm.connection.protocol.MessageProtocol;
+import com.ewan.rfcm.connection.model.WebsocketRequestType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,21 +14,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class AsyncFileControlClient {
 
-    private static final Logger log = LoggerFactory.getLogger(AsyncFileControlClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(AsyncFileControlClient.class);
 
-    //private int bufferSize = 2097152;
     private int bufferSize = 2100000;
 
     private AsynchronousSocketChannel socketChannel;
     private BlockingQueue<String> queue;
     private BlockingQueue<byte[]> byteQueue;
-
-//    public AsyncFileControlClient(AsynchronousSocketChannel socketChannel, BlockingQueue<String> queue){
-//        this.socketChannel = socketChannel;
-//        this.queue = queue;
-//        this.byteQueue = new LinkedBlockingQueue<>();
-//        receive();
-//    }
 
     public AsyncFileControlClient(AsynchronousSocketChannel socketChannel){
         this.socketChannel = socketChannel;
@@ -57,17 +47,15 @@ public class AsyncFileControlClient {
                                     try {
                                         float fileSize = msg.getLong();
                                         int offSet = msg.getInt();
-
                                         if(offSet == -1){
                                             queue.put("success");
-                                            //queue.put(String.valueOf(fileSize));
                                         }else {
                                             int payloadLength = msg.getInt();
                                             byte [] buff = msg.getByte(payloadLength);
                                             byteQueue.add(buff);
                                         }
                                     } catch (Exception e) {
-                                        e.printStackTrace();
+                                        logger.error("[Async client] {}", e.getMessage());
                                     }
                                 }else {
                                     int payloadLength = msg.getInt() ;
@@ -78,7 +66,7 @@ public class AsyncFileControlClient {
                                 receive();
 
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                logger.error("[Async client] {}", e.getMessage());
                             }
                         }
 
@@ -87,19 +75,18 @@ public class AsyncFileControlClient {
                             try {
                                 String address = socketChannel.getRemoteAddress().toString().substring(1);
                                 AsyncFileControlServer.connections.remove(address);
-                                String message = "[클라이언트 통신 안됨 : " + socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName() + "]";
-                                log.info(message);
-                                AsyncFileControlServer.connections.remove(address);
                                 socketChannel.close();
-
                                 WebSocketHandler.sendClientInfo(address, WebsocketRequestType.REMOVE);
 
-                            } catch (Exception e2) {
+                                logger.info("[Async client] Cannot connection, close socket : {}", socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName());
+                            } catch (Exception e) {
+                                logger.error("[Async client] {}", e.getMessage());
                             }
                         }
                     });
-        }catch (Exception e){}
-
+        }catch (Exception e){
+            logger.error("[Async client] {}", e.getMessage());
+        }
     }
 
     public void send(byte[] sendData){
@@ -111,7 +98,7 @@ public class AsyncFileControlClient {
                     //receive();
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("[Async client] {}", e.getMessage());
                 }
             }
 
@@ -120,16 +107,12 @@ public class AsyncFileControlClient {
                 try {
                     String address = socketChannel.getRemoteAddress().toString().substring(1);
                     AsyncFileControlServer.connections.remove(address);
-                    String message = "[클라이언트 통신 안됨 : " + socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName() + "]";
-                    log.info(message);
-                    AsyncFileControlServer.connections.remove(address);
                     socketChannel.close();
-
                     WebSocketHandler.sendClientInfo(address, WebsocketRequestType.REMOVE);
-                    // Send new client information to connected web socket session
-                    //WebSocketHandler.sendWholeClientInfoToWholeWebSocket();
 
-                } catch (Exception e2) {
+                    logger.info("[Async client] Cannot connection, close socket : {}", socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName());
+                } catch (Exception e) {
+                    logger.error("[Async client] {}", e.getMessage());
                 }
             }
         });

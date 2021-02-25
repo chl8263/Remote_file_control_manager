@@ -1,13 +1,18 @@
-package com.ewan.rfcm.server.protocol;
+package com.ewan.rfcm.connection.protocol;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class MessagePacker {
-    //private int bufferSize = 9999; // 버퍼의 초기사이즈(변경가능)
-    private int bufferSize = 2100000; // 버퍼의 초기사이즈(변경가능)
-    private static ByteBuffer buffer; // 한번만 생성해서 사용하고자 함.
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private int bufferSize = 2100000;
+    private static ByteBuffer buffer;
     private int offset = 0;
 
     public MessagePacker() {
@@ -23,21 +28,17 @@ public class MessagePacker {
     public MessagePacker(byte[] data){
         buffer = ByteBuffer.allocate(data.length);
         buffer.clear();
-        buffer = ByteBuffer.wrap(data); // Byte Array를 ByteBuffer로  Wrapping
+        buffer = ByteBuffer.wrap(data);
     }
 
     public byte[] Finish(){
-
-        offset = buffer.position(); // 마지막 포인터 위치 기억
+        offset = buffer.position();
         byte[] data = {};
-
-        if(buffer.hasArray()){ // Array가 존재하는 경우에만
+        if(buffer.hasArray()){
             data = buffer.array();
         }
-
         byte[] result = new byte[offset];
-        System.arraycopy(data, 0, result, 0, offset); // offset만큼 복사한다
-
+        System.arraycopy(data, 0, result, 0, offset);
         buffer.flip();
         return result;
     }
@@ -60,23 +61,23 @@ public class MessagePacker {
     }
 
     public void add(int param){
-        if(buffer.remaining() > Integer.SIZE / Byte.SIZE) // 남은 공간이 있을 경우
+        if(buffer.remaining() > Integer.SIZE / Byte.SIZE)
             buffer.putInt(param);
     }
 
     public void add(float param){
-        if(buffer.remaining() > Float.SIZE / Byte.SIZE) // 남은 공간이 있을 경우
+        if(buffer.remaining() > Float.SIZE / Byte.SIZE)
             buffer.putFloat(param);
     }
 
     public void add(double param){
-        if(buffer.remaining() > Double.SIZE / Byte.SIZE) // 남은 공간이 있을 경우
+        if(buffer.remaining() > Double.SIZE / Byte.SIZE)
             buffer.putDouble(param);
     }
 
     public void addString(String param){
         int len = param.getBytes().length;
-        if(buffer.remaining() > len){ // 남은 공간이 있을 경우
+        if(buffer.remaining() > len){
             buffer.putInt(len);
             buffer.put(param.getBytes());
         }
@@ -85,11 +86,11 @@ public class MessagePacker {
     public void addByte(byte[] bytes){
         try {
             int len = bytes.length;
-            if(buffer.remaining() > len){ // 남은 공간이 있을 경우
+            if(buffer.remaining() > len){
                 buffer.put(bytes);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("[Message packer] {}", e.getMessage());
         }
     }
 
@@ -100,12 +101,12 @@ public class MessagePacker {
             out.writeObject(param);
             byte[] yourBytes = bos.toByteArray();
             int len = yourBytes.length;
-            if(buffer.remaining() > len){ // 남은 공간이 있을 경우
+            if(buffer.remaining() > len){
                 buffer.putInt(len);
                 buffer.put(yourBytes);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("[Message packer] {}", e.getMessage());
         }
     }
 
@@ -136,7 +137,6 @@ public class MessagePacker {
     public String getString(){
         int len = buffer.getInt();
         byte[] temp = new byte[len];
-
         buffer.get(temp);
         String result = new String(temp);
         return result;
@@ -150,19 +150,15 @@ public class MessagePacker {
             ObjectInput in = new ObjectInputStream(bis);
             Object o = in.readObject();
             return o;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.error("[Message packer] {}", e.getMessage());
         }
         return null;
     }
 
     public byte[] getByte(int len){
         byte[] temp = new byte[len];
-
         buffer.get(temp);
         return temp;
     }
-
 }

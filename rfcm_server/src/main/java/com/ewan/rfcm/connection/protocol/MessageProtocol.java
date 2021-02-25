@@ -1,4 +1,4 @@
-package com.ewan.rfcm.server.protocol;
+package com.ewan.rfcm.connection.protocol;
 
 public class MessageProtocol {
     public static final byte ROOT_DIRECTORY = 0;

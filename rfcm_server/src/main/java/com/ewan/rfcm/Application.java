@@ -1,6 +1,6 @@
 package com.ewan.rfcm;
 
-import com.ewan.rfcm.server.AsyncFileControlServer;
+import com.ewan.rfcm.connection.AsyncFileControlServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

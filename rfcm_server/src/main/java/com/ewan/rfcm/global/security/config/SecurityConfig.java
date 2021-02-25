@@ -11,6 +11,7 @@ import com.ewan.rfcm.global.security.handler.LoginAuthenticationFailureHandler;
 import com.ewan.rfcm.global.security.handler.LoginAuthenticationSuccessHandler;
 import com.ewan.rfcm.global.security.provider.JwtAuthenticationProvider;
 import com.ewan.rfcm.global.security.provider.LoginAuthenticationProvider;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,51 +31,24 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
+@AllArgsConstructor
 @Configuration
-@EnableWebSecurity // Active spring security
+@EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private AccountService accountService;
-    private PasswordEncoder passwordEncoder;
+    private final AccountService accountService;
+    private final PasswordEncoder passwordEncoder;
 
-    private LoginAuthenticationSuccessHandler loginAuthenticationSuccessHandler;
-    private LoginAuthenticationFailureHandler loginAuthenticationFailureHandler;
-    private LoginAuthenticationProvider loginAuthenticationProvider;
+    private final LoginAuthenticationSuccessHandler loginAuthenticationSuccessHandler;
+    private final LoginAuthenticationFailureHandler loginAuthenticationFailureHandler;
+    private final LoginAuthenticationProvider loginAuthenticationProvider;
 
-    private JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
-    private JwtAuthenticationFailureHandler jwtAuthenticationFailureHandler;
-    private JwtAuthenticationProvider jwtAuthenticationProvider;
+    private final JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
+    private final JwtAuthenticationFailureHandler jwtAuthenticationFailureHandler;
+    private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
     private HeaderTokenExtractor headerTokenExtractor;
-
-    @Autowired
-    public SecurityConfig(
-            AccountService accountService
-            , PasswordEncoder passwordEncoder
-
-            , LoginAuthenticationSuccessHandler loginAuthenticationSuccessHandler
-            , LoginAuthenticationFailureHandler loginAuthenticationFailureHandler
-            , LoginAuthenticationProvider loginAuthenticationProvider
-
-            , JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler
-            , JwtAuthenticationFailureHandler jwtAuthenticationFailureHandler
-            , JwtAuthenticationProvider jwtAuthenticationProvider
-
-            , HeaderTokenExtractor headerTokenExtractor
-    ){
-        this.accountService = accountService;
-        this.passwordEncoder = passwordEncoder;
-
-        this.loginAuthenticationSuccessHandler = loginAuthenticationSuccessHandler;
-        this.loginAuthenticationFailureHandler = loginAuthenticationFailureHandler;
-        this.loginAuthenticationProvider = loginAuthenticationProvider;
-
-        this.jwtAuthenticationSuccessHandler = jwtAuthenticationSuccessHandler;
-        this.jwtAuthenticationFailureHandler = jwtAuthenticationFailureHandler;
-        this.jwtAuthenticationProvider = jwtAuthenticationProvider;
-        this.headerTokenExtractor = headerTokenExtractor;
-    }
 
     @Bean
     public AuthenticationManager getAuthenticationManager() throws Exception { return super.authenticationManagerBean(); }

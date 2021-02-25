@@ -1,4 +1,4 @@
-package com.ewan.rfcm.domain.account.data.domain;
+package com.ewan.rfcm.domain.account.model.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,13 +17,13 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "ACCOUNT_USERID")
+    @Column(name = "ACCOUNT_USERID", length = 70, nullable = false)
     private String userId;
 
-    @Column(name = "ACCOUNT_PASSWORD")
+    @Column(name = "ACCOUNT_PASSWORD", length = 200, nullable = false)
     private String password;
 
-    @Column(name = "ACCOUNT_ROLE")
+    @Column(name = "ACCOUNT_ROLE", length = 20, nullable = false)
     @Enumerated(value = EnumType.STRING)
     private AccountRole accountRole = AccountRole.USER;
 

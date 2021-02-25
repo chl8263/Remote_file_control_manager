@@ -1,8 +1,6 @@
-package com.ewan.rfcm.server;
+package com.ewan.rfcm.connection;
 
-import com.ewan.rfcm.server.connection.AsyncFileControlClient;
-import com.ewan.rfcm.server.protocol.WebsocketRequestType;
-import com.ewan.rfcm.server.webSocketController.WebSocketHandler;
+import com.ewan.rfcm.connection.model.WebsocketRequestType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,14 +12,13 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class AsyncFileControlServer implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(AsyncFileControlServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(AsyncFileControlServer.class);
 
-    AsynchronousChannelGroup channelGroup;
-    AsynchronousServerSocketChannel serverSocketChannel;
+    private AsynchronousChannelGroup channelGroup;
+    private AsynchronousServerSocketChannel serverSocketChannel;
     public static final ConcurrentHashMap<String, AsyncFileControlClient> connections = new ConcurrentHashMap<>();
 
     @Override
@@ -30,41 +27,36 @@ public class AsyncFileControlServer implements Runnable {
     }
 
     public void startServer(){
+        logger.info("[Async Server] Start server");
         try {
             channelGroup = AsynchronousChannelGroup.withFixedThreadPool(
                     Runtime.getRuntime().availableProcessors(),
                     Executors.defaultThreadFactory()
             );
-
             serverSocketChannel = AsynchronousServerSocketChannel.open(channelGroup);
             serverSocketChannel.bind(new InetSocketAddress(15000));
-
         } catch (IOException e) {
             if(serverSocketChannel.isOpen()) {
                 stopServer();
             }
             return;
         }
-
-        log.info("[Async Server] 서버시작");
-
         serverSocketChannel.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>() {
             @Override
             public void completed(AsynchronousSocketChannel socketChannel, Void attachment) {
                 try {
                     String address = socketChannel.getRemoteAddress().toString().substring(1);
-                    log.info("[Async Server] 연결 수락 : " + address);
                     AsyncFileControlClient client = new AsyncFileControlClient(socketChannel);
                     connections.put(address, client);
-                    log.info("[Async Server] 연결 갯수 : " + connections.size());
-
                     serverSocketChannel.accept(null, this);
-
                     WebSocketHandler.sendClientInfo(address, WebsocketRequestType.ADD);
 
-                } catch (IOException e) { }
+                    logger.info("[Async Server] Accept connection : " + address);
+                    logger.info("[Async Server] Connection count : " + connections.size());
+                } catch (IOException e) {
+                    logger.error("[Async Server] Fail to accept client : {}", e.getMessage());
+                }
             }
-
             @Override
             public void failed(Throwable exc, Void attachment) {
                 if(serverSocketChannel.isOpen()){
@@ -80,15 +72,13 @@ public class AsyncFileControlServer implements Runnable {
             if(channelGroup != null && !channelGroup.isShutdown()){
                 channelGroup.shutdownNow();
             }
-            log.info("[Async Server] 서버 멈춤");
+            logger.info("[Async Server] Close server ...");
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("[Async Server] Fail to stop server : {}", e.getMessage());
         }
     }
 
     public static AsyncFileControlClient getClient(String ip){
-        if(connections.containsKey(ip)){
-            return connections.get(ip);
-        }else return null;
+        return connections.getOrDefault(ip, null);
     }
 }

@@ -14,7 +14,7 @@ import java.util.Optional;
 @Component
 public class JwtDecoder {
 
-    private static final Logger log = LoggerFactory.getLogger(JwtDecoder.class);
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public AccountContext decodeJwt(String token){
         DecodedJWT decodedJWT = isValidToken(token).orElseThrow(() -> new InvalidJwtException("Invalid token."));
@@ -26,16 +26,14 @@ public class JwtDecoder {
 
     private Optional<DecodedJWT> isValidToken(String token){
         DecodedJWT jwt = null;
-
         try{
             Algorithm algorithm = Algorithm.HMAC256(JwtFactory.signingKey);
             JWTVerifier jwtVerifier = JWT.require(algorithm).build();
 
             jwt = jwtVerifier.verify(token);
         }catch (Exception e){
-            log.error("[~~ ERROR]", e);
+            logger.error("[JwtDecoder] {}", e.getMessage());
         }
-
         return Optional.ofNullable(jwt);
     }
 }

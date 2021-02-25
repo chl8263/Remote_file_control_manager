@@ -20,8 +20,6 @@ import java.io.InvalidObjectException;
 @Component
 public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationSuccessHandler.class);
-
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
@@ -30,21 +28,17 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
 
         JwtPostProcessingToken token = (JwtPostProcessingToken) authentication;
 
-        // s: validation
         String userId = token.getUserId();
         String uidPayload = request.getHeader("Uid");
 
         if(UserConnection.userConnections.containsKey(userId) && UserConnection.userConnections.get(userId).equals(uidPayload)) {
-            chain.doFilter(request, response);  //Run chain which remain on security filter}
+            chain.doFilter(request, response);
         }else {
-            //log.error("Invalid token");
             throw new InvalidObjectException("Invalid token");
         }
-        // e: validation
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication){
     }
 }

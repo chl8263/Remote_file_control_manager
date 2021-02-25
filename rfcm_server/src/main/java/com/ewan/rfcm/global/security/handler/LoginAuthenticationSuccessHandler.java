@@ -6,6 +6,7 @@ import com.ewan.rfcm.global.security.JwtFactory;
 import com.ewan.rfcm.global.security.dto.TokenDto;
 import com.ewan.rfcm.global.security.token.LoginPostAuthenticationToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,24 +20,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
 
+@AllArgsConstructor
 @Component
 public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    private JwtFactory jwtFactory;
-    private ObjectMapper objectMapper;
-
-
-    @Autowired
-    public LoginAuthenticationSuccessHandler(
-            JwtFactory jwtFactory
-            , ObjectMapper objectMapper
-    ){
-        this.jwtFactory = jwtFactory;
-        this.objectMapper = objectMapper;
-    }
+    private final JwtFactory jwtFactory;
+    private final ObjectMapper objectMapper;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         LoginPostAuthenticationToken token = (LoginPostAuthenticationToken) authentication;
         AccountContext accountContext = (AccountContext) token.getPrincipal();
         String tokenString = jwtFactory.generateToken(accountContext);

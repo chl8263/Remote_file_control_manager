@@ -1,4 +1,4 @@
-package com.ewan.rfcm.domain.account.data.domain;
+package com.ewan.rfcm.domain.account.model.domain;
 
 import lombok.Getter;
 

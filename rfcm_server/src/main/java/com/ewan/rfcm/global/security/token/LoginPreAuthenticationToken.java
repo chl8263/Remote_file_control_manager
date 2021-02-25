@@ -1,6 +1,6 @@
 package com.ewan.rfcm.global.security.token;
 
-import com.ewan.rfcm.domain.account.data.dto.LoginDto;
+import com.ewan.rfcm.domain.account.model.dto.LoginDto;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 public class LoginPreAuthenticationToken extends UsernamePasswordAuthenticationToken {

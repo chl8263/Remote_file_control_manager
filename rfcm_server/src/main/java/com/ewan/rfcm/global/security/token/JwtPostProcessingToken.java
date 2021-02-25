@@ -1,6 +1,6 @@
 package com.ewan.rfcm.global.security.token;
 
-import com.ewan.rfcm.domain.account.data.domain.AccountRole;
+import com.ewan.rfcm.domain.account.model.domain.AccountRole;
 import com.ewan.rfcm.global.security.AccountContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class JwtPostProcessingToken extends UsernamePasswordAuthenticationToken {
-
 
     public JwtPostProcessingToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
         super(principal, credentials, authorities);

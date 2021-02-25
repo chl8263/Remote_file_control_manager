@@ -1,7 +1,7 @@
 package com.ewan.rfcm.global.security;
 
-import com.ewan.rfcm.domain.account.data.domain.Account;
-import com.ewan.rfcm.domain.account.data.domain.AccountRole;
+import com.ewan.rfcm.domain.account.model.domain.Account;
+import com.ewan.rfcm.domain.account.model.domain.AccountRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;

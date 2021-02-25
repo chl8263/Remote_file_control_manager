@@ -1,4 +1,4 @@
-package com.ewan.rfcm.domain.file.model;
+package com.ewan.rfcm.domain.file.model.dto;
 
 import lombok.Getter;
 

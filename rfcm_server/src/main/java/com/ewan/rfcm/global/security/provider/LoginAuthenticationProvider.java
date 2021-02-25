@@ -1,10 +1,11 @@
 package com.ewan.rfcm.global.security.provider;
 
-import com.ewan.rfcm.domain.account.data.domain.Account;
+import com.ewan.rfcm.domain.account.model.domain.Account;
 import com.ewan.rfcm.domain.account.service.AccountService;
 import com.ewan.rfcm.global.security.AccountContext;
 import com.ewan.rfcm.global.security.token.LoginPostAuthenticationToken;
 import com.ewan.rfcm.global.security.token.LoginPreAuthenticationToken;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -14,20 +15,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.NoSuchElementException;
 
+@AllArgsConstructor
 @Component
 public class LoginAuthenticationProvider implements AuthenticationProvider {
 
-    private AccountService accountService;
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public LoginAuthenticationProvider(
-            AccountService accountService
-            , PasswordEncoder passwordEncoder
-    ){
-        this.accountService = accountService;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final AccountService accountService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {

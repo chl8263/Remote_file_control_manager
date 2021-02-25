@@ -1,4 +1,4 @@
-package com.ewan.rfcm.server.protocol;
+package com.ewan.rfcm.connection.model;
 
 public enum WebsocketRequestType {
     CONNECTIONS,

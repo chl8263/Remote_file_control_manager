@@ -1,8 +1,7 @@
-package com.ewan.rfcm.server.webSocketController;
+package com.ewan.rfcm.connection;
 
-import com.ewan.rfcm.server.AsyncFileControlServer;
-import com.ewan.rfcm.server.model.WebSocketReqDto;
-import com.ewan.rfcm.server.protocol.WebsocketRequestType;
+import com.ewan.rfcm.connection.model.WebSocketReqDto;
+import com.ewan.rfcm.connection.model.WebsocketRequestType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,7 @@ import java.util.HashMap;
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(WebSocketHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
 
     private final ObjectMapper objectMapper;
     public static HashMap<String, WebSocketSession> sessionList;
@@ -30,13 +29,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        log.info("[Websocket] 접속 : " + session.getId());
+        logger.info("[Websocket] connection : {}", session.getId());
         sessionList.put(session.getId(), session);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        log.info("[Websocket] 접속 해제 : " + session.getId());
+        logger.info("[Websocket] disconnection : {}", session.getId());
         sessionList.remove(session.getId());
     }
 
@@ -52,7 +51,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("[Websocket] Failed to handle message from websocket client : {}", session.getId());
         }
     }
 
@@ -77,16 +76,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
             }
         } catch (Exception e) {
             try {
-                log.info("[Websocket] 전송실패로 접속 해제 : " + session.getId());
+                logger.info("[Websocket] Disconnection because of failed to send : {}", session.getId());
                 session.close();
-            } catch (IOException ioException) { }
-        }
-    }
-
-    public static void sendWholeClientInfoToWholeWebSocket(){
-        for(String key : WebSocketHandler.sessionList.keySet()){
-            WebSocketSession webSocketSession =  WebSocketHandler.sessionList.get(key);
-            WebSocketHandler.sendConnectedClientInfo(webSocketSession);
+            } catch (IOException ioException) {
+                logger.error("[Websocket] Failed to close websocket session : {}", session.getId());
+            }
         }
     }
 
@@ -109,7 +103,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("[Websocket] Failed to send client info to websocket session");
         }
     }
 }

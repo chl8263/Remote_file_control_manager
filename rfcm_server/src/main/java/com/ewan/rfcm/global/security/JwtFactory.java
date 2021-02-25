@@ -10,8 +10,7 @@ import java.io.UnsupportedEncodingException;
 
 @Component
 public class JwtFactory {
-
-    private static final Logger log = LoggerFactory.getLogger(JwtFactory.class);
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     protected static final String signingKey = "jwttest";
     protected static final String ISSUER = "RFCM";
@@ -20,7 +19,6 @@ public class JwtFactory {
 
     public String generateToken(AccountContext accountContext){
         String token = null;
-
         try{
             token = JWT.create()
                     .withIssuer(ISSUER)
@@ -29,13 +27,12 @@ public class JwtFactory {
                     .sign(generateAlgorithm(signingKey));
 
         }catch (Exception e){
-            log.error(e.getMessage());
+            logger.error("[JwtFactory] Failed to generate JWT token : {}", e.getMessage());
         }
-
         return token;
     }
 
-    private Algorithm generateAlgorithm(String signingKey) throws UnsupportedEncodingException {
+    private Algorithm generateAlgorithm(String signingKey) {
         return Algorithm.HMAC256(signingKey);
     }
 }

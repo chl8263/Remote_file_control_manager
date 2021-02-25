@@ -1,6 +1,5 @@
-package com.ewan.rfcm.server.model;
+package com.ewan.rfcm.connection.model;
 
-import com.ewan.rfcm.server.protocol.WebsocketRequestType;
 import lombok.Data;
 
 @Data
