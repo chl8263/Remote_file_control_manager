@@ -207,7 +207,6 @@ const mapDispathToProps = (dispatch) => {
         switchMainBoard: () => dispatch(actionCreators.switchMainPageRoute(PAGE_ROUTE.MAINBOARD)),
         addJwtToken: (jwtToken) => dispatch(actionCreators.addJwtToken(jwtToken)),
         addUserInfo: (userInfo) => dispatch(actionCreators.addUserInfo(userInfo)),
-        //addUserName: (username) => dispatch(actionCreators.addUserName(username)),
     };
 }
 

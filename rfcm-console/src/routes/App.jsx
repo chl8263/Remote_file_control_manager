@@ -26,9 +26,7 @@ const App = ( { page, switchLogin, switchMainBoard } ) => {
                     'Accept': MediaType.JSON,
                     'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
                     'Uid': cookies.UID,
-                },
-                // body: JSON.stringify(accountInfo)
-                
+                },                
             }).then(res => { if(!res.ok){ throw res; } return res; })
             .then(res => { switchMainBoard(); })
             .catch(error => { switchLogin(); })
@@ -82,7 +80,6 @@ const mapDispathToProps = (dispatch) => {
         switchMainBoard: () => dispatch(actionCreators.switchMainPageRoute(PAGE_ROUTE.MAINBOARD)),
         addJwtToken: (jwtToken) => dispatch(actionCreators.addJwtToken(jwtToken)),
         addUserInfo: (userInfo) => dispatch(actionCreators.addUserInfo(userInfo)),
-        //addUserName: (username) => dispatch(actionCreators.addUserName(username)),
     };
 }
 

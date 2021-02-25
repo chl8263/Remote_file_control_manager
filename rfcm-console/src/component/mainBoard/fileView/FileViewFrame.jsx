@@ -417,8 +417,6 @@ const EnhancedTableToolbar = (props) => {
             }
             if(json.responseData){
                 alert(TYPE + "  success");
-                // getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
-                // resetCopyItem();
             }
         }).catch(error => {
             console.error(error.errorMsg);
@@ -429,62 +427,6 @@ const EnhancedTableToolbar = (props) => {
         });
         // e: Ajax ----------------------------------
     };
-
-    // const onClickCopy = () => {
-    //     if(fileViewInfo.address == "" || fileViewInfo.path == ""){
-    //       resetCopyItem();
-    //     }
-    //     if(fileViewInfo.fileViewAddress !== copyItem.address){
-    //       alert("Cannot move to another address");
-    //       resetCopyItem();
-    //     }
-    //     // s: Ajax ----------------------------------
-    //     var fianlPath = fileViewInfo.fileViewPath;
-    //     if(fianlPath !== ""){
-    //         fianlPath += "|";
-    //     }
-    //     fianlPath = fianlPath.replace(/\\/g, "|").replace(/\//g,"|");
-    //     if(fianlPath.charAt(0) === '|'){
-    //     fianlPath = fianlPath.substr(1);
-    //     }
-
-    //     const FileMoveCopyInfo = {
-    //         fileName: copyItem.fileName,
-    //         fromFilePath: copyItem.path,
-    //         toDirectoryPath: fianlPath,
-    //     }
-
-    //     fetch(HTTP.SERVER_URL + `/api/file/copy/${copyItem.address}`, {
-    //         method: HTTP.PUT,
-    //         headers: {
-    //             'Content-type': MediaType.JSON,
-    //             'Accept': MediaType.JSON,
-    //             'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
-    //             'Uid': cookies.UID
-    //         },
-    //         body: JSON.stringify(FileMoveCopyInfo)
-    //     }).then(res => { if(!res.ok){ throw res; } return res; })
-    //     .then(res => { return res.json(); })
-    //     .then(json => {
-    //         if(json === null || json === undefined){
-    //             alert("Cannot copy file");
-    //             return;
-    //         }
-    //         if(json.error === true){
-    //             alert("Cannot copy file");
-    //             return;
-    //         }
-    //         if(json.responseData){
-    //             alert("Copy success");
-    //             getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
-    //             resetCopyItem();
-    //         }
-    //     }).catch(error => {
-    //         console.error(error.errorMsg);
-    //         alert("Cannot copy file");
-    //     });
-    //     // e: Ajax ----------------------------------
-    // };
 
     const fileChangedHandler = (e) =>{
         const files = e.target.files;
@@ -655,7 +597,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
-    //const [selectedRow, setSelectedRow] = React.useState([]);
     const [modalState, setModalState] = useState(false);
 
     const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
@@ -735,17 +676,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
   
     const handleClick = (event, row) => {
         if(row.hiden === "previous") return;
-        // var name = row.name;
-        // setSelectedRow(row);
-        // const selectedIndex = selected.indexOf(name);
-        // let newSelected = [];
-        // if (selectedIndex === -1) {
-        //     newSelected = [name];
-        // } else if (selectedIndex === 0) {
-        //     newSelected = newSelected.concat(selected.slice(1));
-        // }
-        // setSelected(newSelected);
-
         var name = row.name;
         const selectedIndex = selected.indexOf(name);
         let newSelected = [];
@@ -806,7 +736,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
             }
         }else {
             path = fileViewInfo.fileViewPath + '|' + row.name;
-            //path = path;
             upPath = fileViewInfo.fileViewPath;
         }
 
@@ -822,15 +751,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
     const changeFileName = () => {
         setSelected([]);
         getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
-
-        // const newfileList = fileList.slice();
-        // for(let i = 0; i < newfileList.length; i++){
-        //     if(newfileList[i].name === beforeName){
-        //         newfileList[i].name = afterName;
-        //     } 
-        // }
-        // setFileList(newfileList);
-        // setSelected([]);
     };
 
     const setCopyItem = (state, address, paths) => {
@@ -872,7 +792,6 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
               stickyHeader
               className={classes.table}F
               aria-labelledby="tableTitle"
-              //size={dense ? 'small' : 'medium'}
               size={'small'}
               aria-label="enhanced table"
             >

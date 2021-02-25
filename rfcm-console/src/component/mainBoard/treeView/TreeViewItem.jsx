@@ -61,10 +61,6 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
   const [directoryList, setDirectoryList] = useState([""]);
   const [cookies, setCookie, removeCookie] = useCookies(["JWT_TOKEN"]);
 
-  // useEffect(() => {
-  //   setDirectoryList([]);
-  // }, []);
-
   const getFileList = (e) => {
     e.preventDefault();
 
@@ -113,7 +109,6 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
     }).catch(error => {
       console.error(error);
       setDirectoryList([]);
-      //alert(error.errorMsg);
     });
     // e: Ajax ----------------------------------
   };
@@ -125,7 +120,6 @@ const TreeViewItem = ( { address, upPath, currentDirectory, no, renewFileViewInf
             nodeId={address + upPath + currentDirectory + no}
             onLabelClick={getFileList}
             onIconClick={getUnderDirectory}
-            // onClick={test}
             label={ <span   style={{ width: 100}} > <FontAwesomeIcon icon={faFolder} /> {currentDirectory} </span> }>
 
             {directoryList.map( x => {
