@@ -103,7 +103,6 @@ const TreeViewParent = ( { appInfo, address } ) => {
         setRootDirectoryList(json.responseData);
         
       }).catch(error => {
-        //console.error(error);
         setRootDirectoryList([]);
       });
       // e: Ajax ----------------------------------
