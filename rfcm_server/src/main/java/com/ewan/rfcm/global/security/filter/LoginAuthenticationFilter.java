@@ -38,9 +38,7 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
         LoginPreAuthenticationToken preAuthenticationToken = new LoginPreAuthenticationToken(loginDto);
 
         HttpSession httpSession = request.getSession();
-        //String id = httpSession.getId();
         httpSession.setAttribute(loginDto.getUserId(), httpSession.getId());
-        //String userId = (String) httpSession.getAttribute(loginDto.getUserId());
 
         return super.getAuthenticationManager().authenticate(preAuthenticationToken);
     }

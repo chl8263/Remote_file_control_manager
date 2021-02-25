@@ -56,14 +56,14 @@ public class FileController {
 
             byte[] data = msg.Finish();
             client.send(data);
-            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
+            String responseResult = client.setPoll(1, TimeUnit.MINUTES);
             if(responseResult == null || responseResult.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
 
             return ResponseEntity.ok(responseResult);
 
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(EMPTY);
         }
     }
@@ -84,14 +84,14 @@ public class FileController {
 
             byte[] data = msg.Finish();
             client.send(data);
-            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
+            String responseResult = client.setPoll(1, TimeUnit.MINUTES);
             if(responseResult == null || responseResult.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
 
             return ResponseEntity.ok(responseResult);
 
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(EMPTY);
         }
     }
@@ -119,7 +119,7 @@ public class FileController {
             msg.addString(tranData);
             byte[] data = msg.Finish();
             client.send(data);
-            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
+            String responseResult = client.setPoll(1, TimeUnit.MINUTES);
             if(responseResult == null || responseResult.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
@@ -155,7 +155,7 @@ public class FileController {
             msg.addString(tranData);
             byte[] data = msg.Finish();
             client.send(data);
-            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
+            String responseResult = client.setPoll(1, TimeUnit.MINUTES);
 
             if (responseResult == null || responseResult.equals(EMPTY)) {
                 return ResponseEntity.badRequest().body(EMPTY);
@@ -187,7 +187,7 @@ public class FileController {
             msg.addString(tranData);
             byte[] data = msg.Finish();
             client.send(data);
-            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
+            String responseResult = client.setPoll(1, TimeUnit.MINUTES);
 
             if (responseResult == null || responseResult.equals(EMPTY)) {
                 return ResponseEntity.badRequest().body(EMPTY);
@@ -277,7 +277,8 @@ public class FileController {
                     }
                 });
             }
-            String responseResult = client.getQueue().poll(1, TimeUnit.MINUTES);
+            String responseResult = client.setPoll(1, TimeUnit.MINUTES);
+
             if(responseResult == null || responseResult.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
@@ -312,15 +313,10 @@ public class FileController {
                 public void failed(Throwable exc, ByteBuffer attachment) { }
             });
 
-            String result = client.getQueue().poll(2, TimeUnit.MINUTES);
+            String result = client.setPoll(2, TimeUnit.MINUTES);
+
             if(result.equals("success")){
-                var byteQueue = client.getByteQueue();
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                while (!byteQueue.isEmpty()){
-                    byte [] temp = byteQueue.poll();
-                    byteArrayOutputStream.write(temp, 0, temp.length);
-                }
-                byte[] fileContent = byteArrayOutputStream.toByteArray();
+                byte[] fileContent = client.getByteInQueue();
 
                 HttpHeaders header = new HttpHeaders();
                 header.setContentLength(fileContent.length);

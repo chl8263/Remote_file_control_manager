@@ -6,11 +6,13 @@ import com.ewan.rfcm.connection.model.WebsocketRequestType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class AsyncFileControlClient {
 
@@ -122,11 +124,21 @@ public class AsyncFileControlClient {
         return socketChannel;
     }
 
-    public BlockingQueue<String> getQueue(){
-        return this.queue;
+    public String setPoll(int timeout, TimeUnit timeUnit){
+        try {
+            return queue.poll(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public BlockingQueue<byte[]> getByteQueue(){
-        return this.byteQueue;
+    public byte[] getByteInQueue(){
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        while (!byteQueue.isEmpty()){
+            byte [] temp = byteQueue.poll();
+            byteArrayOutputStream.write(temp, 0, temp.length);
+        }
+        return byteArrayOutputStream.toByteArray();
     }
 }

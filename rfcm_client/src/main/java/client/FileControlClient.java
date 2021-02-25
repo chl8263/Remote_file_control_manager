@@ -35,8 +35,7 @@ public class FileControlClient {
     private AsynchronousSocketChannel socketChannel;
     private ObjectMapper objectMapper = new ObjectMapper();
     private final ServerInfo serverInfo;
-    BlockingQueue<String> queue;
-
+    private BlockingQueue<String> queue;
     private int bufferSize = 2100000;
 
     public FileControlClient(ServerInfo serverInfo){
@@ -221,8 +220,6 @@ public class FileControlClient {
 
                                     byte [] buff = receivedMsg.getByte(payloadLength);
                                     FileOutputStream fos = new FileOutputStream(path + fineName, true);
-//                                    LOG.info("offSet : " + offSet);
-//                                    LOG.info("payloadLength : " + payloadLength);
                                     fos.write(buff, 0, payloadLength);
                                     fos.close();
                                 } catch (Exception e) {
