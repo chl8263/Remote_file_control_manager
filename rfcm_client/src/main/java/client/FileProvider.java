@@ -86,12 +86,13 @@ public class FileProvider {
         if (!extension.equals("")) {
             finalExtension = "." + extension;
         }
-        File file1 = new File(pathName + "/" + beforeName + finalExtension);
+        String beforeFullName = pathName + "/" + beforeName + finalExtension;
+        File file1 = new File(beforeFullName);
         if(!file1.exists()){
             throw new IllegalArgumentException("The file want to change not found");
         }
-        if(!file1.canWrite()){
-            throw new IllegalArgumentException("The file access deny");
+        if(!Files.isWritable(Path.of(beforeFullName))){
+            throw new IllegalArgumentException("Write access deny [" + beforeFullName + "]");
         }
         File file2 = new File(pathName + "/" + afterName + finalExtension);
         if(file2.exists()){
@@ -104,23 +105,18 @@ public class FileProvider {
     public static List<String> moveCopyFile(FileMoveCopyDto fileMoveCopyDto) {
         List<String> errorMsgList = new ArrayList<>();
         try {
-            //File fromFile = new File(fileMoveCopyDto.getFromFilePath());
             String toPath = fileMoveCopyDto.getToDirectoryPath();
             File toFile = new File(toPath);
-//            if(!fromFile.exists()){
-//                throw new IllegalArgumentException("Not exists from file, please check again.");
-//            }
             if(!toFile.exists()){
                 throw new IllegalArgumentException("Not exists folder to move, please check again.");
             }
-
             for(String path: fileMoveCopyDto.getPaths()){
                 File tempFile = new File(path);
                 if(!tempFile.exists()){
                     errorMsgList.add("Cannot find file : [" + path + "]");
                     continue;
                 }
-                if(!tempFile.canWrite()){
+                if(!Files.isWritable(Path.of(path))){
                     errorMsgList.add("Write access deny [" + path + "]");
                     continue;
                 }
@@ -138,16 +134,16 @@ public class FileProvider {
                     }else if (fileMoveCopyDto.getRole() == FileMoveCopyRole.COPY){
                         if(tempFile.isFile()){
                             if(!copyFile(path, toPath)){
-                                errorMsgList.add("Cannot move file [" + path + "]");
+                                errorMsgList.add("Cannot copy file [" + path + "]");
                             }
                         }else if(tempFile.isDirectory()){
                             if(!copyFolder(path, toPath)){
-                                errorMsgList.add("Cannot move file [" + path + "]");
+                                errorMsgList.add("Cannot copy file [" + path + "]");
                             }
                         }
                     }
                 }catch (Exception e){
-                    errorMsgList.add("Cannot move file [" + path + "]" + e.getMessage());
+                    errorMsgList.add("Cannot conduct file [" + path + "]" + e.getMessage());
                 }
             }
             return errorMsgList;
@@ -240,18 +236,20 @@ public class FileProvider {
                     errorMsgList.add("Cannot find file : [" + path + "]");
                     continue;
                 }
-                if(!tempFile.canWrite()){
+                if(!Files.isWritable(Path.of(path))){
                     errorMsgList.add("Write access deny [" + path + "]");
                     continue;
                 }
                 try{
-                    File rootDir = new File("path");
+                    File rootDir = new File(path);
                     Files.walk(rootDir.toPath())
                             .sorted(Comparator.reverseOrder())
                             .map(Path::toFile)
                             .forEach(File::delete);
+                }catch (AccessDeniedException ae) {
+                    errorMsgList.add("Access denied [" + path + "]");
                 }catch (IOException e) {
-                    errorMsgList.add("Cannot move file [" + path + "]");
+                    errorMsgList.add("Cannot delete file [" + path + "]");
                 }
             }
         } catch (Exception e){

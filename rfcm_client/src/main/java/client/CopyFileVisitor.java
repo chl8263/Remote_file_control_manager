@@ -18,12 +18,9 @@ public class CopyFileVisitor extends SimpleFileVisitor<Path> {
         this.target = Objects.requireNonNull(target);
     }
     @Override
-    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-            throws IOException {
-
+    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
         File a = new File(String.valueOf(target.resolve(source.relativize(dir))));
         a.mkdir();
-        //createDirectories(target.resolve(source.relativize(dir)));
         return FileVisitResult.CONTINUE;
     }
 
@@ -31,7 +28,6 @@ public class CopyFileVisitor extends SimpleFileVisitor<Path> {
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             throws IOException {
         Files.copy(file, target.resolve(source.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
-        //copy(file, target.resolve(source.relativize(file)), options);
         return FileVisitResult.CONTINUE;
     }
 }
