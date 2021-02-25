@@ -6,6 +6,8 @@ import model.dto.FileChangeDto;
 import model.dto.FileDeleteDto;
 import model.dto.FileMoveCopyDto;
 import model.info.ServerInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import protocol.MessagePacker;
 import protocol.MessageProtocol;
 import service.FileService;
@@ -24,11 +26,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 public class FileControlClient {
 
-    private final static Logger LOG = Logger.getLogger(String.valueOf(FileControlClient.class));
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private AsynchronousChannelGroup channelGroup;
     private AsynchronousSocketChannel socketChannel;
@@ -39,7 +40,6 @@ public class FileControlClient {
     private int bufferSize = 2100000;
 
     public FileControlClient(ServerInfo serverInfo){
-
         this.serverInfo = serverInfo;
         queue = new LinkedBlockingQueue<>();
     }
@@ -50,22 +50,22 @@ public class FileControlClient {
                     Runtime.getRuntime().availableProcessors(),
                     Executors.defaultThreadFactory()
             );
-
             socketChannel = AsynchronousSocketChannel.open(channelGroup);
             socketChannel.connect(new InetSocketAddress(serverInfo.getIp(), serverInfo.getPort()), null,
                     new CompletionHandler<Void, Void>() {
                         @Override
                         public void completed(Void result, Void attachment) {
                             try {
-                                LOG.info("[연결 완료 : " + socketChannel.getRemoteAddress() + "]");
+                                logger.info("[Client] Connection success : {}", socketChannel.getRemoteAddress());
                             } catch (IOException e) {
+                                logger.error("", e);
                             }
                             receive();
                         }
 
                         @Override
                         public void failed(Throwable exc, Void attachment) {
-                            LOG.info("[서버와 통신 안됨]");
+                            logger.info("[Client] Failed to connection with server");
                             if(socketChannel.isOpen()) {
                                 stopClient();
                             }
@@ -73,18 +73,18 @@ public class FileControlClient {
                     });
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("", e);
         }
     }
 
     public void stopClient(){
         try {
-            LOG.info("[클라이언트 종료]");
+            logger.info("[Client] Stop client and shut down...");
             if(channelGroup != null && !channelGroup.isShutdown()){
                 channelGroup.shutdownNow();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("", e);
         }
     }
 
@@ -101,7 +101,7 @@ public class FileControlClient {
                         switch (protocol){
                             case MessageProtocol.ROOT_DIRECTORY:{
                                 MessagePacker sendMsg = new MessagePacker();
-                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                 sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
 
                                 String responseData = FileService.getDirectoryInRoot();
@@ -111,12 +111,11 @@ public class FileControlClient {
                                 send(ByteBuffer.wrap(sendData));
                                 break;
                             }
-
                             case MessageProtocol.DIRECTORY:{
                                 String path = receivedMsg.getString();
 
                                 MessagePacker sendMsg = new MessagePacker();
-                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                 sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
 
                                 String responseData = FileService.getUnderLineDirectory(path);
@@ -125,11 +124,10 @@ public class FileControlClient {
                                 send(ByteBuffer.wrap(sendData));
                                 break;
                             }
-
                             case MessageProtocol.FILES:{
                                 String path = receivedMsg.getString();
                                 MessagePacker sendMsg = new MessagePacker();
-                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                 sendMsg.setProtocol(MessageProtocol.FILES);
 
                                 String responseData = FileService.getFilesInDirectory(path);
@@ -140,15 +138,13 @@ public class FileControlClient {
 
                                 break;
                             }
-
                             case MessageProtocol.CHANGE_FILE_NAME:{
-
                                 try {
                                     String convertedJson = receivedMsg.getString();
                                     FileChangeDto fileChangeProtocol = objectMapper.readValue(convertedJson, FileChangeDto.class);
 
                                     MessagePacker sendMsg = new MessagePacker();
-                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                     sendMsg.setProtocol(MessageProtocol.CHANGE_FILE_NAME);
 
                                     String responseData = FileService.changeFileName(fileChangeProtocol.getPath(), fileChangeProtocol.getBeforeName(), fileChangeProtocol.getAfterName(), fileChangeProtocol.getExtension());
@@ -157,19 +153,17 @@ public class FileControlClient {
                                     byte [] sendData = sendMsg.Finish();
                                     send(ByteBuffer.wrap(sendData));
                                 } catch (JsonProcessingException e) {
-                                    e.printStackTrace();
+                                    logger.error("", e);
                                 }
-
                                 break;
                             }
-
                             case MessageProtocol.MOVE_COPY_FILE:{
                                 try {
                                     String convertedJson = receivedMsg.getString();
                                     FileMoveCopyDto fileMoveCopyDto = objectMapper.readValue(convertedJson, FileMoveCopyDto.class);
 
                                     MessagePacker sendMsg = new MessagePacker();
-                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                     sendMsg.setProtocol(MessageProtocol.MOVE_COPY_FILE);
 
                                     String responseData = FileService.moveCopyFile(fileMoveCopyDto);
@@ -179,54 +173,10 @@ public class FileControlClient {
                                     send(ByteBuffer.wrap(sendData));
 
                                 } catch (JsonProcessingException e) {
-                                    e.printStackTrace();
+                                    logger.error("", e);
                                 }
                                 break;
                             }
-
-//                            case MessageProtocol.MOVE_FILE:{
-//                                try {
-//                                    String moveFileJson = receivedMsg.getString();
-//
-//                                    FileMoveCopyDto fileMoveCopyDto = objectMapper.readValue(moveFileJson, FileMoveCopyDto.class);
-//
-//                                    MessagePacker sendMsg = new MessagePacker();
-//                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
-//                                    sendMsg.setProtocol(MessageProtocol.MOVE_FILE);
-//
-//                                    String responseData = FileService.moveFile(fileMoveCopyDto.getFromFilePath(), fileMoveCopyDto.getToDirectoryPath(), fileMoveCopyDto.getFileName());
-//                                    sendMsg.add(responseData);
-//
-//                                    byte[] sendData = sendMsg.Finish();
-//                                    send(ByteBuffer.wrap(sendData));
-//
-//                                } catch (JsonProcessingException e) {
-//                                    e.printStackTrace();
-//                                }
-//                                break;
-//                            }
-
-//                            case MessageProtocol.COPY_FILE:{
-//                                try {
-//                                    String moveFileJson = receivedMsg.getString();
-//
-//                                    FileMoveCopyDto fileMoveCopyDto = objectMapper.readValue(moveFileJson, FileMoveCopyDto.class);
-//
-//                                    MessagePacker sendMsg = new MessagePacker();
-//                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
-//                                    sendMsg.setProtocol(MessageProtocol.COPY_FILE);
-//
-//                                    //String responseData = FileService.copyFile(fileMoveCopyDto.getFromFilePath(), fileMoveCopyDto.getToDirectoryPath(), fileMoveCopyDto.getFileName());
-//                                    //sendMsg.add(responseData);
-//
-//                                    byte[] sendData = sendMsg.Finish();
-//                                    send(ByteBuffer.wrap(sendData));
-//
-//                                } catch (JsonProcessingException e) {
-//                                    e.printStackTrace();
-//                                }
-//                                break;
-//                            }
 
                             case MessageProtocol.DELETE_FILE:{
                                 try {
@@ -234,7 +184,7 @@ public class FileControlClient {
                                     FileDeleteDto fileDeleteDto = objectMapper.readValue(convertedJson, FileDeleteDto.class);
 
                                     MessagePacker sendMsg = new MessagePacker();
-                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                     sendMsg.setProtocol(MessageProtocol.DELETE_FILE);
 
                                     String responseData = FileService.deleteFile(fileDeleteDto.getPaths());
@@ -244,7 +194,7 @@ public class FileControlClient {
                                     send(ByteBuffer.wrap(sendData));
 
                                 } catch (JsonProcessingException e) {
-                                    e.printStackTrace();
+                                    logger.error("", e);
                                 }
                                 break;
                             }
@@ -258,7 +208,7 @@ public class FileControlClient {
 
                                     if(offSet == -1){
                                         MessagePacker sendMsg = new MessagePacker();
-                                        sendMsg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                        sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                         sendMsg.setProtocol(MessageProtocol.FILE_UPLOAD);
 
                                         String responseData = "true";
@@ -271,12 +221,12 @@ public class FileControlClient {
 
                                     byte [] buff = receivedMsg.getByte(payloadLength);
                                     FileOutputStream fos = new FileOutputStream(path + fineName, true);
-                                    LOG.info("offSet : " + offSet);
-                                    LOG.info("payloadLength : " + payloadLength);
+//                                    LOG.info("offSet : " + offSet);
+//                                    LOG.info("payloadLength : " + payloadLength);
                                     fos.write(buff, 0, payloadLength);
                                     fos.close();
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    logger.error("", e);
                                 }
                                 break;
                             }
@@ -294,7 +244,7 @@ public class FileControlClient {
                                     final int[] offSet = {0};
                                     if ((readCount = fis.read(buffer)) != -1) {
                                         MessagePacker msg = new MessagePacker();
-                                        msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                        msg.setEndianType(ByteOrder.BIG_ENDIAN);
                                         msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
                                         msg.addLong(file.length());
                                         msg.addInt(offSet[0]);
@@ -312,7 +262,7 @@ public class FileControlClient {
                                                     if ((readCount = fis.read(newBuff)) != -1) {
 
                                                         MessagePacker msg = new MessagePacker();
-                                                        msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                                        msg.setEndianType(ByteOrder.BIG_ENDIAN);
                                                         msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
                                                         msg.addLong(file.length());
                                                         msg.addInt(offSet[0]);
@@ -323,9 +273,8 @@ public class FileControlClient {
                                                         Thread.sleep(20);
                                                         socketChannel.write(msg.getBuffer(), msg.getBuffer(), this);
                                                     }else {
-                                                        LOG.info("파일전송 마지막");
                                                         MessagePacker msg = new MessagePacker();
-                                                        msg.setEndianType(ByteOrder.BIG_ENDIAN); // Default type in JVM
+                                                        msg.setEndianType(ByteOrder.BIG_ENDIAN);
                                                         msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
                                                         msg.addLong(file.length());
                                                         msg.addInt(-1);
@@ -333,6 +282,7 @@ public class FileControlClient {
                                                         socketChannel.write(msg.getBuffer(), msg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
                                                             @Override
                                                             public void completed(Integer result, ByteBuffer attachment) {
+                                                                logger.info("[client] Success to send file : {}", fileName);
                                                             }
                                                             @Override
                                                             public void failed(Throwable exc, ByteBuffer attachment) {
@@ -340,10 +290,8 @@ public class FileControlClient {
                                                         });
                                                         queue.put("success");
                                                     }
-                                                } catch (IOException e) {
-                                                    e.printStackTrace();
-                                                } catch (InterruptedException e) {
-                                                    e.printStackTrace();
+                                                } catch (Exception e) {
+                                                    logger.error("", e);
                                                 }
                                             }
 
@@ -354,7 +302,7 @@ public class FileControlClient {
                                     }
                                     queue.poll(5, TimeUnit.MINUTES);
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    logger.error("", e);
                                 }
                                 break;
                             }
@@ -366,7 +314,7 @@ public class FileControlClient {
 
                     @Override
                     public void failed(Throwable exc, ByteBuffer attachment) {
-                        LOG.info("[서버 에서 읽기 실패]");
+                        logger.info("[client] Failed to read from server, shutdown client..");
                         stopClient();
                     }
                 }
@@ -378,12 +326,11 @@ public class FileControlClient {
                 new CompletionHandler<Integer, Void>() {
                     @Override
                     public void completed(Integer result, Void attachment) {
-                        LOG.info("[보내기 완료 : ! ]");
+                        logger.info("[client] Send success");
                     }
-
                     @Override
                     public void failed(Throwable exc, Void attachment) {
-                        LOG.info("[서버로 보내기 실패]");
+                        logger.info("[client] Failed to send from server, shutdown client..");
                         stopClient();
                     }
                 });

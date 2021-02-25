@@ -368,6 +368,7 @@ const EnhancedTableToolbar = (props) => {
         if(fileViewInfo.fileViewAddress !== copyItem.address){
           alert("Cannot move to another address");
           resetCopyItem();
+          return;
         }
         // s: Ajax ----------------------------------
         var fianlPath = fileViewInfo.fileViewPath;
@@ -415,7 +416,7 @@ const EnhancedTableToolbar = (props) => {
                 return;
             }
             if(json.responseData){
-                alert("Copy success");
+                alert(TYPE + "  success");
                 // getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
                 // resetCopyItem();
             }

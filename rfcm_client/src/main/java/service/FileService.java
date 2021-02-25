@@ -7,15 +7,15 @@ import model.dto.FileMoveCopyRole;
 import model.info.DirectoryInfo;
 import model.dto.FileMoveCopyDto;
 import model.ResponseModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class FileService {
 
-    private final static Logger LOG = Logger.getLogger(String.valueOf(FileService.class));
-
+    private static final Logger logger = LoggerFactory.getLogger(FileService.class);
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -33,7 +33,7 @@ public class FileService {
         try {
             result = objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
-            LOG.warning(e.getMessage());
+            logger.error("", e);
         }
         return result;
     }
@@ -55,7 +55,7 @@ public class FileService {
         try {
             result = objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
-            LOG.warning(e.getMessage());
+            logger.error("", e);
         }
         return result;
     }
@@ -76,7 +76,7 @@ public class FileService {
         try {
             result = objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
-            LOG.warning(e.getMessage());
+            logger.error("", e);
         }
         return result;
     }
@@ -97,7 +97,7 @@ public class FileService {
         try {
             result = objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
-            LOG.warning(e.getMessage());
+            logger.error("", e);
         }
         return result;
     }
@@ -119,7 +119,7 @@ public class FileService {
         try {
             result = objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
-            LOG.warning(e.getMessage());
+            logger.error("", e);
         }
         return result;
     }
@@ -138,44 +138,8 @@ public class FileService {
         try {
             result = objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
-            LOG.warning(e.getMessage());
+            logger.error("", e);
         }
         return result;
     }
-
-//    public static String moveFile(String fromFilePath, String toDirectoryPath, String fileName) {
-//        ResponseModel<Boolean> responseModel = new ResponseModel<>();
-//        try{
-//            boolean isMoved = FileProvider.moveFile(fromFilePath, toDirectoryPath, fileName);
-//            responseModel.setResponseData(isMoved);
-//        }catch (Exception e){
-//            responseModel.setError(true);
-//            responseModel.setErrorMsg(e.getMessage());
-//        }
-//        String result = null;
-//        try {
-//            result = objectMapper.writeValueAsString(responseModel);
-//        } catch (JsonProcessingException e) {
-//            LOG.warning(e.getMessage());
-//        }
-//        return result;
-//    }
-//
-//    public static String copyFile(String fromFilePath, String toDirectoryPath, String fileName) {
-//        ResponseModel<Boolean> responseModel = new ResponseModel<>();
-//        try{
-//            boolean isCopied = FileProvider.copyFile(fromFilePath, toDirectoryPath, fileName);
-//            responseModel.setResponseData(isCopied);
-//        }catch (Exception e){
-//            responseModel.setError(true);
-//            responseModel.setErrorMsg(e.getMessage());
-//        }
-//        String result = null;
-//        try {
-//            result = objectMapper.writeValueAsString(responseModel);
-//        } catch (JsonProcessingException e) {
-//            LOG.warning(e.getMessage());
-//        }
-//        return result;
-//    }
 }

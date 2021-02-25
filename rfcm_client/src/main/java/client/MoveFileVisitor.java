@@ -1,6 +1,8 @@
 package client;
 
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -10,6 +12,9 @@ import java.util.Objects;
 import static java.nio.file.FileVisitResult.TERMINATE;
 
 public class MoveFileVisitor implements FileVisitor<Path> {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private final Path target;
     private final Path source;
     public MoveFileVisitor(@NotNull Path source, @NotNull Path target) {
@@ -33,8 +38,7 @@ public class MoveFileVisitor implements FileVisitor<Path> {
     }
     @Override
     public FileVisitResult visitFileFailed(Path file, IOException exc) {
-        System.out.println("File fail");
-        System.out.println(exc.getMessage());
+        logger.error("[MoveFileVisitor] File visit fail : {}", file.getFileName(), exc);
         return TERMINATE;
     }
     @Override

@@ -1,15 +1,16 @@
 package config;
 
 import model.info.ServerInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 public class PropertiesReader {
 
-    private final static Logger LOG = Logger.getLogger(String.valueOf(PropertiesReader.class));
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesReader.class);
 
     public final static ServerInfo getServerInfoFromPropertiesValue(){
         ServerInfo serverInfo = new ServerInfo();
@@ -26,7 +27,7 @@ public class PropertiesReader {
             serverInfo.setIp(prop.getProperty("ip"));
             serverInfo.setPort(Integer.parseInt(prop.getProperty("port")));
         } catch(Exception e){
-            LOG.warning("Cannot trace [app.properties] file");
+            logger.error("", e);
         }
         return serverInfo;
     }
