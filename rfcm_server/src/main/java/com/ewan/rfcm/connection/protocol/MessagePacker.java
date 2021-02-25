@@ -90,7 +90,7 @@ public class MessagePacker {
                 buffer.put(bytes);
             }
         } catch (Exception e) {
-            logger.error("[Message packer] {}", e.getMessage());
+            logger.error("[Message packer]", e);
         }
     }
 
@@ -106,7 +106,7 @@ public class MessagePacker {
                 buffer.put(yourBytes);
             }
         } catch (IOException e) {
-            logger.error("[Message packer] {}", e.getMessage());
+            logger.error("[Message packer]", e);
         }
     }
 
@@ -151,7 +151,7 @@ public class MessagePacker {
             Object o = in.readObject();
             return o;
         } catch (Exception e) {
-            logger.error("[Message packer] {}", e.getMessage());
+            logger.error("[Message packer]", e);
         }
         return null;
     }

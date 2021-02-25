@@ -57,7 +57,7 @@ public class AsyncFileControlClient {
                                             byteQueue.add(buff);
                                         }
                                     } catch (Exception e) {
-                                        logger.error("[Async client] {}", e.getMessage());
+                                        logger.error("[Async client]", e);
                                     }
                                 }else {
                                     int payloadLength = msg.getInt() ;
@@ -66,9 +66,8 @@ public class AsyncFileControlClient {
                                 }
 
                                 receive();
-
                             } catch (Exception e) {
-                                logger.error("[Async client] {}", e.getMessage());
+                                logger.error("[Async client]", e);
                             }
                         }
 
@@ -82,12 +81,12 @@ public class AsyncFileControlClient {
 
                                 logger.info("[Async client] Cannot connection, close socket : {}", socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName());
                             } catch (Exception e) {
-                                logger.error("[Async client] {}", e.getMessage());
+                                logger.error("[Async client]", e);
                             }
                         }
                     });
         }catch (Exception e){
-            logger.error("[Async client] {}", e.getMessage());
+            logger.error("[Async client]", e);
         }
     }
 
@@ -98,9 +97,8 @@ public class AsyncFileControlClient {
             public void completed(Integer result, ByteBuffer attachment) {
                 try {
                     //receive();
-
                 } catch (Exception e) {
-                    logger.error("[Async client] {}", e.getMessage());
+                    logger.error("[Async client]", e);
                 }
             }
 
@@ -114,7 +112,7 @@ public class AsyncFileControlClient {
 
                     logger.info("[Async client] Cannot connection, close socket : {}", socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName());
                 } catch (Exception e) {
-                    logger.error("[Async client] {}", e.getMessage());
+                    logger.error("[Async client]", e);
                 }
             }
         });

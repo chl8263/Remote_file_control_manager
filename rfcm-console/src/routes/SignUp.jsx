@@ -15,7 +15,7 @@ const SignUp = ( {switchLogin} ) => {
     const [confirmPassword, setConfirmPassword] = useState("");
 
     useEffect(() => {
-        history.pushState('','', '/SignUp');
+        //history.pushState('','', '/SignUp');
         $(".preloader").fadeOut();
     }, []);
 

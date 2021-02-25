@@ -269,7 +269,7 @@ public class FileController {
                                 });
                             }
                         } catch (Exception e) {
-                            logger.error("[File Api - Upload] {}", e.getMessage());
+                            logger.error("[File Api - Upload]", e);
                         }
                     }
                     @Override

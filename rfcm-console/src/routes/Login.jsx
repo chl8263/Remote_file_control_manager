@@ -53,7 +53,7 @@ const Login = ( {switchSignUp,switchMainBoard, addJwtToken, addUserInfo} ) => {
     const passwordRef = useRef(null);
 
     useEffect(() => {
-        history.pushState('','', '/Login');
+        //history.pushState('','', '/Login');
         $(".preloader").fadeOut();
     }, []);
 

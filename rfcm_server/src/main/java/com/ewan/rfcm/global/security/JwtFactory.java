@@ -27,7 +27,7 @@ public class JwtFactory {
                     .sign(generateAlgorithm(signingKey));
 
         }catch (Exception e){
-            logger.error("[JwtFactory] Failed to generate JWT token : {}", e.getMessage());
+            logger.error("[JwtFactory] Failed to generate JWT token", e);
         }
         return token;
     }

@@ -14,7 +14,18 @@ public class Application {
 
         ServerInfo serverInfo = PropertiesReader.getServerInfoFromPropertiesValue();
 
-        new FileControlClient(serverInfo).startClient();
+        //new FileControlClient(serverInfo).startClient();
+
+        for (int i = 0; i < 2; i++) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    new FileControlClient(serverInfo).startClient();
+                }
+            });
+            thread.start();
+            Thread.sleep(10);
+        }
 
 //        for(int i = 0; i<100; i++){
 //            Thread thread = new Thread(new Runnable() {
@@ -26,7 +37,7 @@ public class Application {
 //            thread.start();
 //        }
 
-//        for(int i = 0; i<2; i++){
+//        for(int i = 0; i<1024; i++){
 //            Thread thread = new Thread(new Runnable() {
 //                @Override
 //                public void run() {
@@ -34,8 +45,7 @@ public class Application {
 //                }
 //            });
 //            thread.start();
+//            Thread.sleep(30);
 //        }
-
-
     }
 }

@@ -160,6 +160,10 @@ public class FileProvider {
         Path file = Paths.get(fromFilePath);
         Path movePath = Paths.get(toDirectoryPath+ "/" + fileName);
 
+        if(new File(toDirectoryPath+ "/" + fileName).exists()){
+            throw new InvalidObjectException("Already exist with same file name");
+        }
+
         if (file == null || movePath == null) throw new NullPointerException("Please check path");
 
         Files.move(file, movePath, StandardCopyOption.REPLACE_EXISTING);
@@ -172,6 +176,10 @@ public class FileProvider {
 
         Path file = Paths.get(fromFilePath);
         Path movePath = Paths.get(toDirectoryPath+ "/" + fileName);
+
+        if(new File(toDirectoryPath+ "/" + fileName).exists()){
+            throw new InvalidObjectException("Already exist with same file name");
+        }
 
         if (file == null || movePath == null) throw new NullPointerException("Please check path");
 

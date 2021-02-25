@@ -54,7 +54,7 @@ public class AsyncFileControlServer implements Runnable {
                     logger.info("[Async Server] Accept connection : " + address);
                     logger.info("[Async Server] Connection count : " + connections.size());
                 } catch (IOException e) {
-                    logger.error("[Async Server] Fail to accept client : {}", e.getMessage());
+                    logger.error("[Async Server] Fail to accept client", e);
                 }
             }
             @Override
@@ -74,7 +74,7 @@ public class AsyncFileControlServer implements Runnable {
             }
             logger.info("[Async Server] Close server ...");
         } catch (IOException e) {
-            logger.error("[Async Server] Fail to stop server : {}", e.getMessage());
+            logger.error("[Async Server] Fail to stop server", e);
         }
     }
 

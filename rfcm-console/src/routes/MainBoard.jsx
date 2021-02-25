@@ -39,7 +39,7 @@ const drawerWidth = 240;
 const MainBoard = ( { store, window } ) => {
 
     useEffect(() => {
-        history.pushState('','', '/main-board');
+        //history.pushState('','', '/main-board');
         $(".preloader").fadeOut(); // Remove preloader.
     }, []);
 
