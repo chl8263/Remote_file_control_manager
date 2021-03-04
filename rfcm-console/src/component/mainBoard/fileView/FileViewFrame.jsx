@@ -398,6 +398,7 @@ const EnhancedTableToolbar = (props) => {
         }).then(res => { if(!res.ok){ throw res; } return res; })
         .then(res => { return res.json(); })
         .then(json => {
+            console.log(json);
             if(json === null || json === undefined){
                 alert("Cannot copy file");
                 return;

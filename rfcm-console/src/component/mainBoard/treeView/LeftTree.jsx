@@ -72,7 +72,7 @@ const LeftTree = ({ renewFileViewInfo, switchModalState, renewConnections }) => 
           reqType: SOCK_REQ_TYPE.CONNECTIONS,
         }
         ));
-    }
+    };
 
     sockJS.onmessage = function (e) {
       if(e !== null && e !== undefined && e.data !== null && e.data !== undefined ){

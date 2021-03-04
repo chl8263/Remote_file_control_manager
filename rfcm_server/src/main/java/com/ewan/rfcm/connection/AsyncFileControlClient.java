@@ -23,6 +23,7 @@ public class AsyncFileControlClient {
     private AsynchronousSocketChannel socketChannel;
     private BlockingQueue<String> queue;
     private BlockingQueue<byte[]> byteQueue;
+    private boolean isBlocked = false;
 
     public AsyncFileControlClient(AsynchronousSocketChannel socketChannel){
         this.socketChannel = socketChannel;
@@ -124,11 +125,15 @@ public class AsyncFileControlClient {
 
     public String setPoll(int timeout, TimeUnit timeUnit){
         try {
-            return queue.poll(timeout, timeUnit);
+            isBlocked = true;
+            String result = queue.poll(timeout, timeUnit);
+            isBlocked = false;
+            return result;
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("", e);
+            isBlocked = false;
         }
-        return null;
+        return "";
     }
 
     public byte[] getByteInQueue(){
@@ -138,5 +143,9 @@ public class AsyncFileControlClient {
             byteArrayOutputStream.write(temp, 0, temp.length);
         }
         return byteArrayOutputStream.toByteArray();
+    }
+
+    public boolean isBlocked(){
+        return isBlocked;
     }
 }

@@ -1,5 +1,6 @@
 package com.ewan.rfcm.domain.file.api;
 
+import com.ewan.rfcm.connection.model.ResponseModel;
 import com.ewan.rfcm.domain.file.model.dto.FileChangeDto;
 import com.ewan.rfcm.domain.file.model.dto.FileDeleteDto;
 import com.ewan.rfcm.domain.file.model.dto.FileMoveCopyDto;
@@ -25,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.CompletionHandler;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @AllArgsConstructor
@@ -43,6 +45,13 @@ public class FileController {
             path = preProcessing(path);
             if(client == null || path == null || path.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
+            }
+
+            if(client.isBlocked()) {
+                ResponseModel<String> responseModel = new ResponseModel<>();
+                responseModel.setError(true);
+                responseModel.setErrorMsg("Client busy, please try later..");
+                return ResponseEntity.ok(responseModel);
             }
 
             MessagePacker msg = new MessagePacker();
@@ -77,6 +86,13 @@ public class FileController {
                 return ResponseEntity.badRequest().body(EMPTY);
             }
 
+            if(client.isBlocked()) {
+                ResponseModel<String> responseModel = new ResponseModel<>();
+                responseModel.setError(true);
+                responseModel.setErrorMsg("Client busy, please try later..");
+                return ResponseEntity.ok(responseModel);
+            }
+
             MessagePacker msg = new MessagePacker();
             msg.setEndianType(ByteOrder.BIG_ENDIAN);
             msg.setProtocol(MessageProtocol.FILES);
@@ -107,6 +123,13 @@ public class FileController {
             path = preProcessing(path);
             if(client == null || path == null || path.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
+            }
+
+            if(client.isBlocked()) {
+                ResponseModel<String> responseModel = new ResponseModel<>();
+                responseModel.setError(true);
+                responseModel.setErrorMsg("Client busy, please try later..");
+                return ResponseEntity.ok(responseModel);
             }
 
             MessagePacker msg = new MessagePacker();
@@ -143,6 +166,13 @@ public class FileController {
                 return ResponseEntity.badRequest().body(EMPTY);
             }
 
+            if(client.isBlocked()) {
+                ResponseModel<String> responseModel = new ResponseModel<>();
+                responseModel.setError(true);
+                responseModel.setErrorMsg("Client busy, please try later..");
+                return ResponseEntity.ok(responseModel);
+            }
+
             fileMoveCopyDto.setPaths(Arrays.stream(fileMoveCopyDto.getPaths()).map(x -> preProcessing(x)).toArray(String[]::new));
             fileMoveCopyDto.setToDirectoryPath(preProcessing(fileMoveCopyDto.getToDirectoryPath()));
 
@@ -155,7 +185,7 @@ public class FileController {
             msg.addString(tranData);
             byte[] data = msg.Finish();
             client.send(data);
-            String responseResult = client.setPoll(1, TimeUnit.MINUTES);
+            String responseResult = client.setPoll(10, TimeUnit.MINUTES);
 
             if (responseResult == null || responseResult.equals(EMPTY)) {
                 return ResponseEntity.badRequest().body(EMPTY);
@@ -176,6 +206,13 @@ public class FileController {
             AsyncFileControlClient client = AsyncFileControlServer.getClient(ip);
             if (client == null) {
                 return ResponseEntity.badRequest().body(EMPTY);
+            }
+
+            if(client.isBlocked()) {
+                ResponseModel<String> responseModel = new ResponseModel<>();
+                responseModel.setError(true);
+                responseModel.setErrorMsg("Client busy, please try later..");
+                return ResponseEntity.ok(responseModel);
             }
 
             MessagePacker msg = new MessagePacker();
@@ -210,6 +247,13 @@ public class FileController {
 
             if (client == null || path == null || path.equals(EMPTY)) {
                 return ResponseEntity.badRequest().body(EMPTY);
+            }
+
+            if(client.isBlocked()) {
+                ResponseModel<String> responseModel = new ResponseModel<>();
+                responseModel.setError(true);
+                responseModel.setErrorMsg("Client busy, please try later..");
+                return ResponseEntity.ok(responseModel);
             }
 
             InputStream is = file.getInputStream();
@@ -298,6 +342,13 @@ public class FileController {
                 return ResponseEntity.badRequest().body(EMPTY);
             }
 
+            if(client.isBlocked()) {
+                ResponseModel<String> responseModel = new ResponseModel<>();
+                responseModel.setError(true);
+                responseModel.setErrorMsg("Client busy, please try later..");
+                return ResponseEntity.ok(responseModel);
+            }
+
             MessagePacker msg = new MessagePacker();
             msg.setEndianType(ByteOrder.BIG_ENDIAN);
             msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
@@ -315,7 +366,7 @@ public class FileController {
 
             String result = client.setPoll(2, TimeUnit.MINUTES);
 
-            if(result.equals("success")){
+            if("success".equals(result)){
                 byte[] fileContent = client.getByteInQueue();
 
                 HttpHeaders header = new HttpHeaders();

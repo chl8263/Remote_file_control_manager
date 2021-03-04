@@ -111,16 +111,30 @@ public class FileControlClient {
                                 break;
                             }
                             case MessageProtocol.DIRECTORY:{
-                                String path = receivedMsg.getString();
+//                                String path = receivedMsg.getString();
+//
+//                                MessagePacker sendMsg = new MessagePacker();
+//                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+//                                sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
+//
+//                                String responseData = FileService.getUnderLineDirectory(path);
+//                                sendMsg.add(responseData);
+//                                byte [] sendData = sendMsg.Finish();
+//                                send(ByteBuffer.wrap(sendData));
+//                                break;
 
-                                MessagePacker sendMsg = new MessagePacker();
-                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
+                                new Thread(() -> {
+                                    String path = receivedMsg.getString();
 
-                                String responseData = FileService.getUnderLineDirectory(path);
-                                sendMsg.add(responseData);
-                                byte [] sendData = sendMsg.Finish();
-                                send(ByteBuffer.wrap(sendData));
+                                    MessagePacker sendMsg = new MessagePacker();
+                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                    sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
+
+                                    String responseData = FileService.getUnderLineDirectory(path);
+                                    sendMsg.add(responseData);
+                                    byte [] sendData = sendMsg.Finish();
+                                    send(ByteBuffer.wrap(sendData));
+                                }).start();
                                 break;
                             }
                             case MessageProtocol.FILES:{
@@ -319,17 +333,20 @@ public class FileControlClient {
     }
 
     public void send(ByteBuffer byteBuffer){
-        socketChannel.write(byteBuffer, null,
-                new CompletionHandler<Integer, Void>() {
-                    @Override
-                    public void completed(Integer result, Void attachment) {
-                        logger.info("[client] Send success");
-                    }
-                    @Override
-                    public void failed(Throwable exc, Void attachment) {
-                        logger.info("[client] Failed to send from server, shutdown client..");
-                        stopClient();
-                    }
-                });
+        synchronized (this) {
+            socketChannel.write(byteBuffer, null,
+                    new CompletionHandler<Integer, Void>() {
+                        @Override
+                        public void completed(Integer result, Void attachment) {
+                            logger.info("[client] Send success");
+                        }
+
+                        @Override
+                        public void failed(Throwable exc, Void attachment) {
+                            logger.info("[client] Failed to send from server, shutdown client..");
+                            stopClient();
+                        }
+                    });
+        }
     }
 }
