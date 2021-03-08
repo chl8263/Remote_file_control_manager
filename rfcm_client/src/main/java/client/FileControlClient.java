@@ -22,15 +22,13 @@ import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class FileControlClient {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private ExecutorService executorService;
     private AsynchronousChannelGroup channelGroup;
     private AsynchronousSocketChannel socketChannel;
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -41,6 +39,7 @@ public class FileControlClient {
     public FileControlClient(ServerInfo serverInfo){
         this.serverInfo = serverInfo;
         queue = new LinkedBlockingQueue<>();
+        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
     public void startClient(){
@@ -99,116 +98,132 @@ public class FileControlClient {
 
                         switch (protocol){
                             case MessageProtocol.ROOT_DIRECTORY:{
-                                MessagePacker sendMsg = new MessagePacker();
-                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
-
-                                String responseData = FileService.getDirectoryInRoot();
-                                sendMsg.add(responseData);
-
-                                byte [] sendData = sendMsg.Finish();
-                                send(ByteBuffer.wrap(sendData));
-                                break;
-                            }
-                            case MessageProtocol.DIRECTORY:{
-//                                String path = receivedMsg.getString();
-//
-//                                MessagePacker sendMsg = new MessagePacker();
-//                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
-//                                sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
-//
-//                                String responseData = FileService.getUnderLineDirectory(path);
-//                                sendMsg.add(responseData);
-//                                byte [] sendData = sendMsg.Finish();
-//                                send(ByteBuffer.wrap(sendData));
-//                                break;
-
-                                new Thread(() -> {
-                                    String path = receivedMsg.getString();
+                                executorService.execute(() -> {
+                                    int uidLen = receivedMsg.getInt();
+                                    String uid = (String) receivedMsg.getObject(uidLen);
 
                                     MessagePacker sendMsg = new MessagePacker();
                                     sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                     sendMsg.setProtocol(MessageProtocol.ROOT_DIRECTORY);
+                                    sendMsg.add(uid);
+
+                                    String responseData = FileService.getDirectoryInRoot();
+                                    sendMsg.add(responseData);
+
+                                    byte [] sendData = sendMsg.Finish();
+                                    send(ByteBuffer.wrap(sendData));
+                                });
+                                break;
+                            }
+                            case MessageProtocol.DIRECTORY:{
+                                executorService.execute(() -> {
+                                    int uidLen = receivedMsg.getInt();
+                                    String uid = (String) receivedMsg.getObject(uidLen);
+
+                                    String path = receivedMsg.getString();
+                                    MessagePacker sendMsg = new MessagePacker();
+                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                    sendMsg.setProtocol(MessageProtocol.DIRECTORY);
+                                    sendMsg.add(uid);
 
                                     String responseData = FileService.getUnderLineDirectory(path);
                                     sendMsg.add(responseData);
                                     byte [] sendData = sendMsg.Finish();
                                     send(ByteBuffer.wrap(sendData));
-                                }).start();
+                                });
                                 break;
                             }
                             case MessageProtocol.FILES:{
-                                String path = receivedMsg.getString();
-                                MessagePacker sendMsg = new MessagePacker();
-                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                sendMsg.setProtocol(MessageProtocol.FILES);
+                                executorService.execute(() -> {
+                                    int uidLen = receivedMsg.getInt();
+                                    String uid = (String) receivedMsg.getObject(uidLen);
 
-                                String responseData = FileService.getFilesInDirectory(path);
-                                sendMsg.add(responseData);
+                                    String path = receivedMsg.getString();
+                                    MessagePacker sendMsg = new MessagePacker();
+                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                    sendMsg.setProtocol(MessageProtocol.FILES);
+                                    sendMsg.add(uid);
 
-                                byte [] sendData = sendMsg.Finish();
-                                send(ByteBuffer.wrap(sendData));
+                                    String responseData = FileService.getFilesInDirectory(path);
+                                    sendMsg.add(responseData);
 
+                                    byte [] sendData = sendMsg.Finish();
+                                    send(ByteBuffer.wrap(sendData));
+                                });
                                 break;
                             }
                             case MessageProtocol.CHANGE_FILE_NAME:{
-                                try {
-                                    String convertedJson = receivedMsg.getString();
-                                    FileChangeDto fileChangeProtocol = objectMapper.readValue(convertedJson, FileChangeDto.class);
+                                executorService.execute(() -> {
+                                    try {
+                                        int uidLen = receivedMsg.getInt();
+                                        String uid = (String) receivedMsg.getObject(uidLen);
 
-                                    MessagePacker sendMsg = new MessagePacker();
-                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                    sendMsg.setProtocol(MessageProtocol.CHANGE_FILE_NAME);
+                                        String convertedJson = receivedMsg.getString();
+                                        FileChangeDto fileChangeProtocol = objectMapper.readValue(convertedJson, FileChangeDto.class);
 
-                                    String responseData = FileService.changeFileName(fileChangeProtocol.getPath(), fileChangeProtocol.getBeforeName(), fileChangeProtocol.getAfterName(), fileChangeProtocol.getExtension());
+                                        MessagePacker sendMsg = new MessagePacker();
+                                        sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                        sendMsg.setProtocol(MessageProtocol.CHANGE_FILE_NAME);
+                                        sendMsg.add(uid);
 
-                                    sendMsg.add(responseData);
-                                    byte [] sendData = sendMsg.Finish();
-                                    send(ByteBuffer.wrap(sendData));
-                                } catch (JsonProcessingException e) {
-                                    logger.error("", e);
-                                }
+                                        String responseData = FileService.changeFileName(fileChangeProtocol.getPath(), fileChangeProtocol.getBeforeName(), fileChangeProtocol.getAfterName(), fileChangeProtocol.getExtension());
+                                        sendMsg.add(responseData);
+                                        byte [] sendData = sendMsg.Finish();
+                                        send(ByteBuffer.wrap(sendData));
+                                    } catch (JsonProcessingException e) {
+                                        logger.error("", e);
+                                    }
+                                });
                                 break;
                             }
                             case MessageProtocol.MOVE_COPY_FILE:{
-                                try {
-                                    String convertedJson = receivedMsg.getString();
-                                    FileMoveCopyDto fileMoveCopyDto = objectMapper.readValue(convertedJson, FileMoveCopyDto.class);
+                                executorService.execute(() -> {
+                                    try {
+                                        int uidLen = receivedMsg.getInt();
+                                        String uid = (String) receivedMsg.getObject(uidLen);
 
-                                    MessagePacker sendMsg = new MessagePacker();
-                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                    sendMsg.setProtocol(MessageProtocol.MOVE_COPY_FILE);
+                                        String convertedJson = receivedMsg.getString();
+                                        FileMoveCopyDto fileMoveCopyDto = objectMapper.readValue(convertedJson, FileMoveCopyDto.class);
 
-                                    String responseData = FileService.moveCopyFile(fileMoveCopyDto);
-                                    sendMsg.add(responseData);
+                                        MessagePacker sendMsg = new MessagePacker();
+                                        sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                        sendMsg.setProtocol(MessageProtocol.MOVE_COPY_FILE);
+                                        sendMsg.add(uid);
 
-                                    byte[] sendData = sendMsg.Finish();
-                                    send(ByteBuffer.wrap(sendData));
+                                        String responseData = FileService.moveCopyFile(fileMoveCopyDto);
+                                        sendMsg.add(responseData);
 
-                                } catch (JsonProcessingException e) {
-                                    logger.error("", e);
-                                }
+                                        byte[] sendData = sendMsg.Finish();
+                                        send(ByteBuffer.wrap(sendData));
+                                    } catch (JsonProcessingException e) {
+                                        logger.error("", e);
+                                    }
+                                });
                                 break;
                             }
-
                             case MessageProtocol.DELETE_FILE:{
-                                try {
-                                    String convertedJson = receivedMsg.getString();
-                                    FileDeleteDto fileDeleteDto = objectMapper.readValue(convertedJson, FileDeleteDto.class);
+                                executorService.execute(() -> {
+                                    try {
+                                        int uidLen = receivedMsg.getInt();
+                                        String uid = (String) receivedMsg.getObject(uidLen);
 
-                                    MessagePacker sendMsg = new MessagePacker();
-                                    sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                    sendMsg.setProtocol(MessageProtocol.DELETE_FILE);
+                                        String convertedJson = receivedMsg.getString();
+                                        FileDeleteDto fileDeleteDto = objectMapper.readValue(convertedJson, FileDeleteDto.class);
 
-                                    String responseData = FileService.deleteFile(fileDeleteDto.getPaths());
-                                    sendMsg.add(responseData);
+                                        MessagePacker sendMsg = new MessagePacker();
+                                        sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                        sendMsg.setProtocol(MessageProtocol.DELETE_FILE);
+                                        sendMsg.add(uid);
 
-                                    byte[] sendData = sendMsg.Finish();
-                                    send(ByteBuffer.wrap(sendData));
+                                        String responseData = FileService.deleteFile(fileDeleteDto.getPaths());
+                                        sendMsg.add(responseData);
 
-                                } catch (JsonProcessingException e) {
-                                    logger.error("", e);
-                                }
+                                        byte[] sendData = sendMsg.Finish();
+                                        send(ByteBuffer.wrap(sendData));
+                                    } catch (JsonProcessingException e) {
+                                        logger.error("", e);
+                                    }
+                                });
                                 break;
                             }
 
@@ -318,7 +333,6 @@ public class FileControlClient {
                                 break;
                             }
                         }
-
                         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
                         socketChannel.read(byteBuffer, byteBuffer, this);
                     }

@@ -120,6 +120,15 @@ public class FileProvider {
                     errorMsgList.add("Write access deny [" + path + "]");
                     continue;
                 }
+
+                //File tempSameFile = new File(path);
+                if(tempFile.renameTo(tempFile)){
+                    System.out.println("file is closed");
+                }else{
+                    // if the file didnt accept the renaming operation
+                    System.out.println("file is opened");
+                }
+
                 try{
                     if(fileMoveCopyDto.getRole() == FileMoveCopyRole.MOVE){
                         if(tempFile.isFile()){

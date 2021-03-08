@@ -12,7 +12,7 @@ public class MessagePacker {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private int bufferSize = 2100000;
-    private static ByteBuffer buffer;
+    private ByteBuffer buffer;
     private int offset = 0;
 
     public MessagePacker() {

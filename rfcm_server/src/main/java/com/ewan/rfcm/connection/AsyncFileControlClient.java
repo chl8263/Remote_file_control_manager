@@ -1,5 +1,6 @@
 package com.ewan.rfcm.connection;
 
+import com.ewan.rfcm.connection.model.SocketResponseModel;
 import com.ewan.rfcm.connection.protocol.MessagePacker;
 import com.ewan.rfcm.connection.protocol.MessageProtocol;
 import com.ewan.rfcm.connection.model.WebsocketRequestType;
@@ -11,8 +12,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+
+import static com.ewan.rfcm.connection.protocol.MessageProtocol.*;
 
 public class AsyncFileControlClient {
 
@@ -22,6 +26,7 @@ public class AsyncFileControlClient {
 
     private AsynchronousSocketChannel socketChannel;
     private BlockingQueue<String> queue;
+    private ConcurrentHashMap<Integer, BlockingQueue<SocketResponseModel>> queueHash;
     private BlockingQueue<byte[]> byteQueue;
     private boolean isBlocked = false;
 
@@ -29,6 +34,16 @@ public class AsyncFileControlClient {
         this.socketChannel = socketChannel;
         this.queue = new LinkedBlockingQueue<>();
         this.byteQueue = new LinkedBlockingQueue<>();
+        this.queueHash = new ConcurrentHashMap<>();
+        queueHash.put((int) ROOT_DIRECTORY, new LinkedBlockingQueue<>());
+        queueHash.put((int) DIRECTORY, new LinkedBlockingQueue<>());
+        queueHash.put((int) FILES, new LinkedBlockingQueue<>());
+        queueHash.put((int) CHANGE_FILE_NAME, new LinkedBlockingQueue<>());
+        queueHash.put((int) MOVE_COPY_FILE, new LinkedBlockingQueue<>());
+        queueHash.put((int) DELETE_FILE, new LinkedBlockingQueue<>());
+        queueHash.put((int) FILE_UPLOAD, new LinkedBlockingQueue<>());
+        queueHash.put((int) FILE_DOWN_LOAD, new LinkedBlockingQueue<>());
+
         receive();
     }
 
@@ -46,12 +61,17 @@ public class AsyncFileControlClient {
                                 MessagePacker msg = new MessagePacker(byteArr);
 
                                 byte protocol = msg.getProtocol();
+
+                                BlockingQueue<SocketResponseModel> tQueue = queueHash.get((int) protocol);
+                                if(tQueue == null) throw new NullPointerException("Cannot find queue");
+
                                 if(protocol == MessageProtocol.FILE_DOWN_LOAD){
                                     try {
                                         float fileSize = msg.getLong();
                                         int offSet = msg.getInt();
                                         if(offSet == -1){
-                                            queue.put("success");
+                                            //queue.put("success");
+                                            tQueue.put(new SocketResponseModel("success", "success"));
                                         }else {
                                             int payloadLength = msg.getInt();
                                             byte [] buff = msg.getByte(payloadLength);
@@ -61,9 +81,30 @@ public class AsyncFileControlClient {
                                         logger.error("[Async client]", e);
                                     }
                                 }else {
-                                    int payloadLength = msg.getInt() ;
+                                    var model = new SocketResponseModel();
+//                                    if(protocol == MOVE_COPY_FILE){
+//                                        int uidLen = msg.getInt();
+//                                        String uid = (String) msg.getObject(uidLen);
+//                                        System.out.println("receive@@@@@@ =============");
+//                                        System.out.println(uid);
+//                                        System.out.println("=============");
+//                                        model.setUid(uid);
+//                                    }else {
+//                                        model.setUid("");
+//                                    }
+
+                                    int uidLen = msg.getInt();
+                                    String uid = (String) msg.getObject(uidLen);
+                                    model.setUid(uid);
+
+                                    int payloadLength = msg.getInt();
                                     String payload = (String) msg.getObject(payloadLength);
-                                    queue.put(payload);
+
+                                    model.setResponseData(payload);
+//                                    BlockingQueue<String> tQueue = queueHash.get(Integer.valueOf(protocol));
+//                                    if(tQueue == null) throw new NullPointerException("Cannot find queue");
+                                    //tQueue.put(payload);
+                                    tQueue.put(model);
                                 }
 
                                 receive();
@@ -123,18 +164,56 @@ public class AsyncFileControlClient {
         return socketChannel;
     }
 
-    public String setPoll(int timeout, TimeUnit timeUnit){
+    public SocketResponseModel setPoll(int key, int timeout, TimeUnit timeUnit){
         try {
-            isBlocked = true;
-            String result = queue.poll(timeout, timeUnit);
-            isBlocked = false;
+            BlockingQueue<SocketResponseModel> queue = queueHash.get(key);
+            if(queue == null) throw new NullPointerException("Cannot find queue");
+            SocketResponseModel result = queue.take();//queue.poll(timeout, timeUnit);
             return result;
         } catch (InterruptedException e) {
             logger.error("", e);
             isBlocked = false;
         }
-        return "";
+        return new SocketResponseModel();
     }
+
+    public SocketResponseModel setPut(int key, SocketResponseModel socketResponseModel){
+        try {
+            BlockingQueue<SocketResponseModel> queue = queueHash.get(key);
+            if(queue == null) throw new NullPointerException("Cannot find queue");
+            queue.put(socketResponseModel);
+        } catch (InterruptedException e) {
+            logger.error("", e);
+            isBlocked = false;
+        }
+        return new SocketResponseModel();
+    }
+
+//    public SocketResponseModel hashSetPeek(int key, int timeout, TimeUnit timeUnit){
+//        try {
+//            BlockingQueue<SocketResponseModel> queue = queueHash.get(key);
+//            if(queue == null) throw new NullPointerException("Cannot find queue");
+//            SocketResponseModel result = queue.peek();//queue.poll(timeout, timeUnit);
+//            return result;
+//        } catch (Exception e) {
+//            logger.error("", e);
+//            isBlocked = false;
+//        }
+//        return new SocketResponseModel();
+//    }
+
+//    public String setPoll(int timeout, TimeUnit timeUnit){
+//        try {
+//            isBlocked = true;
+//            String result = queue.poll(timeout, timeUnit);
+//            isBlocked = false;
+//            return result;
+//        } catch (InterruptedException e) {
+//            logger.error("", e);
+//            isBlocked = false;
+//        }
+//        return "";
+//    }
 
     public byte[] getByteInQueue(){
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
