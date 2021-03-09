@@ -110,7 +110,7 @@ public class AsyncFileControlClient {
                                 socketChannel.close();
                                 WebSocketHandler.sendClientInfo(address, WebsocketRequestType.REMOVE);
 
-                                logger.info("[Async client] Cannot connection, close socket : {}", socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName());
+                                logger.info("[Async client] Cannot connection, close socket : {}", address + " , Thread => " + Thread.currentThread().getName());
                             } catch (Exception e) {
                                 logger.error("[Async client]", e);
                             }
@@ -141,7 +141,7 @@ public class AsyncFileControlClient {
                     socketChannel.close();
                     WebSocketHandler.sendClientInfo(address, WebsocketRequestType.REMOVE);
 
-                    logger.info("[Async client] Cannot connection, close socket : {}", socketChannel.getRemoteAddress() + " : " + Thread.currentThread().getName());
+                    logger.info("[Async client] Cannot connection, close socket : {}", address + " , Thread => " + Thread.currentThread().getName());
                 } catch (Exception e) {
                     logger.error("[Async client]", e);
                 }
@@ -177,32 +177,6 @@ public class AsyncFileControlClient {
         }
         return new SocketResponseModel();
     }
-
-//    public SocketResponseModel hashSetPeek(int key, int timeout, TimeUnit timeUnit){
-//        try {
-//            BlockingQueue<SocketResponseModel> queue = queueHash.get(key);
-//            if(queue == null) throw new NullPointerException("Cannot find queue");
-//            SocketResponseModel result = queue.peek();//queue.poll(timeout, timeUnit);
-//            return result;
-//        } catch (Exception e) {
-//            logger.error("", e);
-//            isBlocked = false;
-//        }
-//        return new SocketResponseModel();
-//    }
-
-//    public String setPoll(int timeout, TimeUnit timeUnit){
-//        try {
-//            isBlocked = true;
-//            String result = queue.poll(timeout, timeUnit);
-//            isBlocked = false;
-//            return result;
-//        } catch (InterruptedException e) {
-//            logger.error("", e);
-//            isBlocked = false;
-//        }
-//        return "";
-//    }
 
     public byte[] getByteInQueue(){
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
