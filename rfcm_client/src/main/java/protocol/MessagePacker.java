@@ -11,7 +11,7 @@ public class MessagePacker {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private int bufferSize = 2100000;
+    private int bufferSize = 2150000;
     private ByteBuffer buffer;
     private int offset = 0;
 
@@ -31,7 +31,7 @@ public class MessagePacker {
         buffer = ByteBuffer.wrap(data);
     }
 
-    public byte[] Finish(){
+    public byte[] finish(){
         offset = buffer.position();
         byte[] data = {};
         if(buffer.hasArray()){

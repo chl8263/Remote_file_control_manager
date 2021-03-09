@@ -22,7 +22,7 @@ public class AsyncFileControlClient {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncFileControlClient.class);
 
-    private int bufferSize = 2100000;
+    private int bufferSize = 2150000;
 
     private AsynchronousSocketChannel socketChannel;
     private BlockingQueue<String> queue;
@@ -58,21 +58,30 @@ public class AsyncFileControlClient {
                                 attachment.flip();
 
                                 byte [] byteArr = attachment.array();
+                                System.out.println(byteArr.length);
                                 MessagePacker msg = new MessagePacker(byteArr);
-
                                 byte protocol = msg.getProtocol();
 
                                 BlockingQueue<SocketResponseModel> tQueue = queueHash.get((int) protocol);
                                 if(tQueue == null) throw new NullPointerException("Cannot find queue");
+
+                                SocketResponseModel responseModel = new SocketResponseModel();
+                                int uidLen = msg.getInt();
+                                String uid = (String) msg.getObject(uidLen);
+                                responseModel.setUid(uid);
 
                                 if(protocol == MessageProtocol.FILE_DOWN_LOAD){
                                     try {
                                         float fileSize = msg.getLong();
                                         int offSet = msg.getInt();
                                         if(offSet == -1){
+                                            System.out.println("마지막" + offSet);
                                             //queue.put("success");
-                                            tQueue.put(new SocketResponseModel("success", "success"));
+                                            responseModel.setResponseData(DOWNLOAD_SUCCESS);
+                                            tQueue.put(responseModel);
+                                            //tQueue.put(new SocketResponseModel("success", "success"));
                                         }else {
+                                            System.out.println("쌓임" + offSet);
                                             int payloadLength = msg.getInt();
                                             byte [] buff = msg.getByte(payloadLength);
                                             byteQueue.add(buff);
@@ -81,30 +90,10 @@ public class AsyncFileControlClient {
                                         logger.error("[Async client]", e);
                                     }
                                 }else {
-                                    var model = new SocketResponseModel();
-//                                    if(protocol == MOVE_COPY_FILE){
-//                                        int uidLen = msg.getInt();
-//                                        String uid = (String) msg.getObject(uidLen);
-//                                        System.out.println("receive@@@@@@ =============");
-//                                        System.out.println(uid);
-//                                        System.out.println("=============");
-//                                        model.setUid(uid);
-//                                    }else {
-//                                        model.setUid("");
-//                                    }
-
-                                    int uidLen = msg.getInt();
-                                    String uid = (String) msg.getObject(uidLen);
-                                    model.setUid(uid);
-
                                     int payloadLength = msg.getInt();
                                     String payload = (String) msg.getObject(payloadLength);
-
-                                    model.setResponseData(payload);
-//                                    BlockingQueue<String> tQueue = queueHash.get(Integer.valueOf(protocol));
-//                                    if(tQueue == null) throw new NullPointerException("Cannot find queue");
-                                    //tQueue.put(payload);
-                                    tQueue.put(model);
+                                    responseModel.setResponseData(payload);
+                                    tQueue.put(responseModel);
                                 }
 
                                 receive();

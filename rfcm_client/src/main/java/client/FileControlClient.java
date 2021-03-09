@@ -24,6 +24,8 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.*;
 
+import static protocol.MessageProtocol.DOWNLOAD_SUCCESS;
+
 public class FileControlClient {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -33,16 +35,16 @@ public class FileControlClient {
     private AsynchronousSocketChannel socketChannel;
     private ObjectMapper objectMapper = new ObjectMapper();
     private final ServerInfo serverInfo;
-    private BlockingQueue<String> queue;
-    private int bufferSize = 2100000;
+    //private BlockingQueue<String> queue;
+    private int bufferSize = 2150000;
 
-    public FileControlClient(ServerInfo serverInfo){
+    public FileControlClient(ServerInfo serverInfo) {
         this.serverInfo = serverInfo;
-        queue = new LinkedBlockingQueue<>();
+        //queue = new LinkedBlockingQueue<>();
         executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
-    public void startClient(){
+    public void startClient() {
         try {
             channelGroup = AsynchronousChannelGroup.withFixedThreadPool(
                     Runtime.getRuntime().availableProcessors(),
@@ -64,7 +66,7 @@ public class FileControlClient {
                         @Override
                         public void failed(Throwable exc, Void attachment) {
                             logger.info("[Client] Failed to connection with server");
-                            if(socketChannel.isOpen()) {
+                            if (socketChannel.isOpen()) {
                                 stopClient();
                             }
                         }
@@ -75,10 +77,10 @@ public class FileControlClient {
         }
     }
 
-    public void stopClient(){
+    public void stopClient() {
         try {
             logger.info("[Client] Stop client and shut down...");
-            if(channelGroup != null && !channelGroup.isShutdown()){
+            if (channelGroup != null && !channelGroup.isShutdown()) {
                 channelGroup.shutdownNow();
             }
         } catch (IOException e) {
@@ -86,18 +88,18 @@ public class FileControlClient {
         }
     }
 
-    public void receive(){
+    public void receive() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
         socketChannel.read(byteBuffer, byteBuffer,
                 new CompletionHandler<Integer, ByteBuffer>() {
                     @Override
                     public void completed(Integer result, ByteBuffer attachment) {
-                        byte [] byteArr = attachment.array();
+                        byte[] byteArr = attachment.array();
                         MessagePacker receivedMsg = new MessagePacker(byteArr);
                         byte protocol = receivedMsg.getProtocol();
 
-                        switch (protocol){
-                            case MessageProtocol.ROOT_DIRECTORY:{
+                        switch (protocol) {
+                            case MessageProtocol.ROOT_DIRECTORY: {
                                 executorService.execute(() -> {
                                     int uidLen = receivedMsg.getInt();
                                     String uid = (String) receivedMsg.getObject(uidLen);
@@ -110,12 +112,12 @@ public class FileControlClient {
                                     String responseData = FileService.getDirectoryInRoot();
                                     sendMsg.add(responseData);
 
-                                    byte [] sendData = sendMsg.Finish();
+                                    byte[] sendData = sendMsg.finish();
                                     send(ByteBuffer.wrap(sendData));
                                 });
                                 break;
                             }
-                            case MessageProtocol.DIRECTORY:{
+                            case MessageProtocol.DIRECTORY: {
                                 executorService.execute(() -> {
                                     int uidLen = receivedMsg.getInt();
                                     String uid = (String) receivedMsg.getObject(uidLen);
@@ -128,12 +130,12 @@ public class FileControlClient {
 
                                     String responseData = FileService.getUnderLineDirectory(path);
                                     sendMsg.add(responseData);
-                                    byte [] sendData = sendMsg.Finish();
+                                    byte[] sendData = sendMsg.finish();
                                     send(ByteBuffer.wrap(sendData));
                                 });
                                 break;
                             }
-                            case MessageProtocol.FILES:{
+                            case MessageProtocol.FILES: {
                                 executorService.execute(() -> {
                                     int uidLen = receivedMsg.getInt();
                                     String uid = (String) receivedMsg.getObject(uidLen);
@@ -147,12 +149,12 @@ public class FileControlClient {
                                     String responseData = FileService.getFilesInDirectory(path);
                                     sendMsg.add(responseData);
 
-                                    byte [] sendData = sendMsg.Finish();
+                                    byte[] sendData = sendMsg.finish();
                                     send(ByteBuffer.wrap(sendData));
                                 });
                                 break;
                             }
-                            case MessageProtocol.CHANGE_FILE_NAME:{
+                            case MessageProtocol.CHANGE_FILE_NAME: {
                                 executorService.execute(() -> {
                                     try {
                                         int uidLen = receivedMsg.getInt();
@@ -168,7 +170,7 @@ public class FileControlClient {
 
                                         String responseData = FileService.changeFileName(fileChangeProtocol.getPath(), fileChangeProtocol.getBeforeName(), fileChangeProtocol.getAfterName(), fileChangeProtocol.getExtension());
                                         sendMsg.add(responseData);
-                                        byte [] sendData = sendMsg.Finish();
+                                        byte[] sendData = sendMsg.finish();
                                         send(ByteBuffer.wrap(sendData));
                                     } catch (JsonProcessingException e) {
                                         logger.error("", e);
@@ -176,7 +178,7 @@ public class FileControlClient {
                                 });
                                 break;
                             }
-                            case MessageProtocol.MOVE_COPY_FILE:{
+                            case MessageProtocol.MOVE_COPY_FILE: {
                                 executorService.execute(() -> {
                                     try {
                                         int uidLen = receivedMsg.getInt();
@@ -193,7 +195,7 @@ public class FileControlClient {
                                         String responseData = FileService.moveCopyFile(fileMoveCopyDto);
                                         sendMsg.add(responseData);
 
-                                        byte[] sendData = sendMsg.Finish();
+                                        byte[] sendData = sendMsg.finish();
                                         send(ByteBuffer.wrap(sendData));
                                     } catch (JsonProcessingException e) {
                                         logger.error("", e);
@@ -201,7 +203,7 @@ public class FileControlClient {
                                 });
                                 break;
                             }
-                            case MessageProtocol.DELETE_FILE:{
+                            case MessageProtocol.DELETE_FILE: {
                                 executorService.execute(() -> {
                                     try {
                                         int uidLen = receivedMsg.getInt();
@@ -218,7 +220,7 @@ public class FileControlClient {
                                         String responseData = FileService.deleteFile(fileDeleteDto.getPaths());
                                         sendMsg.add(responseData);
 
-                                        byte[] sendData = sendMsg.Finish();
+                                        byte[] sendData = sendMsg.finish();
                                         send(ByteBuffer.wrap(sendData));
                                     } catch (JsonProcessingException e) {
                                         logger.error("", e);
@@ -227,109 +229,137 @@ public class FileControlClient {
                                 break;
                             }
 
-                            case MessageProtocol.FILE_UPLOAD:{
-                                try {
-                                    String path = receivedMsg.getString();
-                                    String fineName = receivedMsg.getString();
-                                    int offSet = receivedMsg.getInt();
-                                    int payloadLength = receivedMsg.getInt();
+                            case MessageProtocol.FILE_UPLOAD: {
+                                executorService.execute(() -> {
+                                    try {
+                                        int uidLen = receivedMsg.getInt();
+                                        String uid = (String) receivedMsg.getObject(uidLen);
 
-                                    if(offSet == -1){
-                                        MessagePacker sendMsg = new MessagePacker();
-                                        sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                        sendMsg.setProtocol(MessageProtocol.FILE_UPLOAD);
+                                        String path = receivedMsg.getString();
+                                        String fineName = receivedMsg.getString();
+                                        int offSet = receivedMsg.getInt();
+                                        int payloadLength = receivedMsg.getInt();
 
-                                        String responseData = "true";
-                                        sendMsg.add(responseData);
+                                        if (offSet == -1) {
+                                            MessagePacker sendMsg = new MessagePacker();
+                                            sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                            sendMsg.setProtocol(MessageProtocol.FILE_UPLOAD);
+                                            sendMsg.add(uid);
 
-                                        byte[] sendData = sendMsg.Finish();
-                                        send(ByteBuffer.wrap(sendData));
-                                        break;
+                                            String responseData = "true";
+                                            sendMsg.add(responseData);
+
+                                            byte[] sendData = sendMsg.finish();
+                                            send(ByteBuffer.wrap(sendData));
+                                            //break;
+                                        } else {
+                                            byte[] buff = receivedMsg.getByte(payloadLength);
+                                            FileOutputStream fos = new FileOutputStream(path + fineName, true);
+                                            fos.write(buff, 0, payloadLength);
+                                            fos.close();
+                                        }
+                                    } catch (Exception e) {
+                                        logger.error("", e);
                                     }
-
-                                    byte [] buff = receivedMsg.getByte(payloadLength);
-                                    FileOutputStream fos = new FileOutputStream(path + fineName, true);
-                                    fos.write(buff, 0, payloadLength);
-                                    fos.close();
-                                } catch (Exception e) {
-                                    logger.error("", e);
-                                }
+                                });
                                 break;
                             }
 
-                            case MessageProtocol.FILE_DOWN_LOAD:{
-                                try {
-                                    String path = receivedMsg.getString();
-                                    String fileName = receivedMsg.getString();
+                            case MessageProtocol.FILE_DOWN_LOAD: {
+                                executorService.execute(() -> {
+                                    try {
+                                        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
 
-                                    File file = new File(path+"/"+fileName);
-                                    FileInputStream fis = new FileInputStream(file);
+                                        int uidLen = receivedMsg.getInt();
+                                        String uid = (String) receivedMsg.getObject(uidLen);
 
-                                    int readCount = 0;
-                                    byte [] buffer = new byte[2097152];
-                                    final int[] offSet = {0};
-                                    if ((readCount = fis.read(buffer)) != -1) {
-                                        MessagePacker msg = new MessagePacker();
-                                        msg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                        msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
-                                        msg.addLong(file.length());
-                                        msg.addInt(offSet[0]);
-                                        msg.addInt(readCount);
-                                        offSet[0] += readCount;
-                                        msg.addByte(buffer);
-                                        msg.getBuffer().flip();
+                                        String path = receivedMsg.getString();
+                                        String fileName = receivedMsg.getString();
 
-                                    socketChannel.write(msg.getBuffer(), msg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
-                                            @Override
-                                            public void completed(Integer result, ByteBuffer attachment) {
-                                                try {
-                                                    int readCount = 0;
-                                                    byte [] newBuff = new byte[2097152];
-                                                    if ((readCount = fis.read(newBuff)) != -1) {
+                                        File file = new File(path + "/" + fileName);
+                                        FileInputStream fis = new FileInputStream(file);
 
-                                                        MessagePacker msg = new MessagePacker();
-                                                        msg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                                        msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
-                                                        msg.addLong(file.length());
-                                                        msg.addInt(offSet[0]);
-                                                        msg.addInt(readCount);
-                                                        offSet[0] += readCount;
-                                                        msg.addByte(newBuff);
-                                                        msg.getBuffer().flip();
-                                                        Thread.sleep(20);
-                                                        socketChannel.write(msg.getBuffer(), msg.getBuffer(), this);
-                                                    }else {
-                                                        MessagePacker msg = new MessagePacker();
-                                                        msg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                                        msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
-                                                        msg.addLong(file.length());
-                                                        msg.addInt(-1);
-                                                        msg.getBuffer().flip();
-                                                        socketChannel.write(msg.getBuffer(), msg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
-                                                            @Override
-                                                            public void completed(Integer result, ByteBuffer attachment) {
-                                                                logger.info("[client] Success to send file : {}", fileName);
-                                                            }
-                                                            @Override
-                                                            public void failed(Throwable exc, ByteBuffer attachment) {
-                                                            }
-                                                        });
-                                                        queue.put("success");
+                                        int readCount = 0;
+                                        byte[] buffer = new byte[2097152];
+                                        final int[] offSet = {0};
+                                        if ((readCount = fis.read(buffer)) != -1) {
+                                            MessagePacker fmsg = new MessagePacker();
+                                            fmsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                            fmsg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
+
+                                            fmsg.add(uid);
+
+                                            fmsg.addLong(file.length());
+                                            fmsg.addInt(offSet[0]);
+                                            fmsg.addInt(readCount);
+                                            offSet[0] += readCount;
+                                            fmsg.addByte(buffer);
+                                            fmsg.getBuffer().flip();
+
+                                            //byte[] sendData = fmsg.finish();
+                                            //System.out.println(sendData.length);
+                                            System.out.println("첫번째 보냄" + offSet[0]);
+                                            socketChannel.write(fmsg.getBuffer(), fmsg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
+                                                @Override
+                                                public void completed(Integer result, ByteBuffer attachment) {
+                                                    try {
+                                                        int readCount = 0;
+                                                        byte[] newBuff = new byte[2097152];
+                                                        if ((readCount = fis.read(newBuff)) != -1) {
+                                                            System.out.println("보냄" + offSet[0]);
+                                                            MessagePacker msg = new MessagePacker();
+                                                            msg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                                            msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
+
+                                                            msg.add(uid);
+
+                                                            msg.addLong(file.length());
+                                                            msg.addInt(offSet[0]);
+                                                            msg.addInt(readCount);
+                                                            offSet[0] += readCount;
+                                                            msg.addByte(newBuff);
+                                                            msg.getBuffer().flip();
+                                                            Thread.sleep(20);
+                                                            socketChannel.write(msg.getBuffer(), msg.getBuffer(), this);
+                                                        } else {
+                                                            System.out.println("마지막" + offSet[0]);
+                                                            MessagePacker msg = new MessagePacker();
+                                                            msg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                                            msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
+
+                                                            msg.add(uid);
+
+                                                            msg.addLong(file.length());
+                                                            msg.addInt(-1);
+                                                            msg.addString(DOWNLOAD_SUCCESS);
+                                                            msg.getBuffer().flip();
+                                                            socketChannel.write(msg.getBuffer(), msg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
+                                                                @Override
+                                                                public void completed(Integer result, ByteBuffer attachment) {
+                                                                    logger.info("[client] Success to send file : {}", fileName);
+                                                                }
+
+                                                                @Override
+                                                                public void failed(Throwable exc, ByteBuffer attachment) {
+                                                                }
+                                                            });
+                                                            queue.put("success");
+                                                        }
+                                                    } catch (Exception e) {
+                                                        logger.error("", e);
                                                     }
-                                                } catch (Exception e) {
-                                                    logger.error("", e);
                                                 }
-                                            }
 
-                                            @Override
-                                            public void failed(Throwable exc, ByteBuffer attachment) { }
-                                        });
-
+                                                @Override
+                                                public void failed(Throwable exc, ByteBuffer attachment) {
+                                                }
+                                            });
+                                        }
+                                        queue.poll(5, TimeUnit.MINUTES);
+                                    } catch (Exception e) {
+                                        logger.error("", e);
                                     }
-                                    queue.poll(5, TimeUnit.MINUTES);
-                                } catch (Exception e) {
-                                    logger.error("", e);
-                                }
+                                });
                                 break;
                             }
                         }
@@ -346,7 +376,7 @@ public class FileControlClient {
         );
     }
 
-    public void send(ByteBuffer byteBuffer){
+    public void send(ByteBuffer byteBuffer) {
         synchronized (this) {
             socketChannel.write(byteBuffer, null,
                     new CompletionHandler<Integer, Void>() {

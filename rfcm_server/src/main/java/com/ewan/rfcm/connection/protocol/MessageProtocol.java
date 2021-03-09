@@ -9,4 +9,7 @@ public class MessageProtocol {
     public static final byte DELETE_FILE = 5;
     public static final byte FILE_UPLOAD = 6;
     public static final byte FILE_DOWN_LOAD = 7;
+
+    public static final String DOWNLOAD_SUCCESS = "DOWNLOAD_SUCCESS";
+    public static final String DOWNLOAD_FAIL = "DOWNLOAD_FAIL";
 }
