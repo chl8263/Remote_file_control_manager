@@ -58,7 +58,6 @@ public class AsyncFileControlClient {
                                 attachment.flip();
 
                                 byte [] byteArr = attachment.array();
-                                System.out.println(byteArr.length);
                                 MessagePacker msg = new MessagePacker(byteArr);
                                 byte protocol = msg.getProtocol();
 
@@ -75,13 +74,9 @@ public class AsyncFileControlClient {
                                         float fileSize = msg.getLong();
                                         int offSet = msg.getInt();
                                         if(offSet == -1){
-                                            System.out.println("마지막" + offSet);
-                                            //queue.put("success");
                                             responseModel.setResponseData(DOWNLOAD_SUCCESS);
                                             tQueue.put(responseModel);
-                                            //tQueue.put(new SocketResponseModel("success", "success"));
                                         }else {
-                                            System.out.println("쌓임" + offSet);
                                             int payloadLength = msg.getInt();
                                             byte [] buff = msg.getByte(payloadLength);
                                             byteQueue.add(buff);
@@ -95,7 +90,6 @@ public class AsyncFileControlClient {
                                     responseModel.setResponseData(payload);
                                     tQueue.put(responseModel);
                                 }
-
                                 receive();
                             } catch (Exception e) {
                                 logger.error("[Async client]", e);

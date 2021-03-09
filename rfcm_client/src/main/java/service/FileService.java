@@ -29,13 +29,12 @@ public class FileService {
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
         }
-        String result = null;
         try {
-            result = objectMapper.writeValueAsString(responseModel);
+            return objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
             logger.error("", e);
+            return getNativeJsonParsingErrorResponse();
         }
-        return result;
     }
 
     public static String getUnderLineDirectory(String pathName){
@@ -51,13 +50,12 @@ public class FileService {
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
         }
-        String result = null;
         try {
-            result = objectMapper.writeValueAsString(responseModel);
+            return objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
             logger.error("", e);
+            return getNativeJsonParsingErrorResponse();
         }
-        return result;
     }
 
     public static String getFilesInDirectory(String pathName) {
@@ -72,13 +70,12 @@ public class FileService {
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
         }
-        String result = null;
         try {
-            result = objectMapper.writeValueAsString(responseModel);
+            return objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
             logger.error("", e);
+            return getNativeJsonParsingErrorResponse();
         }
-        return result;
     }
 
     public static String changeFileName(String pathName, String beforeName, String afterName, String extension) {
@@ -93,13 +90,12 @@ public class FileService {
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
         }
-        String result = null;
         try {
-            result = objectMapper.writeValueAsString(responseModel);
+            return objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
             logger.error("", e);
+            return getNativeJsonParsingErrorResponse();
         }
-        return result;
     }
 
     public static String moveCopyFile(FileMoveCopyDto fileMoveCopyDto) {
@@ -115,13 +111,12 @@ public class FileService {
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
         }
-        String result = null;
         try {
-            result = objectMapper.writeValueAsString(responseModel);
+            return objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
             logger.error("", e);
+            return getNativeJsonParsingErrorResponse();
         }
-        return result;
     }
 
     public static String deleteFile(String [] paths) {
@@ -134,12 +129,15 @@ public class FileService {
             responseModel.setError(true);
             responseModel.setErrorMsg(e.getMessage());
         }
-        String result = null;
         try {
-            result = objectMapper.writeValueAsString(responseModel);
+            return objectMapper.writeValueAsString(responseModel);
         } catch (JsonProcessingException e) {
             logger.error("", e);
+            return getNativeJsonParsingErrorResponse();
         }
-        return result;
+    }
+
+    private static String getNativeJsonParsingErrorResponse(){
+        return "{\"error\":false,\"errorMsg\":\"Json parsing error on server, please check server.\",\"responseData\":true}";
     }
 }

@@ -296,9 +296,6 @@ public class FileControlClient {
                                             fmsg.addByte(buffer);
                                             fmsg.getBuffer().flip();
 
-                                            //byte[] sendData = fmsg.finish();
-                                            //System.out.println(sendData.length);
-                                            System.out.println("첫번째 보냄" + offSet[0]);
                                             socketChannel.write(fmsg.getBuffer(), fmsg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
                                                 @Override
                                                 public void completed(Integer result, ByteBuffer attachment) {
@@ -306,7 +303,6 @@ public class FileControlClient {
                                                         int readCount = 0;
                                                         byte[] newBuff = new byte[2097152];
                                                         if ((readCount = fis.read(newBuff)) != -1) {
-                                                            System.out.println("보냄" + offSet[0]);
                                                             MessagePacker msg = new MessagePacker();
                                                             msg.setEndianType(ByteOrder.BIG_ENDIAN);
                                                             msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
@@ -322,7 +318,6 @@ public class FileControlClient {
                                                             Thread.sleep(20);
                                                             socketChannel.write(msg.getBuffer(), msg.getBuffer(), this);
                                                         } else {
-                                                            System.out.println("마지막" + offSet[0]);
                                                             MessagePacker msg = new MessagePacker();
                                                             msg.setEndianType(ByteOrder.BIG_ENDIAN);
                                                             msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
