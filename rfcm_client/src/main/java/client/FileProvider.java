@@ -257,6 +257,10 @@ public class FileProvider {
                     errorMsgList.add("Write access deny [" + path + "]");
                     continue;
                 }
+                if(!tempFile.renameTo(tempFile)){
+                    errorMsgList.add("Cannot delete file, file busy... [" + path + "]");
+                    continue;
+                }
                 try{
                     File rootDir = new File(path);
                     Files.walk(rootDir.toPath())

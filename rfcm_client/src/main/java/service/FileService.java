@@ -83,6 +83,10 @@ public class FileService {
         try{
             boolean isChanged = FileProvider.changeFileName(pathName, beforeName, afterName, extension);
             responseModel.setResponseData(isChanged);
+            if(!isChanged){
+                responseModel.setError(true);
+                responseModel.setErrorMsg("Cannot change file name, file busy...");
+            }
         }catch (AccessDeniedException ed){
             responseModel.setError(true);
             responseModel.setErrorMsg("Access denied");

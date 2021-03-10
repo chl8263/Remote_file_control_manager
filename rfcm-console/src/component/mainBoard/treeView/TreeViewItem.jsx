@@ -5,7 +5,6 @@ import { connect } from "react-redux";
 import { PAGE_ROUTE, HTTP, MediaType, SOCK_REQ_TYPE} from "../../../util/Const";
 
 import PropTypes from 'prop-types';
-import SvgIcon from '@material-ui/core/SvgIcon';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
 import TreeItem from '@material-ui/lab/TreeItem';
 import Collapse from '@material-ui/core/Collapse';
@@ -29,7 +28,7 @@ function TransitionComponent(props) {
         <Collapse {...props} />
       </animated.div>
     );
-};
+}
 
 TransitionComponent.propTypes = {
     in: PropTypes.bool,
