@@ -311,9 +311,7 @@ public class FileControlClient {
                                                 }
                                             });
                                         }else {
-
                                             FileInputStream fis = new FileInputStream(file);
-
                                             int readCount = 0;
                                             byte[] buffer = new byte[2097152];
                                             final int[] offSet = {0};
@@ -321,9 +319,7 @@ public class FileControlClient {
                                                 MessagePacker fmsg = new MessagePacker();
                                                 fmsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                                 fmsg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
-
                                                 fmsg.add(uid);
-
                                                 fmsg.addLong(file.length());
                                                 fmsg.addInt(offSet[0]);
                                                 fmsg.addInt(readCount);
@@ -341,9 +337,7 @@ public class FileControlClient {
                                                                 MessagePacker msg = new MessagePacker();
                                                                 msg.setEndianType(ByteOrder.BIG_ENDIAN);
                                                                 msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
-
                                                                 msg.add(uid);
-
                                                                 msg.addLong(file.length());
                                                                 msg.addInt(offSet[0]);
                                                                 msg.addInt(readCount);
@@ -356,9 +350,7 @@ public class FileControlClient {
                                                                 MessagePacker msg = new MessagePacker();
                                                                 msg.setEndianType(ByteOrder.BIG_ENDIAN);
                                                                 msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
-
                                                                 msg.add(uid);
-
                                                                 msg.addLong(file.length());
                                                                 msg.addInt(-1);
                                                                 msg.addString(DOWNLOAD_SUCCESS);
@@ -374,6 +366,7 @@ public class FileControlClient {
                                                                     }
                                                                 });
                                                                 queue.put(DOWNLOAD_SUCCESS);
+                                                                fis.close();
                                                             }
                                                         } catch (Exception e) {
                                                             logger.error("", e);
