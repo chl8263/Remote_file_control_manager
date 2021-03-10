@@ -11,8 +11,8 @@ spring:
     password: 930324
   servlet:
     multipart:
-      maxFileSize: 1GB
-      maxRequestSize: 1GB
+      maxFileSize: 10GB
+      maxRequestSize: 10GB
 
   jpa:
     hibernate:
