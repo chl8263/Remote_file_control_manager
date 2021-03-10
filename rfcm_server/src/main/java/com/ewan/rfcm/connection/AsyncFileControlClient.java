@@ -76,6 +76,11 @@ public class AsyncFileControlClient {
                                         if(offSet == -1){
                                             responseModel.setResponseData(DOWNLOAD_SUCCESS);
                                             tQueue.put(responseModel);
+                                        }else if(offSet == -2){
+                                            int errorMsgLen = msg.getInt();
+                                            String errorMsg = (String) msg.getObject(errorMsgLen);
+                                            responseModel.setResponseData(errorMsg);
+                                            tQueue.put(responseModel);
                                         }else {
                                             int payloadLength = msg.getInt();
                                             byte [] buff = msg.getByte(payloadLength);

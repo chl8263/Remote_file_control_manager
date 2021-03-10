@@ -22,8 +22,11 @@ import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.*;
 
+import static protocol.MessageProtocol.DOWNLOAD_FAIL;
 import static protocol.MessageProtocol.DOWNLOAD_SUCCESS;
 
 public class FileControlClient {
@@ -277,71 +280,29 @@ public class FileControlClient {
                                         String fileName = receivedMsg.getString();
 
                                         File file = new File(path + "/" + fileName);
-                                        FileInputStream fis = new FileInputStream(file);
 
-                                        int readCount = 0;
-                                        byte[] buffer = new byte[2097152];
-                                        final int[] offSet = {0};
-                                        if ((readCount = fis.read(buffer)) != -1) {
+                                        if(!Files.isWritable(Path.of(path)) || !file.renameTo(file)) {
+                                            String message = "";
+                                            if (!Files.isWritable(Path.of(path))) {
+                                                message = "{\"error\":true,\"errorMsg\":\"Write access deny" + path + "/" + fileName + "\",\"responseData\":false}";
+                                            } else if (!file.renameTo(file)) {
+                                                message = "{\"error\":true,\"errorMsg\":\"Cannot download" + path + "/" + fileName + " file busy...\",\"responseData\":false}";
+                                            }
                                             MessagePacker fmsg = new MessagePacker();
                                             fmsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                             fmsg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
-
                                             fmsg.add(uid);
-
                                             fmsg.addLong(file.length());
-                                            fmsg.addInt(offSet[0]);
-                                            fmsg.addInt(readCount);
-                                            offSet[0] += readCount;
-                                            fmsg.addByte(buffer);
+                                            fmsg.addInt(-2);
+                                            fmsg.add(message);
                                             fmsg.getBuffer().flip();
-
                                             socketChannel.write(fmsg.getBuffer(), fmsg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
                                                 @Override
                                                 public void completed(Integer result, ByteBuffer attachment) {
                                                     try {
-                                                        int readCount = 0;
-                                                        byte[] newBuff = new byte[2097152];
-                                                        if ((readCount = fis.read(newBuff)) != -1) {
-                                                            MessagePacker msg = new MessagePacker();
-                                                            msg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                                            msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
-
-                                                            msg.add(uid);
-
-                                                            msg.addLong(file.length());
-                                                            msg.addInt(offSet[0]);
-                                                            msg.addInt(readCount);
-                                                            offSet[0] += readCount;
-                                                            msg.addByte(newBuff);
-                                                            msg.getBuffer().flip();
-                                                            Thread.sleep(20);
-                                                            socketChannel.write(msg.getBuffer(), msg.getBuffer(), this);
-                                                        } else {
-                                                            MessagePacker msg = new MessagePacker();
-                                                            msg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                                            msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
-
-                                                            msg.add(uid);
-
-                                                            msg.addLong(file.length());
-                                                            msg.addInt(-1);
-                                                            msg.addString(DOWNLOAD_SUCCESS);
-                                                            msg.getBuffer().flip();
-                                                            socketChannel.write(msg.getBuffer(), msg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
-                                                                @Override
-                                                                public void completed(Integer result, ByteBuffer attachment) {
-                                                                    logger.info("[client] Success to send file : {}", fileName);
-                                                                }
-
-                                                                @Override
-                                                                public void failed(Throwable exc, ByteBuffer attachment) {
-                                                                }
-                                                            });
-                                                            queue.put("success");
-                                                        }
-                                                    } catch (Exception e) {
-                                                        logger.error("", e);
+                                                        queue.put(DOWNLOAD_FAIL);
+                                                    } catch (InterruptedException e) {
+                                                        e.printStackTrace();
                                                     }
                                                 }
 
@@ -349,6 +310,81 @@ public class FileControlClient {
                                                 public void failed(Throwable exc, ByteBuffer attachment) {
                                                 }
                                             });
+                                        }else {
+
+                                            FileInputStream fis = new FileInputStream(file);
+
+                                            int readCount = 0;
+                                            byte[] buffer = new byte[2097152];
+                                            final int[] offSet = {0};
+                                            if ((readCount = fis.read(buffer)) != -1) {
+                                                MessagePacker fmsg = new MessagePacker();
+                                                fmsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                                fmsg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
+
+                                                fmsg.add(uid);
+
+                                                fmsg.addLong(file.length());
+                                                fmsg.addInt(offSet[0]);
+                                                fmsg.addInt(readCount);
+                                                offSet[0] += readCount;
+                                                fmsg.addByte(buffer);
+                                                fmsg.getBuffer().flip();
+
+                                                socketChannel.write(fmsg.getBuffer(), fmsg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
+                                                    @Override
+                                                    public void completed(Integer result, ByteBuffer attachment) {
+                                                        try {
+                                                            int readCount = 0;
+                                                            byte[] newBuff = new byte[2097152];
+                                                            if ((readCount = fis.read(newBuff)) != -1) {
+                                                                MessagePacker msg = new MessagePacker();
+                                                                msg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                                                msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
+
+                                                                msg.add(uid);
+
+                                                                msg.addLong(file.length());
+                                                                msg.addInt(offSet[0]);
+                                                                msg.addInt(readCount);
+                                                                offSet[0] += readCount;
+                                                                msg.addByte(newBuff);
+                                                                msg.getBuffer().flip();
+                                                                Thread.sleep(20);
+                                                                socketChannel.write(msg.getBuffer(), msg.getBuffer(), this);
+                                                            } else {
+                                                                MessagePacker msg = new MessagePacker();
+                                                                msg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                                                msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
+
+                                                                msg.add(uid);
+
+                                                                msg.addLong(file.length());
+                                                                msg.addInt(-1);
+                                                                msg.addString(DOWNLOAD_SUCCESS);
+                                                                msg.getBuffer().flip();
+                                                                socketChannel.write(msg.getBuffer(), msg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
+                                                                    @Override
+                                                                    public void completed(Integer result, ByteBuffer attachment) {
+                                                                        logger.info("[client] Success to send file : {}", fileName);
+                                                                    }
+
+                                                                    @Override
+                                                                    public void failed(Throwable exc, ByteBuffer attachment) {
+                                                                    }
+                                                                });
+                                                                queue.put(DOWNLOAD_SUCCESS);
+                                                            }
+                                                        } catch (Exception e) {
+                                                            logger.error("", e);
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void failed(Throwable exc, ByteBuffer attachment) {
+                                                    }
+                                                });
+                                            }
                                         }
                                         queue.poll(5, TimeUnit.MINUTES);
                                     } catch (Exception e) {

@@ -633,8 +633,10 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
                 'Authorization': HTTP.BASIC_TOKEN_PREFIX + cookies.JWT_TOKEN,
                 'Uid': cookies.UID
             },
-        }).then(res => { if(!res.ok){ throw res; } return res;
-        }).then(res => { return res.json();
+        }).then(res => {
+            if(!res.ok){ throw res; } return res;
+        }).then(res => {
+            return res.json();
         }).then(json => {
             if(json === null || json === undefined) {
                 setFileList([]);
@@ -713,13 +715,28 @@ const FileViewFrame = ({ fileViewInfo, copyItem, conn, renewFileViewInfo, renewC
                     'Uid': cookies.UID
                 },
             }).then(response => {
-                response.blob().then(blob => {
-                    let url = window.URL.createObjectURL(blob);
-                    let a = document.createElement('a');
-                    a.href = url;
-                    a.download = row.name;
-                    a.click();
-                });
+                if(response.ok){
+                    response.blob().then(blob => {
+                        let url = window.URL.createObjectURL(blob);
+                        let a = document.createElement('a');
+                        a.href = url;
+                        a.download = row.name;
+                        a.click();
+                    });
+                }else {
+                    // const a = response.json();
+                    // console.log(a);
+                    return response.json();
+                }
+            }).then(json => {
+                if(json === null || json === undefined) {
+                    return;
+                }
+                if(json.error === true){
+                    alert(json.errorMsg);
+                    return;
+                }
+            }).catch(error => {
             });
             return;
         }

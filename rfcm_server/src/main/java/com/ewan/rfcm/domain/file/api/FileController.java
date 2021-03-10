@@ -434,7 +434,7 @@ public class FileController {
 
                 return new ResponseEntity<>(fileContent, header, HttpStatus.OK);
             }else {
-                return ResponseEntity.badRequest().body(EMPTY);
+                return ResponseEntity.badRequest().body(responseResult.getResponseData());
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(EMPTY);
