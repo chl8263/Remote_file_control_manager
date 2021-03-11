@@ -39,6 +39,7 @@ public class FileControlClient {
     private ObjectMapper objectMapper = new ObjectMapper();
     private final ServerInfo serverInfo;
     //private BlockingQueue<String> queue;
+    private ConcurrentHashMap upLoadMap = new ConcurrentHashMap();
     private int bufferSize = 2150000;
 
     public FileControlClient(ServerInfo serverInfo) {
@@ -243,6 +244,24 @@ public class FileControlClient {
                                         int offSet = receivedMsg.getInt();
                                         int payloadLength = receivedMsg.getInt();
 
+                                        if(!upLoadMap.contains(path + fineName)){
+                                            upLoadMap.put(path + fineName, true);
+                                        }else {
+                                            MessagePacker sendMsg = new MessagePacker();
+                                            sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                            sendMsg.setProtocol(MessageProtocol.FILE_UPLOAD);
+                                            sendMsg.add(uid);
+
+                                            String responseData = "false";
+                                            sendMsg.add(responseData);
+
+                                            String responseMsg = path + fineName + " already exists. Please check again.";
+                                            sendMsg.add(responseMsg);
+
+                                            byte[] sendData = sendMsg.finish();
+                                            send(ByteBuffer.wrap(sendData));
+                                        }
+
                                         if (offSet == -1) {
                                             MessagePacker sendMsg = new MessagePacker();
                                             sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
@@ -251,6 +270,10 @@ public class FileControlClient {
 
                                             String responseData = "true";
                                             sendMsg.add(responseData);
+
+                                            if(upLoadMap.contains(path + fineName)){
+                                                upLoadMap.remove(path + fineName);
+                                            }
 
                                             byte[] sendData = sendMsg.finish();
                                             send(ByteBuffer.wrap(sendData));
@@ -276,6 +299,10 @@ public class FileControlClient {
                                         int uidLen = receivedMsg.getInt();
                                         String uid = (String) receivedMsg.getObject(uidLen);
 
+                                        //
+                                        System.out.println(uid + " , current Thread => " + Thread.currentThread());
+                                        //
+
                                         String path = receivedMsg.getString();
                                         String fileName = receivedMsg.getString();
 
@@ -284,9 +311,9 @@ public class FileControlClient {
                                         if(!Files.isWritable(Path.of(path)) || !file.renameTo(file)) {
                                             String message = "";
                                             if (!Files.isWritable(Path.of(path))) {
-                                                message = "{\"error\":true,\"errorMsg\":\"Write access deny" + path + "/" + fileName + "\",\"responseData\":false}";
+                                                message = responseJson(true, "Write access deny " + path + "/" + fileName, false);
                                             } else if (!file.renameTo(file)) {
-                                                message = "{\"error\":true,\"errorMsg\":\"Cannot download" + path + "/" + fileName + " file busy...\",\"responseData\":false}";
+                                                message = responseJson(true, "Cannot download " + path + "/" + fileName + "file busy...", false);
                                             }
                                             MessagePacker fmsg = new MessagePacker();
                                             fmsg.setEndianType(ByteOrder.BIG_ENDIAN);
@@ -300,6 +327,7 @@ public class FileControlClient {
                                                 @Override
                                                 public void completed(Integer result, ByteBuffer attachment) {
                                                     try {
+                                                        System.out.println(uid + " , current Thread => " + Thread.currentThread());
                                                         queue.put(DOWNLOAD_FAIL);
                                                     } catch (InterruptedException e) {
                                                         e.printStackTrace();
@@ -327,10 +355,13 @@ public class FileControlClient {
                                                 fmsg.addByte(buffer);
                                                 fmsg.getBuffer().flip();
 
+                                                System.out.println(uid + " , current Thread => " + Thread.currentThread());
+
                                                 socketChannel.write(fmsg.getBuffer(), fmsg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
                                                     @Override
                                                     public void completed(Integer result, ByteBuffer attachment) {
                                                         try {
+
                                                             int readCount = 0;
                                                             byte[] newBuff = new byte[2097152];
                                                             if ((readCount = fis.read(newBuff)) != -1) {
@@ -345,8 +376,11 @@ public class FileControlClient {
                                                                 msg.addByte(newBuff);
                                                                 msg.getBuffer().flip();
                                                                 Thread.sleep(20);
+                                                                System.out.println(uid + " " + fileName + " , current Thread => " + Thread.currentThread());
                                                                 socketChannel.write(msg.getBuffer(), msg.getBuffer(), this);
                                                             } else {
+
+                                                                System.out.println(uid + " , current Thread => " + Thread.currentThread() + " 마지막");
                                                                 MessagePacker msg = new MessagePacker();
                                                                 msg.setEndianType(ByteOrder.BIG_ENDIAN);
                                                                 msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
@@ -416,5 +450,11 @@ public class FileControlClient {
                         }
                     });
         }
+    }
+
+    private String responseJson(boolean error, String errorMsg, boolean responseData){
+
+        return "{\"error\":"+ error +",\"errorMsg\": \""+ errorMsg +"\", \"responseData\": " + responseData + "}";
+
     }
 }

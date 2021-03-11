@@ -373,8 +373,6 @@ public class FileController {
                 responseResult = client.setPoll(protocol, 10, TimeUnit.MINUTES);
             }
 
-            //String responseResult = client.setPoll(protocol, 10, TimeUnit.MINUTES).getResponseData();
-
             if(responseResult == null || responseResult.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
