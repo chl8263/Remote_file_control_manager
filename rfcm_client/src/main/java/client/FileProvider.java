@@ -172,7 +172,7 @@ public class FileProvider {
             throw new InvalidObjectException("Already exist with same file name");
         }
         if(FileControlClient.upLoadMap.containsKey(fromFile.getAbsolutePath())){
-            throw new IllegalArgumentException("Cannot change file name during the file upload..");
+            throw new IllegalArgumentException("Cannot move file during the file upload..");
         }
 
         if (fromPath == null || movePath == null) throw new NullPointerException("Please check path");
@@ -185,19 +185,20 @@ public class FileProvider {
         int index = fromFilePath.lastIndexOf("/");
         String fileName = fromFilePath.substring(index + 1);
 
-        Path file = Paths.get(fromFilePath);
+        Path fromPath = Paths.get(fromFilePath);
         Path movePath = Paths.get(toDirectoryPath+ "/" + fileName);
+        File fromFile = new File(fromFilePath);
         File moveFile = new File(toDirectoryPath+ "/" + fileName);
         if(moveFile.exists()){
             throw new InvalidObjectException("Already exist with same file name");
         }
-        if(FileControlClient.upLoadMap.containsKey(moveFile.getAbsolutePath())){
-            throw new IllegalArgumentException("Cannot change file name during the file upload..");
+        if(FileControlClient.upLoadMap.containsKey(fromFile.getAbsolutePath())){
+            throw new IllegalArgumentException("Cannot copy file during the file upload..");
         }
 
-        if (file == null || movePath == null) throw new NullPointerException("Please check path");
+        if (fromPath == null || movePath == null) throw new NullPointerException("Please check path");
 
-        Files.copy(file, movePath, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(fromPath, movePath, StandardCopyOption.REPLACE_EXISTING);
         return true;
     }
 
@@ -257,6 +258,9 @@ public class FileProvider {
                 if(!tempFile.exists()){
                     errorMsgList.add("Cannot find file : [" + path + "]");
                     continue;
+                }
+                if(FileControlClient.upLoadMap.containsKey(tempFile.getAbsolutePath())){
+                    throw new IllegalArgumentException("Cannot delete file during the file upload..");
                 }
                 if(!Files.isWritable(Path.of(path))){
                     errorMsgList.add("Write access deny [" + path + "]");
