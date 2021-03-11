@@ -248,7 +248,6 @@ public class FileControlClient {
                                         int payloadLength = receivedMsg.getInt();
 
                                         File tFile = new File(path + fileName);
-                                        //if(!upLoadMap.contains(path + fileName)){
                                         if(!upLoadMap.containsKey(tFile.getAbsolutePath())){
                                             upLoadMap.put(tFile.getAbsolutePath(), uid);
                                         }
@@ -264,14 +263,12 @@ public class FileControlClient {
                                                 String responseData = responseJson(false, "", false);//"true";
                                                 sendMsg.add(responseData);
 
-                                                //if(upLoadMap.contains(path + fileName)){
                                                 if(upLoadMap.containsKey(tFile.getAbsolutePath())){
                                                     upLoadMap.remove(tFile.getAbsolutePath());
                                                 }
 
                                                 byte[] sendData = sendMsg.finish();
                                                 send(ByteBuffer.wrap(sendData));
-                                                //break;
                                             } else {
                                                 byte[] buff = receivedMsg.getByte(payloadLength);
                                                 FileOutputStream fos = new FileOutputStream(path + fileName, true);
@@ -288,16 +285,9 @@ public class FileControlClient {
                                             String responseData = responseJson(true, path + "/" + fileName + " already exists. Please check again.", false);
                                             sendMsg.add(responseData);
 
-//                                            String responseMsg = path + fineName + " already exists. Please check again.";
-//                                            sendMsg.add(responseMsg);
-
                                             byte[] sendData = sendMsg.finish();
                                             send(ByteBuffer.wrap(sendData));
                                         }
-
-                                        //}else {
-
-                                        //}
                                     } catch (Exception e) {
                                         logger.error("", e);
                                     }
@@ -313,21 +303,19 @@ public class FileControlClient {
                                         int uidLen = receivedMsg.getInt();
                                         String uid = (String) receivedMsg.getObject(uidLen);
 
-                                        //
-                                        System.out.println(uid + " , current Thread => " + Thread.currentThread());
-                                        //
-
                                         String path = receivedMsg.getString();
                                         String fileName = receivedMsg.getString();
 
                                         File file = new File(path + "/" + fileName);
 
-                                        if(!Files.isWritable(Path.of(path)) || !file.renameTo(file)) {
+                                        if(!Files.isWritable(Path.of(path)) || !file.renameTo(file) || FileControlClient.upLoadMap.containsKey(file.getAbsolutePath())) {
                                             String message = "";
                                             if (!Files.isWritable(Path.of(path))) {
                                                 message = responseJson(true, "Write access deny " + path + "/" + fileName, false);
                                             } else if (!file.renameTo(file)) {
                                                 message = responseJson(true, "Cannot download " + path + "/" + fileName + "file busy...", false);
+                                            } else if(FileControlClient.upLoadMap.containsKey(file.getAbsolutePath())){
+                                                message = responseJson(true, "Cannot download " + path + "/" + fileName + " during the file upload...", false);
                                             }
                                             MessagePacker fmsg = new MessagePacker();
                                             fmsg.setEndianType(ByteOrder.BIG_ENDIAN);
@@ -369,8 +357,6 @@ public class FileControlClient {
                                                 fmsg.addByte(buffer);
                                                 fmsg.getBuffer().flip();
 
-                                                System.out.println(uid + " , current Thread => " + Thread.currentThread());
-
                                                 socketChannel.write(fmsg.getBuffer(), fmsg.getBuffer(), new CompletionHandler<Integer, ByteBuffer>() {
                                                     @Override
                                                     public void completed(Integer result, ByteBuffer attachment) {
@@ -390,11 +376,8 @@ public class FileControlClient {
                                                                 msg.addByte(newBuff);
                                                                 msg.getBuffer().flip();
                                                                 Thread.sleep(20);
-                                                                System.out.println(uid + " " + fileName + " , current Thread => " + Thread.currentThread());
                                                                 socketChannel.write(msg.getBuffer(), msg.getBuffer(), this);
                                                             } else {
-
-                                                                System.out.println(uid + " , current Thread => " + Thread.currentThread() + " 마지막");
                                                                 MessagePacker msg = new MessagePacker();
                                                                 msg.setEndianType(ByteOrder.BIG_ENDIAN);
                                                                 msg.setProtocol(MessageProtocol.FILE_DOWN_LOAD);
