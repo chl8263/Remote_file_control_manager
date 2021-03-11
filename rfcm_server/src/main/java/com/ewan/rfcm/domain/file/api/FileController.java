@@ -249,7 +249,6 @@ public class FileController {
             msg.add(uid);
 
             String tranData = objectMapper.writeValueAsString(fileDeleteDto);
-
             msg.addString(tranData);
             byte[] data = msg.finish();
             client.send(data);
@@ -282,13 +281,6 @@ public class FileController {
                 return ResponseEntity.badRequest().body(EMPTY);
             }
 
-//            if(client.isBlocked()) {
-//                ResponseModel<String> responseModel = new ResponseModel<>();
-//                responseModel.setError(true);
-//                responseModel.setErrorMsg("Client busy, please try later..");
-//                return ResponseEntity.ok(responseModel);
-//            }
-
             InputStream is = file.getInputStream();
             int readCount = 0;
             byte[] buffer = new byte[2097152];
@@ -300,9 +292,7 @@ public class FileController {
                 MessagePacker msg = new MessagePacker();
                 msg.setEndianType(ByteOrder.BIG_ENDIAN);
                 msg.setProtocol(protocol);
-
                 msg.add(uid);
-
                 msg.addString(path);
                 msg.addString(file.getOriginalFilename());
                 msg.add(offSet[0]);
@@ -372,6 +362,8 @@ public class FileController {
                 client.setPut(protocol, responseResult);
                 responseResult = client.setPoll(protocol, 10, TimeUnit.MINUTES);
             }
+
+            //if(responseResult.getResponseData().charAt(11) == 'T') flag = false;
 
             if(responseResult == null || responseResult.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);

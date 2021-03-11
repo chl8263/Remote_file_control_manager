@@ -88,6 +88,9 @@ public class FileProvider {
         }
         String beforeFullName = pathName + "/" + beforeName + finalExtension;
         File file1 = new File(beforeFullName);
+        if(FileControlClient.upLoadMap.containsKey(file1.getAbsolutePath())){
+            throw new IllegalArgumentException("Cannot change file name during the file upload..");
+        }
         if(!file1.exists()){
             throw new IllegalArgumentException("The file want to change not found");
         }
@@ -161,16 +164,20 @@ public class FileProvider {
         int index = fromFilePath.lastIndexOf("/");
         String fileName = fromFilePath.substring(index + 1);
 
-        Path file = Paths.get(fromFilePath);
+        Path fromPath = Paths.get(fromFilePath);
         Path movePath = Paths.get(toDirectoryPath+ "/" + fileName);
-
-        if(new File(toDirectoryPath+ "/" + fileName).exists()){
+        File fromFile = new File(fromFilePath);
+        File moveFile = new File(toDirectoryPath+ "/" + fileName);
+        if(moveFile.exists()){
             throw new InvalidObjectException("Already exist with same file name");
         }
+        if(FileControlClient.upLoadMap.containsKey(fromFile.getAbsolutePath())){
+            throw new IllegalArgumentException("Cannot change file name during the file upload..");
+        }
 
-        if (file == null || movePath == null) throw new NullPointerException("Please check path");
+        if (fromPath == null || movePath == null) throw new NullPointerException("Please check path");
 
-        Files.move(file, movePath, StandardCopyOption.REPLACE_EXISTING);
+        Files.move(fromPath, movePath, StandardCopyOption.REPLACE_EXISTING);
         return true;
     }
 
@@ -180,9 +187,12 @@ public class FileProvider {
 
         Path file = Paths.get(fromFilePath);
         Path movePath = Paths.get(toDirectoryPath+ "/" + fileName);
-
-        if(new File(toDirectoryPath+ "/" + fileName).exists()){
+        File moveFile = new File(toDirectoryPath+ "/" + fileName);
+        if(moveFile.exists()){
             throw new InvalidObjectException("Already exist with same file name");
+        }
+        if(FileControlClient.upLoadMap.containsKey(moveFile.getAbsolutePath())){
+            throw new IllegalArgumentException("Cannot change file name during the file upload..");
         }
 
         if (file == null || movePath == null) throw new NullPointerException("Please check path");

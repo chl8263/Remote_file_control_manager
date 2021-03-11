@@ -24,6 +24,8 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.*;
 
 import static protocol.MessageProtocol.DOWNLOAD_FAIL;
@@ -39,7 +41,8 @@ public class FileControlClient {
     private ObjectMapper objectMapper = new ObjectMapper();
     private final ServerInfo serverInfo;
     //private BlockingQueue<String> queue;
-    private ConcurrentHashMap upLoadMap = new ConcurrentHashMap();
+    //private static ConcurrentHashMap upLoadMap = new ConcurrentHashMap();
+    protected static ConcurrentHashMap upLoadMap = new ConcurrentHashMap();
     private int bufferSize = 2150000;
 
     public FileControlClient(ServerInfo serverInfo) {
@@ -240,50 +243,61 @@ public class FileControlClient {
                                         String uid = (String) receivedMsg.getObject(uidLen);
 
                                         String path = receivedMsg.getString();
-                                        String fineName = receivedMsg.getString();
+                                        String fileName = receivedMsg.getString();
                                         int offSet = receivedMsg.getInt();
                                         int payloadLength = receivedMsg.getInt();
 
-                                        if(!upLoadMap.contains(path + fineName)){
-                                            upLoadMap.put(path + fineName, true);
-                                        }else {
-                                            MessagePacker sendMsg = new MessagePacker();
-                                            sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                            sendMsg.setProtocol(MessageProtocol.FILE_UPLOAD);
-                                            sendMsg.add(uid);
-
-                                            String responseData = "false";
-                                            sendMsg.add(responseData);
-
-                                            String responseMsg = path + fineName + " already exists. Please check again.";
-                                            sendMsg.add(responseMsg);
-
-                                            byte[] sendData = sendMsg.finish();
-                                            send(ByteBuffer.wrap(sendData));
+                                        File tFile = new File(path + fileName);
+                                        //if(!upLoadMap.contains(path + fileName)){
+                                        if(!upLoadMap.containsKey(tFile.getAbsolutePath())){
+                                            upLoadMap.put(tFile.getAbsolutePath(), uid);
                                         }
 
-                                        if (offSet == -1) {
-                                            MessagePacker sendMsg = new MessagePacker();
-                                            sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
-                                            sendMsg.setProtocol(MessageProtocol.FILE_UPLOAD);
-                                            sendMsg.add(uid);
+                                        if(upLoadMap.get(tFile.getAbsolutePath()).equals(uid)){
+                                            System.out.println(upLoadMap.get(tFile.getAbsolutePath()));
+                                            if (offSet == -1) {
+                                                MessagePacker sendMsg = new MessagePacker();
+                                                sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                                sendMsg.setProtocol(MessageProtocol.FILE_UPLOAD);
+                                                sendMsg.add(uid);
 
-                                            String responseData = "true";
-                                            sendMsg.add(responseData);
+                                                String responseData = responseJson(false, "", false);//"true";
+                                                sendMsg.add(responseData);
 
-                                            if(upLoadMap.contains(path + fineName)){
-                                                upLoadMap.remove(path + fineName);
+                                                //if(upLoadMap.contains(path + fileName)){
+                                                if(upLoadMap.containsKey(tFile.getAbsolutePath())){
+                                                    upLoadMap.remove(tFile.getAbsolutePath());
+                                                }
+
+                                                byte[] sendData = sendMsg.finish();
+                                                send(ByteBuffer.wrap(sendData));
+                                                //break;
+                                            } else {
+                                                byte[] buff = receivedMsg.getByte(payloadLength);
+                                                FileOutputStream fos = new FileOutputStream(path + fileName, true);
+                                                fos.write(buff, 0, payloadLength);
+                                                fos.close();
                                             }
+                                        }else if(tFile.exists() || !upLoadMap.get(tFile.getAbsolutePath()).equals(uid)) {
+                                            System.out.println("!!!!!!!!!"+ upLoadMap.get(tFile.getAbsolutePath()));
+                                            MessagePacker sendMsg = new MessagePacker();
+                                            sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
+                                            sendMsg.setProtocol(MessageProtocol.FILE_UPLOAD);
+                                            sendMsg.add(uid);
+
+                                            String responseData = responseJson(true, path + "/" + fileName + " already exists. Please check again.", false);
+                                            sendMsg.add(responseData);
+
+//                                            String responseMsg = path + fineName + " already exists. Please check again.";
+//                                            sendMsg.add(responseMsg);
 
                                             byte[] sendData = sendMsg.finish();
                                             send(ByteBuffer.wrap(sendData));
-                                            //break;
-                                        } else {
-                                            byte[] buff = receivedMsg.getByte(payloadLength);
-                                            FileOutputStream fos = new FileOutputStream(path + fineName, true);
-                                            fos.write(buff, 0, payloadLength);
-                                            fos.close();
                                         }
+
+                                        //}else {
+
+                                        //}
                                     } catch (Exception e) {
                                         logger.error("", e);
                                     }
@@ -452,7 +466,7 @@ public class FileControlClient {
         }
     }
 
-    private String responseJson(boolean error, String errorMsg, boolean responseData){
+    private String responseJson(boolean error, String errorMsg, Object responseData){
 
         return "{\"error\":"+ error +",\"errorMsg\": \""+ errorMsg +"\", \"responseData\": " + responseData + "}";
 

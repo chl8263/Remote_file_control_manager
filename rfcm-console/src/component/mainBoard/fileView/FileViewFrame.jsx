@@ -254,10 +254,22 @@ const EnhancedTableToolbar = (props) => {
         }).then(res => { if(!res.ok){ throw res; } return res; })
         .then(res => { return res.json(); })
         .then(json => {
-            if(json) {
+
+            if(json === null || json === undefined){
+                alert("Cannot upload file");
+                return;
+            }
+            if(json.error === true){
+                alert(json.errorMsg);
+                return;
+            }else {
                 alert("Success upload");
                 getFileData(fileViewInfo.fileViewAddress, fileViewInfo.fileViewPath);
             }
+
+            // if(json) {
+            //
+            // }
         }).catch(error => {
             console.error(error);
             alert(error.errorMsg);
@@ -319,7 +331,6 @@ const EnhancedTableToolbar = (props) => {
         }).then(res => { if(!res.ok){ throw res; } return res; })
         .then(res => { return res.json(); })
         .then(json => {
-            console.log(json);
             if(json === null || json === undefined){
                 alert("Cannot delete file");
                 return;
