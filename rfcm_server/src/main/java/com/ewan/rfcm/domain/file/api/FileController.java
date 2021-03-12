@@ -363,6 +363,8 @@ public class FileController {
                 public void failed(Throwable exc, ByteBuffer attachment) { }
             });
 
+            client.addHash(uid);
+
             SocketResponseModel responseResult = client.setPoll(protocol, 10, TimeUnit.MINUTES);
 
             while (!responseResult.getUid().equals(uid)){
@@ -371,7 +373,8 @@ public class FileController {
             }
 
             if(DOWNLOAD_SUCCESS.equals(responseResult.getResponseData())){
-                byte[] fileContent = client.getByteInQueue();
+                //byte[] fileContent = client.getByteInQueue();
+                byte[] fileContent = client.getByteInQueueInHash(uid);
 
                 HttpHeaders header = new HttpHeaders();
                 header.setContentLength(fileContent.length);

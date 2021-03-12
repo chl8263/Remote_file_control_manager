@@ -28,6 +28,7 @@ public class AsyncFileControlClient {
     private BlockingQueue<String> queue;
     private ConcurrentHashMap<Integer, BlockingQueue<SocketResponseModel>> queueHash;
     private BlockingQueue<byte[]> byteQueue;
+    private ConcurrentHashMap<String, BlockingQueue<byte[]>> byteQueueHash;
     private boolean isBlocked = false;
 
     public AsyncFileControlClient(AsynchronousSocketChannel socketChannel){
@@ -35,6 +36,7 @@ public class AsyncFileControlClient {
         this.queue = new LinkedBlockingQueue<>();
         this.byteQueue = new LinkedBlockingQueue<>();
         this.queueHash = new ConcurrentHashMap<>();
+        this.byteQueueHash = new ConcurrentHashMap<>();
         queueHash.put((int) ROOT_DIRECTORY, new LinkedBlockingQueue<>());
         queueHash.put((int) DIRECTORY, new LinkedBlockingQueue<>());
         queueHash.put((int) FILES, new LinkedBlockingQueue<>());
@@ -84,7 +86,8 @@ public class AsyncFileControlClient {
                                         }else {
                                             int payloadLength = msg.getInt();
                                             byte [] buff = msg.getByte(payloadLength);
-                                            byteQueue.add(buff);
+                                            byteQueueHash.get(uid).add(buff);
+                                            //byteQueue.add(buff);
                                         }
                                     } catch (Exception e) {
                                         logger.error("[Async client]", e);
@@ -175,6 +178,20 @@ public class AsyncFileControlClient {
             isBlocked = false;
         }
         return new SocketResponseModel();
+    }
+
+    public void addHash(String uid){
+        byteQueueHash.put(uid, new LinkedBlockingQueue<>());
+    }
+
+    public byte[] getByteInQueueInHash(String uid){
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        var tByteQueue = byteQueueHash.get(uid);
+        while (!tByteQueue.isEmpty()){
+            byte [] temp = tByteQueue.poll();
+            byteArrayOutputStream.write(temp, 0, temp.length);
+        }
+        return byteArrayOutputStream.toByteArray();
     }
 
     public byte[] getByteInQueue(){
