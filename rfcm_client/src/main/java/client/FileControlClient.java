@@ -40,14 +40,11 @@ public class FileControlClient {
     private AsynchronousSocketChannel socketChannel;
     private ObjectMapper objectMapper = new ObjectMapper();
     private final ServerInfo serverInfo;
-    //private BlockingQueue<String> queue;
-    //private static ConcurrentHashMap upLoadMap = new ConcurrentHashMap();
     protected static ConcurrentHashMap upLoadMap = new ConcurrentHashMap();
     private int bufferSize = 2150000;
 
     public FileControlClient(ServerInfo serverInfo) {
         this.serverInfo = serverInfo;
-        //queue = new LinkedBlockingQueue<>();
         executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
@@ -253,14 +250,13 @@ public class FileControlClient {
                                         }
 
                                         if(upLoadMap.get(tFile.getAbsolutePath()).equals(uid)){
-                                            System.out.println(upLoadMap.get(tFile.getAbsolutePath()));
                                             if (offSet == -1) {
                                                 MessagePacker sendMsg = new MessagePacker();
                                                 sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                                 sendMsg.setProtocol(MessageProtocol.FILE_UPLOAD);
                                                 sendMsg.add(uid);
 
-                                                String responseData = responseJson(false, "", false);//"true";
+                                                String responseData = responseJson(false, "", false);
                                                 sendMsg.add(responseData);
 
                                                 if(upLoadMap.containsKey(tFile.getAbsolutePath())){
@@ -276,7 +272,6 @@ public class FileControlClient {
                                                 fos.close();
                                             }
                                         }else if(tFile.exists() || !upLoadMap.get(tFile.getAbsolutePath()).equals(uid)) {
-                                            System.out.println("!!!!!!!!!"+ upLoadMap.get(tFile.getAbsolutePath()));
                                             MessagePacker sendMsg = new MessagePacker();
                                             sendMsg.setEndianType(ByteOrder.BIG_ENDIAN);
                                             sendMsg.setProtocol(MessageProtocol.FILE_UPLOAD);
@@ -329,7 +324,6 @@ public class FileControlClient {
                                                 @Override
                                                 public void completed(Integer result, ByteBuffer attachment) {
                                                     try {
-                                                        System.out.println(uid + " , current Thread => " + Thread.currentThread());
                                                         queue.put(DOWNLOAD_FAIL);
                                                     } catch (InterruptedException e) {
                                                         e.printStackTrace();
@@ -450,8 +444,6 @@ public class FileControlClient {
     }
 
     private String responseJson(boolean error, String errorMsg, Object responseData){
-
         return "{\"error\":"+ error +",\"errorMsg\": \""+ errorMsg +"\", \"responseData\": " + responseData + "}";
-
     }
 }

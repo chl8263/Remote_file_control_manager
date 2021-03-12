@@ -7,11 +7,6 @@ public class Application {
 
     public static void main(String[] args) throws Exception {
 
-        //FileProvider.copyFile("C:\\test14\\ES_최원균.jpg", "C:\\test6");
-        //FileProvider.test();
-        //FileProvider.copyFolderTest("C:/test14", "C:/test6");
-        //FileProvider.copyFolderTest2();
-
         ServerInfo serverInfo = PropertiesReader.getServerInfoFromPropertiesValue();
 
         //new FileControlClient(serverInfo).startClient();

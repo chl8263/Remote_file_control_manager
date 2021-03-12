@@ -47,14 +47,6 @@ public class FileController {
             if(client == null || path == null || path.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
-
-//            if(client.isBlocked()) {
-//                ResponseModel<String> responseModel = new ResponseModel<>();
-//                responseModel.setError(true);
-//                responseModel.setErrorMsg("Client busy, please try later..");
-//                return ResponseEntity.ok(responseModel);
-//            }
-
             MessagePacker msg = new MessagePacker();
             msg.setEndianType(ByteOrder.BIG_ENDIAN);
             int protocol;
@@ -71,8 +63,6 @@ public class FileController {
             }
             byte[] data = msg.finish();
             client.send(data);
-            //String responseResult = client.setPoll(1, TimeUnit.MINUTES);
-            //String responseResult = client.setPoll(protocol, 10, TimeUnit.MINUTES).getResponseData();
             SocketResponseModel responseResult = client.setPoll(protocol, 5, TimeUnit.MINUTES);
 
             while (!responseResult.getUid().equals(uid) && !responseResult.getUid().equals(EMPTY)){
@@ -97,12 +87,6 @@ public class FileController {
                 return ResponseEntity.badRequest().body(EMPTY);
             }
 
-//            if(client.isBlocked()) {
-//                ResponseModel<String> responseModel = new ResponseModel<>();
-//                responseModel.setError(true);
-//                responseModel.setErrorMsg("Client busy, please try later..");
-//                return ResponseEntity.ok(responseModel);
-//            }
             String uid = UUID.randomUUID().toString();
             byte protocol = MessageProtocol.FILES;
             MessagePacker msg = new MessagePacker();
@@ -137,13 +121,6 @@ public class FileController {
             if(client == null || path == null || path.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
-
-//            if(client.isBlocked()) {
-//                ResponseModel<String> responseModel = new ResponseModel<>();
-//                responseModel.setError(true);
-//                responseModel.setErrorMsg("Client busy, please try later..");
-//                return ResponseEntity.ok(responseModel);
-//            }
 
             String uid = UUID.randomUUID().toString();
             byte protocol = MessageProtocol.CHANGE_FILE_NAME;
@@ -184,13 +161,6 @@ public class FileController {
             if (client == null) {
                 return ResponseEntity.badRequest().body(EMPTY);
             }
-
-//            if(client.isBlocked()) {
-//                ResponseModel<String> responseModel = new ResponseModel<>();
-//                responseModel.setError(true);
-//                responseModel.setErrorMsg("Client busy, please try later..");
-//                return ResponseEntity.ok(responseModel);
-//            }
 
             fileMoveCopyDto.setPaths(Arrays.stream(fileMoveCopyDto.getPaths()).map(x -> preProcessing(x)).toArray(String[]::new));
             fileMoveCopyDto.setToDirectoryPath(preProcessing(fileMoveCopyDto.getToDirectoryPath()));
@@ -233,13 +203,6 @@ public class FileController {
             if (client == null) {
                 return ResponseEntity.badRequest().body(EMPTY);
             }
-
-//            if(client.isBlocked()) {
-//                ResponseModel<String> responseModel = new ResponseModel<>();
-//                responseModel.setError(true);
-//                responseModel.setErrorMsg("Client busy, please try later..");
-//                return ResponseEntity.ok(responseModel);
-//            }
 
             String uid = UUID.randomUUID().toString();
             byte protocol = MessageProtocol.DELETE_FILE;
@@ -363,8 +326,6 @@ public class FileController {
                 responseResult = client.setPoll(protocol, 10, TimeUnit.MINUTES);
             }
 
-            //if(responseResult.getResponseData().charAt(11) == 'T') flag = false;
-
             if(responseResult == null || responseResult.equals(EMPTY)){
                 return ResponseEntity.badRequest().body(EMPTY);
             }
@@ -384,12 +345,6 @@ public class FileController {
                 return ResponseEntity.badRequest().body(EMPTY);
             }
 
-//            if(client.isBlocked()) {
-//                ResponseModel<String> responseModel = new ResponseModel<>();
-//                responseModel.setError(true);
-//                responseModel.setErrorMsg("Client busy, please try later..");
-//                return ResponseEntity.ok(responseModel);
-//            }
             String uid = UUID.randomUUID().toString();
             byte protocol = MessageProtocol.FILE_DOWN_LOAD;
             MessagePacker msg = new MessagePacker();
